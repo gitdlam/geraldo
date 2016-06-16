@@ -11,11 +11,11 @@ def shortcut(request, content_type_id, object_id):
         content_type = ContentType.objects.get(pk=content_type_id)
         obj = content_type.get_object_for_this_type(pk=object_id)
     except ObjectDoesNotExist:
-        raise http.Http404, "Content type %s object %s doesn't exist" % (content_type_id, object_id)
+        raise http.Http404("Content type %s object %s doesn't exist" % (content_type_id, object_id))
     try:
         absurl = obj.get_absolute_url()
     except AttributeError:
-        raise http.Http404, "%s objects don't have get_absolute_url() methods" % content_type.name
+        raise http.Http404("%s objects don't have get_absolute_url() methods" % content_type.name)
 
     # Try to figure out the object's domain, so we can do a cross-site redirect
     # if necessary.

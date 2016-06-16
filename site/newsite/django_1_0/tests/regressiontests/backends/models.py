@@ -13,7 +13,7 @@ class Person(models.Model):
     last_name = models.CharField(max_length=20)
 
     def __unicode__(self):
-        return u'%s %s' % (self.first_name, self.last_name)
+        return '%s %s' % (self.first_name, self.last_name)
 
 if connection.features.uses_case_insensitive_names:
     t_convert = lambda x: x.upper()

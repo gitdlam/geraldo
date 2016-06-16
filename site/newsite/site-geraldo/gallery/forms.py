@@ -2,7 +2,7 @@ from google.appengine.ext import db
 
 from django import forms
 
-from models import Item
+from .models import Item
 
 class FormItem(forms.ModelForm):
     class Meta:

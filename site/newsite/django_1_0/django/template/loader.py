@@ -52,12 +52,12 @@ def find_template_source(name, dirs=None):
             module, attr = path[:i], path[i+1:]
             try:
                 mod = __import__(module, globals(), locals(), [attr])
-            except ImportError, e:
-                raise ImproperlyConfigured, 'Error importing template source loader %s: "%s"' % (module, e)
+            except ImportError as e:
+                raise ImproperlyConfigured('Error importing template source loader %s: "%s"' % (module, e))
             try:
                 func = getattr(mod, attr)
             except AttributeError:
-                raise ImproperlyConfigured, 'Module "%s" does not define a "%s" callable template source loader' % (module, attr)
+                raise ImproperlyConfigured('Module "%s" does not define a "%s" callable template source loader' % (module, attr))
             if not func.is_usable:
                 import warnings
                 warnings.warn("Your TEMPLATE_LOADERS setting includes %r, but your Python installation doesn't support that type of template loading. Consider removing that line from TEMPLATE_LOADERS." % path)
@@ -70,7 +70,7 @@ def find_template_source(name, dirs=None):
             return (source, make_origin(display_name, loader, name, dirs))
         except TemplateDoesNotExist:
             pass
-    raise TemplateDoesNotExist, name
+    raise TemplateDoesNotExist(name)
 
 def get_template(template_name):
     """
@@ -114,6 +114,6 @@ def select_template(template_name_list):
         except TemplateDoesNotExist:
             continue
     # If we get here, none of the templates could be loaded
-    raise TemplateDoesNotExist, ', '.join(template_name_list)
+    raise TemplateDoesNotExist(', '.join(template_name_list))
 
 add_to_builtins('django.template.loader_tags')

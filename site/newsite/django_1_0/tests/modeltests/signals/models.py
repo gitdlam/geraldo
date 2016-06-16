@@ -10,37 +10,37 @@ class Person(models.Model):
     last_name = models.CharField(max_length=20)
 
     def __unicode__(self):
-        return u"%s %s" % (self.first_name, self.last_name)
+        return "%s %s" % (self.first_name, self.last_name)
 
 
 def pre_save_nokwargs_test(sender, instance):
-    print 'pre_save_nokwargs signal'
+    print('pre_save_nokwargs signal')
 
 def post_save_nokwargs_test(sender, instance):
-    print 'post_save_nokwargs signal'
+    print('post_save_nokwargs signal')
 
 def pre_save_test(sender, instance, **kwargs):
-    print 'pre_save signal,', instance
+    print('pre_save signal,', instance)
     if kwargs.get('raw'):
-        print 'Is raw'
+        print('Is raw')
 
 def post_save_test(sender, instance, **kwargs):
-    print 'post_save signal,', instance
+    print('post_save signal,', instance)
     if 'created' in kwargs:
         if kwargs['created']:
-            print 'Is created'
+            print('Is created')
         else:
-            print 'Is updated'
+            print('Is updated')
     if kwargs.get('raw'):
-        print 'Is raw'
+        print('Is raw')
 
 def pre_delete_test(sender, instance, **kwargs):
-    print 'pre_delete signal,', instance
-    print 'instance.id is not None: %s' % (instance.id != None)
+    print('pre_delete signal,', instance)
+    print('instance.id is not None: %s' % (instance.id != None))
 
 def post_delete_test(sender, instance, **kwargs):
-    print 'post_delete signal,', instance
-    print 'instance.id is None: %s' % (instance.id == None)
+    print('post_delete signal,', instance)
+    print('instance.id is None: %s' % (instance.id == None))
 
 __test__ = {'API_TESTS':"""
 >>> dispatcher.connect(pre_save_nokwargs_test, signal=models.signals.pre_save)

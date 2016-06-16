@@ -8,6 +8,7 @@ from django.utils.encoding import force_unicode, smart_str
 from django.utils.translation import ugettext
 from django.utils.http import urlencode
 import operator
+from functools import reduce
 
 try:
     set
@@ -52,7 +53,7 @@ class ChangeList(object):
             self.page_num = 0
         self.show_all = ALL_VAR in request.GET
         self.is_popup = IS_POPUP_VAR in request.GET
-        self.params = dict(request.GET.items())
+        self.params = dict(list(request.GET.items()))
         if PAGE_VAR in self.params:
             del self.params[PAGE_VAR]
         if ERROR_FLAG in self.params:
@@ -81,10 +82,10 @@ class ChangeList(object):
         if remove is None: remove = []
         p = self.params.copy()
         for r in remove:
-            for k in p.keys():
+            for k in list(p.keys()):
                 if k.startswith(r):
                     del p[k]
-        for k, v in new_params.items():
+        for k, v in list(new_params.items()):
             if v is None:
                 if k in p:
                     del p[k]
@@ -172,7 +173,7 @@ class ChangeList(object):
         for i in (ALL_VAR, ORDER_VAR, ORDER_TYPE_VAR, SEARCH_VAR, IS_POPUP_VAR):
             if i in lookup_params:
                 del lookup_params[i]
-        for key, value in lookup_params.items():
+        for key, value in list(lookup_params.items()):
             if not isinstance(key, str):
                 # 'key' will be used as a keyword argument later, so Python
                 # requires it to be a string.

@@ -22,38 +22,38 @@ class AssertContainsTests(TestCase):
 
         try:
             self.assertNotContains(response, 'once')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Response should not contain 'once'")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Response should not contain 'once'")
             
         try:
             self.assertContains(response, 'never', 1)
-        except AssertionError, e:
-            self.assertEquals(str(e), "Found 0 instances of 'never' in response (expected 1)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Found 0 instances of 'never' in response (expected 1)")
 
         try:
             self.assertContains(response, 'once', 0)
-        except AssertionError, e:
-            self.assertEquals(str(e), "Found 1 instances of 'once' in response (expected 0)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Found 1 instances of 'once' in response (expected 0)")
 
         try:
             self.assertContains(response, 'once', 2)
-        except AssertionError, e:
-            self.assertEquals(str(e), "Found 1 instances of 'once' in response (expected 2)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Found 1 instances of 'once' in response (expected 2)")
 
         try:
             self.assertContains(response, 'twice', 1)
-        except AssertionError, e:
-            self.assertEquals(str(e), "Found 2 instances of 'twice' in response (expected 1)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Found 2 instances of 'twice' in response (expected 1)")
 
         try:
             self.assertContains(response, 'thrice')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Couldn't find 'thrice' in response")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Couldn't find 'thrice' in response")
 
         try:
             self.assertContains(response, 'thrice', 3)
-        except AssertionError, e:
-            self.assertEquals(str(e), "Found 0 instances of 'thrice' in response (expected 3)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Found 0 instances of 'thrice' in response (expected 3)")
 
 class AssertTemplateUsedTests(TestCase):
     fixtures = ['testdata.json']
@@ -67,8 +67,8 @@ class AssertTemplateUsedTests(TestCase):
 
         try:
             self.assertTemplateUsed(response, 'GET Template')
-        except AssertionError, e:
-            self.assertEquals(str(e), "No templates used to render the response")
+        except AssertionError as e:
+            self.assertEqual(str(e), "No templates used to render the response")
 
     def test_single_context(self):
         "Template assertions work when there is a single context"
@@ -77,13 +77,13 @@ class AssertTemplateUsedTests(TestCase):
         #
         try:
             self.assertTemplateNotUsed(response, 'Empty GET Template')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Template 'Empty GET Template' was used unexpectedly in rendering the response")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Template 'Empty GET Template' was used unexpectedly in rendering the response")
 
         try:
             self.assertTemplateUsed(response, 'Empty POST Template')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Template 'Empty POST Template' was not a template used to render the response. Actual template(s) used: Empty GET Template")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Template 'Empty POST Template' was not a template used to render the response. Actual template(s) used: Empty GET Template")
 
     def test_multiple_context(self):
         "Template assertions work when there are multiple contexts"
@@ -98,18 +98,18 @@ class AssertTemplateUsedTests(TestCase):
         self.assertContains(response, 'POST data OK')
         try:
             self.assertTemplateNotUsed(response, "form_view.html")
-        except AssertionError, e:
-            self.assertEquals(str(e), "Template 'form_view.html' was used unexpectedly in rendering the response")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Template 'form_view.html' was used unexpectedly in rendering the response")
 
         try:
             self.assertTemplateNotUsed(response, 'base.html')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Template 'base.html' was used unexpectedly in rendering the response")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Template 'base.html' was used unexpectedly in rendering the response")
 
         try:
             self.assertTemplateUsed(response, "Valid POST Template")
-        except AssertionError, e:
-            self.assertEquals(str(e), "Template 'Valid POST Template' was not a template used to render the response. Actual template(s) used: form_view.html, base.html")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Template 'Valid POST Template' was not a template used to render the response. Actual template(s) used: form_view.html, base.html")
 
 class AssertRedirectsTests(TestCase):
     def test_redirect_page(self):
@@ -118,16 +118,16 @@ class AssertRedirectsTests(TestCase):
         response = self.client.get('/test_client/permanent_redirect_view/')
         try:
             self.assertRedirects(response, '/test_client/get_view/')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Response didn't redirect as expected: Response code was 301 (expected 302)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Response didn't redirect as expected: Response code was 301 (expected 302)")
 
     def test_lost_query(self):
         "An assertion is raised if the redirect location doesn't preserve GET parameters"
         response = self.client.get('/test_client/redirect_view/', {'var': 'value'})
         try:
             self.assertRedirects(response, '/test_client/get_view/')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Response redirected to 'http://testserver/test_client/get_view/?var=value', expected 'http://testserver/test_client/get_view/'")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Response redirected to 'http://testserver/test_client/get_view/?var=value', expected 'http://testserver/test_client/get_view/'")
 
     def test_incorrect_target(self):
         "An assertion is raised if the response redirects to another target"
@@ -135,8 +135,8 @@ class AssertRedirectsTests(TestCase):
         try:
             # Should redirect to get_view
             self.assertRedirects(response, '/test_client/some_view/')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Response didn't redirect as expected: Response code was 301 (expected 302)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Response didn't redirect as expected: Response code was 301 (expected 302)")
 
     def test_target_page(self):
         "An assertion is raised if the response redirect target cannot be retrieved as expected"
@@ -144,8 +144,8 @@ class AssertRedirectsTests(TestCase):
         try:
             # The redirect target responds with a 301 code, not 200
             self.assertRedirects(response, 'http://testserver/test_client/permanent_redirect_view/')
-        except AssertionError, e:
-            self.assertEquals(str(e), "Couldn't retrieve redirection page '/test_client/permanent_redirect_view/': response code was 301 (expected 200)")
+        except AssertionError as e:
+            self.assertEqual(str(e), "Couldn't retrieve redirection page '/test_client/permanent_redirect_view/': response code was 301 (expected 200)")
 
 class AssertFormErrorTests(TestCase):
     def test_unknown_form(self):
@@ -163,7 +163,7 @@ class AssertFormErrorTests(TestCase):
 
         try:
             self.assertFormError(response, 'wrong_form', 'some_field', 'Some error.')
-        except AssertionError, e:
+        except AssertionError as e:
             self.assertEqual(str(e), "The form 'wrong_form' was not used to render the response")
 
     def test_unknown_field(self):
@@ -181,7 +181,7 @@ class AssertFormErrorTests(TestCase):
 
         try:
             self.assertFormError(response, 'form', 'some_field', 'Some error.')
-        except AssertionError, e:
+        except AssertionError as e:
             self.assertEqual(str(e), "The form 'form' in context 0 does not contain the field 'some_field'")
 
     def test_noerror_field(self):
@@ -199,7 +199,7 @@ class AssertFormErrorTests(TestCase):
 
         try:
             self.assertFormError(response, 'form', 'value', 'Some error.')
-        except AssertionError, e:
+        except AssertionError as e:
             self.assertEqual(str(e), "The field 'value' on form 'form' in context 0 contains no errors")
 
     def test_unknown_error(self):
@@ -217,7 +217,7 @@ class AssertFormErrorTests(TestCase):
 
         try:
             self.assertFormError(response, 'form', 'email', 'Some error.')
-        except AssertionError, e:
+        except AssertionError as e:
             self.assertEqual(str(e), "The field 'email' on form 'form' in context 0 does not contain the error 'Some error.' (actual errors: [u'Enter a valid e-mail address.'])")
 
     def test_unknown_nonfield_error(self):
@@ -238,7 +238,7 @@ class AssertFormErrorTests(TestCase):
 
         try:
             self.assertFormError(response, 'form', None, 'Some error.')
-        except AssertionError, e:
+        except AssertionError as e:
             self.assertEqual(str(e), "The form 'form' in context 0 does not contain the non-field error 'Some error.' (actual errors: )")
 
 class LoginTests(TestCase):
@@ -250,7 +250,7 @@ class LoginTests(TestCase):
         # Create a second client, and log in.
         c = Client()
         login = c.login(username='testclient', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
 
         # Get a redirection page with the second client.
         response = c.get("/test_client_regress/login_protected_redirect_view/")
@@ -292,7 +292,7 @@ class ExceptionTests(TestCase):
         "#5836 - A stale user exception isn't re-raised by the test client."
 
         login = self.client.login(username='testclient',password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
         try:
             response = self.client.get("/test_client_regress/staff_only/")
             self.fail("General users should not be able to visit this page")
@@ -303,7 +303,7 @@ class ExceptionTests(TestCase):
         
         # This next operation should be successful; if it isn't we have a problem.
         login = self.client.login(username='staff', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
         try:
             self.client.get("/test_client_regress/staff_only/")
         except SuspiciousOperation:
@@ -318,7 +318,7 @@ class UrlconfSubstitutionTests(TestCase):
     def test_urlconf_was_changed(self):
         "TestCase can enforce a custom URLConf on a per-test basis"
         url = reverse('arg_view', args=['somename'])
-        self.assertEquals(url, '/arg_view/somename/')
+        self.assertEqual(url, '/arg_view/somename/')
 
 # This test needs to run *after* UrlconfSubstitutionTests; the zz prefix in the
 # name is to ensure alphabetical ordering.
@@ -326,4 +326,4 @@ class zzUrlconfSubstitutionTests(TestCase):
     def test_urlconf_was_reverted(self):
         "URLconf is reverted to original value after modification in a TestCase"
         url = reverse('arg_view', args=['somename'])
-        self.assertEquals(url, '/test_client_regress/arg_view/somename/')
+        self.assertEqual(url, '/test_client_regress/arg_view/somename/')

@@ -13,9 +13,9 @@ or implicit commits or rollbacks.
 """
 
 try:
-    import thread
+    import _thread
 except ImportError:
-    import dummy_thread as thread
+    import _dummy_thread as thread
 try:
     from functools import wraps
 except ImportError:
@@ -49,7 +49,7 @@ def enter_transaction_management():
     from the settings, if there is no surrounding block (dirty is always false
     when no current block is running).
     """
-    thread_ident = thread.get_ident()
+    thread_ident = _thread.get_ident()
     if thread_ident in state and state[thread_ident]:
         state[thread_ident].append(state[thread_ident][-1])
     else:
@@ -64,7 +64,7 @@ def leave_transaction_management():
     over to the surrounding block, as a commit will commit all changes, even
     those from outside. (Commits are on connection level.)
     """
-    thread_ident = thread.get_ident()
+    thread_ident = _thread.get_ident()
     if thread_ident in state and state[thread_ident]:
         del state[thread_ident][-1]
     else:
@@ -79,7 +79,7 @@ def is_dirty():
     Returns True if the current transaction requires a commit for changes to
     happen.
     """
-    return dirty.get(thread.get_ident(), False)
+    return dirty.get(_thread.get_ident(), False)
 
 def set_dirty():
     """
@@ -87,7 +87,7 @@ def set_dirty():
     to decide in a managed block of code to decide whether there are open
     changes waiting for commit.
     """
-    thread_ident = thread.get_ident()
+    thread_ident = _thread.get_ident()
     if thread_ident in dirty:
         dirty[thread_ident] = True
     else:
@@ -99,7 +99,7 @@ def set_clean():
     to decide in a managed block of code to decide whether a commit or rollback
     should happen.
     """
-    thread_ident = thread.get_ident()
+    thread_ident = _thread.get_ident()
     if thread_ident in dirty:
         dirty[thread_ident] = False
     else:
@@ -109,7 +109,7 @@ def is_managed():
     """
     Checks whether the transaction manager is in manual or in auto state.
     """
-    thread_ident = thread.get_ident()
+    thread_ident = _thread.get_ident()
     if thread_ident in state:
         if state[thread_ident]:
             return state[thread_ident][-1]
@@ -122,7 +122,7 @@ def managed(flag=True):
     management and there is a pending commit/rollback, the data will be
     commited.
     """
-    thread_ident = thread.get_ident()
+    thread_ident = _thread.get_ident()
     top = state.get(thread_ident, None)
     if top:
         top[-1] = flag

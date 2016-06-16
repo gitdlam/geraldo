@@ -15,7 +15,7 @@ class Answer(models.Model):
         order_with_respect_to = 'question'
 
     def __unicode__(self):
-        return unicode(self.text)
+        return str(self.text)
 
 __test__ = {'API_TESTS': """
 >>> q1 = Question(text="Which Beatle starts with the letter 'R'?")

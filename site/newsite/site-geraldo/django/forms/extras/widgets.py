@@ -31,14 +31,14 @@ class SelectDateWidget(Widget):
             self.years = years
         else:
             this_year = datetime.date.today().year
-            self.years = range(this_year, this_year+10)
+            self.years = list(range(this_year, this_year+10))
 
     def render(self, name, value, attrs=None):
         try:
             year_val, month_val, day_val = value.year, value.month, value.day
         except AttributeError:
             year_val = month_val = day_val = None
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 match = RE_DATE.match(value)
                 if match:
                     year_val, month_val, day_val = [int(v) for v in match.groups()]
@@ -50,7 +50,7 @@ class SelectDateWidget(Widget):
         else:
             id_ = 'id_%s' % name
 
-        month_choices = MONTHS.items()
+        month_choices = list(MONTHS.items())
         month_choices.sort()
         local_attrs = self.build_attrs(id=self.month_field % id_)
         select_html = Select(choices=month_choices).render(self.month_field % name, month_val, local_attrs)
@@ -66,7 +66,7 @@ class SelectDateWidget(Widget):
         select_html = Select(choices=year_choices).render(self.year_field % name, year_val, local_attrs)
         output.append(select_html)
 
-        return mark_safe(u'\n'.join(output))
+        return mark_safe('\n'.join(output))
 
     def id_for_label(self, id_):
         return '%s_month' % id_

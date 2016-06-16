@@ -84,7 +84,7 @@ class CsrfMiddleware(object):
             def add_csrf_field(match):
                 """Returns the matched <form> tag plus the added <input> element"""
                 return mark_safe(match.group() + "<div style='display:none;'>" + \
-                "<input type='hidden' " + idattributes.next() + \
+                "<input type='hidden' " + next(idattributes) + \
                 " name='csrfmiddlewaretoken' value='" + csrf_token + \
                 "' /></div>")
 

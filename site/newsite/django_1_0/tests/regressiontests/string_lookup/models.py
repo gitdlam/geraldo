@@ -44,7 +44,7 @@ class Article(models.Model):
     def __str__(self):
         return "Article %s" % self.name
 
-__test__ = {'API_TESTS': ur"""
+__test__ = {'API_TESTS': r"""
 # Regression test for #1661 and #1662: Check that string form referencing of
 # models works, both as pre and post reference, on all RelatedField types.
 

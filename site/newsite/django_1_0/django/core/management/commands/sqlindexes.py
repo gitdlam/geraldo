@@ -7,4 +7,4 @@ class Command(AppCommand):
 
     def handle_app(self, app, **options):
         from django.core.management.sql import sql_indexes
-        return u'\n'.join(sql_indexes(app, self.style)).encode('utf-8')
+        return '\n'.join(sql_indexes(app, self.style)).encode('utf-8')

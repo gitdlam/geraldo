@@ -30,7 +30,7 @@ from django.db import models
 from google.appengine.api import datastore_types
 from google.appengine.ext import db
 
-from python import FakeParent
+from .python import FakeParent
 
 getInnerText = xml_serializer.getInnerText
 
@@ -66,16 +66,16 @@ class Serializer(xml_serializer.Serializer):
     application name) to make importing easier.
     """
     xml = obj._entity.ToXml()
-    xml = xml.replace(u"""kind="%s" """ % obj._entity.kind(),
-                      u"""kind="%s" """ % unicode(obj._meta))
+    xml = xml.replace("""kind="%s" """ % obj._entity.kind(),
+                      """kind="%s" """ % str(obj._meta))
     self._objects.append(xml)
 
   def getvalue(self):
     """Wrap the serialized objects with XML headers and return."""
-    str = u"""<?xml version="1.0" encoding="utf-8"?>\n"""
-    str += u"""<django-objects version="1.0">\n"""
-    str += u"".join(self._objects)
-    str += u"""</django-objects>"""
+    str = """<?xml version="1.0" encoding="utf-8"?>\n"""
+    str += """<django-objects version="1.0">\n"""
+    str += "".join(self._objects)
+    str += """</django-objects>"""
     return str
 
 
@@ -87,7 +87,7 @@ class Deserializer(xml_serializer.Deserializer):
   construct a model object.
   """
 
-  def next(self):
+  def __next__(self):
     """Replacement next method to look for 'entity'.
 
     The default next implementation exepects 'object' nodes which is not
@@ -125,12 +125,12 @@ class Deserializer(xml_serializer.Deserializer):
       if isinstance(field, db.Reference):
         m = re.match("tag:.*\[(.*)\]", field_value)
         if not m:
-          raise base.DeserializationError(u"Invalid reference value: '%s'" %
+          raise base.DeserializationError("Invalid reference value: '%s'" %
                                           field_value)
         key = m.group(1)
         key_obj = db.Key(key)
         if not key_obj.name():
-          raise base.DeserializationError(u"Cannot load Reference with "
+          raise base.DeserializationError("Cannot load Reference with "
                                           "unnamed key: '%s'" % field_value)
         data[field.name] = key_obj
       else:

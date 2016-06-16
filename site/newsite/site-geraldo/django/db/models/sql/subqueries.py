@@ -172,7 +172,7 @@ class UpdateQuery(Query):
         if query.alias_refcount[first_table] == 1:
             # We can remove one table from the inner query.
             query.unref_alias(first_table)
-            for i in xrange(1, len(query.tables)):
+            for i in range(1, len(query.tables)):
                 table = query.tables[i]
                 if query.alias_refcount[table]:
                     break
@@ -225,7 +225,7 @@ class UpdateQuery(Query):
         querysets.
         """
         values_seq = []
-        for name, val in values.iteritems():
+        for name, val in values.items():
             field, model, direct, m2m = self.model._meta.get_field_by_name(name)
             if not direct or m2m:
                 raise FieldError('Cannot update model field %r (only non-relations and foreign keys permitted).' % field)
@@ -275,7 +275,7 @@ class UpdateQuery(Query):
         if not self.related_updates:
             return []
         result = []
-        for model, values in self.related_updates.iteritems():
+        for model, values in self.related_updates.items():
             query = UpdateQuery(model, self.connection)
             query.values = values
             if self.related_ids:

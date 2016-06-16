@@ -5,9 +5,9 @@ Classes representing uploaded files.
 import os
 import warnings
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 from django.conf import settings
 
@@ -135,7 +135,7 @@ class UploadedFile(object):
         return self
 
     def readlines(self):
-        return list(self.xreadlines())
+        return list(self)
 
     def __iter__(self):
         # Iterate over this file-like object by newlines
@@ -205,7 +205,7 @@ class TemporaryUploadedFile(UploadedFile):
     def close(self):                return self._file.close()
     def __iter__(self):             return iter(self._file)
     def readlines(self, size=None): return self._file.readlines(size)
-    def xreadlines(self):           return self._file.xreadlines()
+    def xreadlines(self):           return self._file
 
 class InMemoryUploadedFile(UploadedFile):
     """

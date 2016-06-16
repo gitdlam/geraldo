@@ -50,12 +50,12 @@ def parse_gallery(text):
             lista.order(field)
 
         if tag:
-            lista = filter(lambda o: tag in o.tags, lista)
+            lista = [o for o in lista if tag in o.tags]
 
         # Monta HTML
         html_tmp = '<ul class="gallery_items">'
         for obj in lista[:int(count)]:
-            html_tmp += '<li><a href="%s" title="%s"><img src="%s" alt="%s"/></a></li>'%(obj.get_file_url(), unicode(obj), obj.get_thumb_url(), unicode(obj))
+            html_tmp += '<li><a href="%s" title="%s"><img src="%s" alt="%s"/></a></li>'%(obj.get_file_url(), str(obj), obj.get_thumb_url(), str(obj))
         html_tmp += '</ul>'
 
         # Aplica resultado no texto

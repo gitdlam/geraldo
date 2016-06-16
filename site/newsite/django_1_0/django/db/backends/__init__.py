@@ -148,7 +148,7 @@ class BaseDatabaseOperations(object):
         if isinstance(params, (list, tuple)):
             u_params = tuple([to_unicode(val) for val in params])
         else:
-            u_params = dict([(to_unicode(k), to_unicode(v)) for k, v in params.items()])
+            u_params = dict([(to_unicode(k), to_unicode(v)) for k, v in list(params.items())])
 
         return smart_unicode(sql) % u_params
 

@@ -57,13 +57,13 @@ class ExtendsNode(Node):
             error_msg = "Invalid template name in 'extends' tag: %r." % parent
             if self.parent_name_expr:
                 error_msg += " Got this from the '%s' variable." % self.parent_name_expr.token
-            raise TemplateSyntaxError, error_msg
+            raise TemplateSyntaxError(error_msg)
         if hasattr(parent, 'render'):
             return parent # parent is a Template object
         try:
             source, origin = find_template_source(parent, self.template_dirs)
         except TemplateDoesNotExist:
-            raise TemplateSyntaxError, "Template %r cannot be extended, because it doesn't exist" % parent
+            raise TemplateSyntaxError("Template %r cannot be extended, because it doesn't exist" % parent)
         else:
             return get_template_from_string(source, origin, parent)
 
@@ -121,7 +121,7 @@ class IncludeNode(Node):
             template_name = self.template_name.resolve(context)
             t = get_template(template_name)
             return t.render(context)
-        except TemplateSyntaxError, e:
+        except TemplateSyntaxError as e:
             if settings.TEMPLATE_DEBUG:
                 raise
             return ''
@@ -134,13 +134,13 @@ def do_block(parser, token):
     """
     bits = token.contents.split()
     if len(bits) != 2:
-        raise TemplateSyntaxError, "'%s' tag takes only one argument" % bits[0]
+        raise TemplateSyntaxError("'%s' tag takes only one argument" % bits[0])
     block_name = bits[1]
     # Keep track of the names of BlockNodes found in this template, so we can
     # check for duplication.
     try:
         if block_name in parser.__loaded_blocks:
-            raise TemplateSyntaxError, "'%s' tag with name '%s' appears more than once" % (bits[0], block_name)
+            raise TemplateSyntaxError("'%s' tag with name '%s' appears more than once" % (bits[0], block_name))
         parser.__loaded_blocks.append(block_name)
     except AttributeError: # parser.__loaded_blocks isn't a list yet
         parser.__loaded_blocks = [block_name]
@@ -160,7 +160,7 @@ def do_extends(parser, token):
     """
     bits = token.contents.split()
     if len(bits) != 2:
-        raise TemplateSyntaxError, "'%s' takes one argument" % bits[0]
+        raise TemplateSyntaxError("'%s' takes one argument" % bits[0])
     parent_name, parent_name_expr = None, None
     if bits[1][0] in ('"', "'") and bits[1][-1] == bits[1][0]:
         parent_name = bits[1][1:-1]
@@ -168,7 +168,7 @@ def do_extends(parser, token):
         parent_name_expr = parser.compile_filter(bits[1])
     nodelist = parser.parse()
     if nodelist.get_nodes_by_type(ExtendsNode):
-        raise TemplateSyntaxError, "'%s' cannot appear more than once in the same template" % bits[0]
+        raise TemplateSyntaxError("'%s' cannot appear more than once in the same template" % bits[0])
     return ExtendsNode(nodelist, parent_name, parent_name_expr)
 
 def do_include(parser, token):
@@ -181,7 +181,7 @@ def do_include(parser, token):
     """
     bits = token.contents.split()
     if len(bits) != 2:
-        raise TemplateSyntaxError, "%r tag takes one argument: the name of the template to be included" % bits[0]
+        raise TemplateSyntaxError("%r tag takes one argument: the name of the template to be included" % bits[0])
     path = bits[1]
     if path[0] in ('"', "'") and path[-1] == path[0]:
         return ConstantIncludeNode(path[1:-1])

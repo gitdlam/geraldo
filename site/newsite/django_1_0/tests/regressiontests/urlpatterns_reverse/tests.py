@@ -31,10 +31,10 @@ class URLPatternReverse(unittest.TestCase):
         for regex, expected, args, kwargs in test_data:
             try:
                 got = reverse_helper(re.compile(regex), *args, **kwargs)
-            except NoReverseMatch, e:
+            except NoReverseMatch as e:
                 self.assertEqual(expected, NoReverseMatch)
             else:
-                self.assertEquals(got, expected)
+                self.assertEqual(got, expected)
 
 if __name__ == "__main__":
     run_tests(1)

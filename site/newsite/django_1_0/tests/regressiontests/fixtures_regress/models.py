@@ -25,9 +25,9 @@ class Stuff(models.Model):
         # Oracle doesn't distinguish between None and the empty string.
         # This hack makes the test case pass using Oracle.
         name = self.name
-        if settings.DATABASE_ENGINE == 'oracle' and name == u'':
+        if settings.DATABASE_ENGINE == 'oracle' and name == '':
             name = None
-        return unicode(name) + u' is owned by ' + unicode(self.owner)
+        return str(name) + ' is owned by ' + str(self.owner)
 
 class Absolute(models.Model):
     name = models.CharField(max_length=40)

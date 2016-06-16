@@ -1,5 +1,6 @@
 import sys
 import time
+import collections
 try:
     set
 except NameError:
@@ -305,7 +306,7 @@ class BaseDatabaseCreation(object):
         database already exists. Returns the name of the test database created.
         """
         if verbosity >= 1:
-            print "Creating test database..."
+            print("Creating test database...")
 
         test_database_name = self._create_test_db(verbosity, autoclobber)
 
@@ -342,23 +343,23 @@ class BaseDatabaseCreation(object):
         self.set_autocommit()
         try:
             cursor.execute("CREATE DATABASE %s %s" % (qn(test_database_name), suffix))
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Got an error creating the test database: %s\n" % e)
             if not autoclobber:
-                confirm = raw_input("Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % test_database_name)
+                confirm = input("Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % test_database_name)
             if autoclobber or confirm == 'yes':
                 try:
                     if verbosity >= 1:
-                        print "Destroying old test database..."
+                        print("Destroying old test database...")
                     cursor.execute("DROP DATABASE %s" % qn(test_database_name))
                     if verbosity >= 1:
-                        print "Creating test database..."
+                        print("Creating test database...")
                     cursor.execute("CREATE DATABASE %s %s" % (qn(test_database_name), suffix))
-                except Exception, e:
+                except Exception as e:
                     sys.stderr.write("Got an error recreating the test database: %s\n" % e)
                     sys.exit(2)
             else:
-                print "Tests cancelled."
+                print("Tests cancelled.")
                 sys.exit(1)
 
         return test_database_name
@@ -369,7 +370,7 @@ class BaseDatabaseCreation(object):
         database already exists. Returns the name of the test database created.
         """
         if verbosity >= 1:
-            print "Destroying test database..."
+            print("Destroying test database...")
         self.connection.close()
         test_database_name = settings.DATABASE_NAME
         settings.DATABASE_NAME = old_database_name
@@ -391,7 +392,7 @@ class BaseDatabaseCreation(object):
     def set_autocommit(self):
         "Make sure a connection is in autocommit mode."
         if hasattr(self.connection.connection, "autocommit"):
-            if callable(self.connection.connection.autocommit):
+            if isinstance(self.connection.connection.autocommit, collections.Callable):
                 self.connection.connection.autocommit(True)
             else:
                 self.connection.connection.autocommit = True

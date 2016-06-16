@@ -2,8 +2,8 @@ from google.appengine.ext import db
 
 from django import forms
 
-from models import Entry
-from migration import import_from_json
+from .models import Entry
+from .migration import import_from_json
 
 BLOG_FORMAT_CHOICES = (
     ('html','html'),

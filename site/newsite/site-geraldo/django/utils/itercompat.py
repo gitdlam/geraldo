@@ -23,7 +23,7 @@ def compat_tee(iterable):
             else:
                 item = dpop(i)
             yield item
-    next = iter(iterable).next
+    next = iter(iterable).__next__
     return gen(next), gen(next)
 
 def groupby(iterable, keyfunc=None):
@@ -33,7 +33,7 @@ def groupby(iterable, keyfunc=None):
     if keyfunc is None:
         keyfunc = lambda x:x
     iterable = iter(iterable)
-    l = [iterable.next()]
+    l = [next(iterable)]
     lastkey = keyfunc(l[0])
     for item in iterable:
         key = keyfunc(item)
@@ -48,7 +48,7 @@ def groupby(iterable, keyfunc=None):
 # Not really in itertools, since it's a builtin in Python 2.4 and later, but it
 # does operate as an iterator.
 def reversed(data):
-    for index in xrange(len(data)-1, -1, -1):
+    for index in range(len(data)-1, -1, -1):
         yield data[index]
 
 if hasattr(itertools, 'tee'):

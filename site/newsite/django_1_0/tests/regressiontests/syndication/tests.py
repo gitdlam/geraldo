@@ -11,4 +11,4 @@ class SyndicationFeedTest(TestCase):
         """
         c = Client()
         response = c.get('/syndication/feeds/complex/')
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)

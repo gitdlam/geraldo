@@ -5,7 +5,7 @@ import os
 import re
 import sys
 import gettext as gettext_module
-from cStringIO import StringIO
+from io import StringIO
 
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.thread_support import currentThread
@@ -145,7 +145,7 @@ def translation(language):
                 t = gettext_module.translation('django', path, [loc], klass)
                 t.set_language(lang)
                 return t
-            except IOError, e:
+            except IOError as e:
                 return None
 
         res = _translation(globalpath)

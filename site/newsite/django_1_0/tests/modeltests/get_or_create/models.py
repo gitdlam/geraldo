@@ -13,7 +13,7 @@ class Person(models.Model):
     birthday = models.DateField()
 
     def __unicode__(self):
-        return u'%s %s' % (self.first_name, self.last_name)
+        return '%s %s' % (self.first_name, self.last_name)
 
 __test__ = {'API_TESTS':"""
 # Acting as a divine being, create an Person.

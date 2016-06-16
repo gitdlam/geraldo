@@ -1,6 +1,6 @@
 import base64
 import md5
-import cPickle as pickle
+import pickle as pickle
 try:
     from functools import wraps
 except ImportError:
@@ -43,7 +43,7 @@ def _decode_post_data(encoded_data):
     pickled, tamper_check = encoded_data[:-32], encoded_data[-32:]
     if md5.new(pickled + settings.SECRET_KEY).hexdigest() != tamper_check:
         from django.core.exceptions import SuspiciousOperation
-        raise SuspiciousOperation, "User may have tampered with session cookie."
+        raise SuspiciousOperation("User may have tampered with session cookie.")
     return pickle.loads(pickled)
 
 def staff_member_required(view_func):

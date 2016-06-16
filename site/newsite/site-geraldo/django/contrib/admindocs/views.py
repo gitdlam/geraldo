@@ -50,8 +50,8 @@ def template_tag_index(request):
     load_all_installed_template_libraries()
 
     tags = []
-    for module_name, library in template.libraries.items():
-        for tag_name, tag_func in library.tags.items():
+    for module_name, library in list(template.libraries.items()):
+        for tag_name, tag_func in list(library.tags.items()):
             title, body, metadata = utils.parse_docstring(tag_func.__doc__)
             if title:
                 title = utils.parse_rst(title, 'tag', _('tag:') + tag_name)
@@ -83,8 +83,8 @@ def template_filter_index(request):
     load_all_installed_template_libraries()
 
     filters = []
-    for module_name, library in template.libraries.items():
-        for filter_name, filter_func in library.filters.items():
+    for module_name, library in list(template.libraries.items()):
+        for filter_name, filter_func in list(library.filters.items()):
             title, body, metadata = utils.parse_docstring(filter_func.__doc__)
             if title:
                 title = utils.parse_rst(title, 'filter', _('filter:') + filter_name)
@@ -183,14 +183,14 @@ def model_detail(request, app_label, model_name):
     try:
         app_mod = models.get_app(app_label)
     except ImproperlyConfigured:
-        raise Http404, _("App %r not found") % app_label
+        raise Http404(_("App %r not found") % app_label)
     model = None
     for m in models.get_models(app_mod):
         if m._meta.object_name.lower() == model_name:
             model = m
             break
     if model is None:
-        raise Http404, _("Model %(model_name)r not found in app %(app_label)r") % {'model_name': model_name, 'app_label': app_label}
+        raise Http404(_("Model %(model_name)r not found in app %(app_label)r") % {'model_name': model_name, 'app_label': app_label})
 
     opts = model._meta
 
@@ -214,7 +214,7 @@ def model_detail(request, app_label, model_name):
         })
 
     # Gather model methods.
-    for func_name, func in model.__dict__.items():
+    for func_name, func in list(model.__dict__.items()):
         if (inspect.isfunction(func) and len(inspect.getargspec(func)[0]) == 1):
             try:
                 for exclude in MODEL_METHODS_EXCLUDE:
@@ -364,7 +364,7 @@ def extract_views_from_urlpatterns(urlpatterns, base=''):
                 continue
             views.extend(extract_views_from_urlpatterns(patterns, base + p.regex.pattern))
         else:
-            raise TypeError, _("%s does not appear to be a urlpattern object") % p
+            raise TypeError(_("%s does not appear to be a urlpattern object") % p)
     return views
 
 named_group_matcher = re.compile(r'\(\?P(<\w+>).+?\)')

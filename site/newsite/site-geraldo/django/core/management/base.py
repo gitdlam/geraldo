@@ -85,7 +85,7 @@ class BaseCommand(object):
             try:
                 from django.utils import translation
                 translation.activate('en-us')
-            except ImportError, e:
+            except ImportError as e:
                 # If settings should be available, but aren't, 
                 # raise the error and quit.
                 sys.stderr.write(self.style.ERROR(str('Error: %s\n' % e)))
@@ -99,11 +99,11 @@ class BaseCommand(object):
                     # This needs to be imported here, because it relies on settings.
                     from django.db import connection
                     if connection.ops.start_transaction_sql():
-                        print self.style.SQL_KEYWORD(connection.ops.start_transaction_sql())
-                print output
+                        print(self.style.SQL_KEYWORD(connection.ops.start_transaction_sql()))
+                print(output)
                 if self.output_transaction:
-                    print self.style.SQL_KEYWORD("COMMIT;")
-        except CommandError, e:
+                    print(self.style.SQL_KEYWORD("COMMIT;"))
+        except CommandError as e:
             sys.stderr.write(self.style.ERROR(str('Error: %s\n' % e)))
             sys.exit(1)
 
@@ -115,9 +115,9 @@ class BaseCommand(object):
         """
         from django.core.management.validation import get_validation_errors
         try:
-            from cStringIO import StringIO
+            from io import StringIO
         except ImportError:
-            from StringIO import StringIO
+            from io import StringIO
         s = StringIO()
         num_errors = get_validation_errors(s, app)
         if num_errors:
@@ -125,7 +125,7 @@ class BaseCommand(object):
             error_text = s.read()
             raise CommandError("One or more models did not validate:\n%s" % error_text)
         if display_num_errors:
-            print "%s error%s found" % (num_errors, num_errors != 1 and 's' or '')
+            print("%s error%s found" % (num_errors, num_errors != 1 and 's' or ''))
 
     def handle(self, *args, **options):
         raise NotImplementedError()
@@ -139,7 +139,7 @@ class AppCommand(BaseCommand):
             raise CommandError('Enter at least one appname.')
         try:
             app_list = [models.get_app(app_label) for app_label in app_labels]
-        except (ImproperlyConfigured, ImportError), e:
+        except (ImproperlyConfigured, ImportError) as e:
             raise CommandError("%s. Are you sure your INSTALLED_APPS setting is correct?" % e)
         output = []
         for app in app_list:
@@ -199,7 +199,7 @@ def copy_helper(style, app_or_project, name, directory, other_name=''):
     top_dir = os.path.join(directory, name)
     try:
         os.mkdir(top_dir)
-    except OSError, e:
+    except OSError as e:
         raise CommandError(e)
 
     # Determine where the app or project templates are. Use

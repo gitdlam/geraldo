@@ -54,8 +54,8 @@ class Cache(unittest.TestCase):
     def test_has_key(self):
         # has_key
         cache.set("hello1", "goodbye1")
-        self.assertEqual(cache.has_key("hello1"), True)
-        self.assertEqual(cache.has_key("goodbye1"), False)
+        self.assertEqual("hello1" in cache, True)
+        self.assertEqual("goodbye1" in cache, False)
 
     def test_in(self):
         cache.set("hello2", "goodbye2")
@@ -85,16 +85,16 @@ class Cache(unittest.TestCase):
         
         cache.add("expire2", "newvalue")
         self.assertEqual(cache.get("expire2"), "newvalue")
-        self.assertEqual(cache.has_key("expire3"), False)
+        self.assertEqual("expire3" in cache, False)
 
     def test_unicode(self):
         stuff = {
-            u'ascii': u'ascii_value',
-            u'unicode_ascii': u'Iñtërnâtiônàlizætiøn1',
-            u'Iñtërnâtiônàlizætiøn': u'Iñtërnâtiônàlizætiøn2',
-            u'ascii': {u'x' : 1 }
+            'ascii': 'ascii_value',
+            'unicode_ascii': 'Iñtërnâtiônàlizætiøn1',
+            'Iñtërnâtiônàlizætiøn': 'Iñtërnâtiônàlizætiøn2',
+            'ascii': {'x' : 1 }
             }
-        for (key, value) in stuff.items():
+        for (key, value) in list(stuff.items()):
             cache.set(key, value)
             self.assertEqual(cache.get(key), value)
 
@@ -121,7 +121,7 @@ class FileBasedCacheTests(unittest.TestCase):
         self.cache.set("foo", "bar")
         keyhash = md5.new("foo").hexdigest()
         keypath = os.path.join(self.dirname, keyhash[:2], keyhash[2:4], keyhash[4:])
-        self.assert_(os.path.exists(keypath))
+        self.assertTrue(os.path.exists(keypath))
         
     def test_subdirectory_removal(self):
         """
@@ -130,12 +130,12 @@ class FileBasedCacheTests(unittest.TestCase):
         self.cache.set("foo", "bar")
         keyhash = md5.new("foo").hexdigest()
         keypath = os.path.join(self.dirname, keyhash[:2], keyhash[2:4], keyhash[4:])
-        self.assert_(os.path.exists(keypath))
+        self.assertTrue(os.path.exists(keypath))
 
         self.cache.delete("foo")
-        self.assert_(not os.path.exists(keypath))
-        self.assert_(not os.path.exists(os.path.dirname(keypath)))
-        self.assert_(not os.path.exists(os.path.dirname(os.path.dirname(keypath))))
+        self.assertTrue(not os.path.exists(keypath))
+        self.assertTrue(not os.path.exists(os.path.dirname(keypath)))
+        self.assertTrue(not os.path.exists(os.path.dirname(os.path.dirname(keypath))))
 
 class CacheUtils(unittest.TestCase):
     """TestCase for django.utils.cache functions."""

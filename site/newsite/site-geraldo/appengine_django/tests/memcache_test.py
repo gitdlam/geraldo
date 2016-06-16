@@ -38,6 +38,6 @@ class AppengineMemcacheTest(unittest.TestCase):
   def testDelete(self):
     """Tests that delete removes values from the cache."""
     self._cache.set("test_key", "test_value")
-    self.assertEqual(self._cache.has_key("test_key"), True)
+    self.assertEqual("test_key" in self._cache, True)
     self._cache.delete("test_key")
-    self.assertEqual(self._cache.has_key("test_key"), False)
+    self.assertEqual("test_key" in self._cache, False)

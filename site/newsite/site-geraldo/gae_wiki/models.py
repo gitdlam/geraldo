@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 
 from utils.custom_models import CustomModel
 
-import app_settings
+from . import app_settings
 
 class Wiki(CustomModel):
     title = db.StringProperty()
@@ -35,7 +35,7 @@ class Wiki(CustomModel):
 
     def put(self):
         if not self.slug:
-            self.slug = unicode(slugify(self.title))
+            self.slug = str(slugify(self.title))
 
         # Delete from cache
         cache.delete(Wiki.get_cache_key(self.slug))

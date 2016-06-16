@@ -111,8 +111,8 @@ if __name__ == '__main__':
     from django.utils.simplejson.decoder import JSONDecoder
     from django.utils.simplejson.encoder import JSONEncoder
 else:
-    from decoder import JSONDecoder
-    from encoder import JSONEncoder
+    from .decoder import JSONDecoder
+    from .encoder import JSONEncoder
 
 _default_encoder = JSONEncoder(
     skipkeys=False,

@@ -15,10 +15,10 @@ class ModelRawIdWidget(forms.TextInput):
         from django.conf import settings
         related_url = '/admin/%s/%s/' % (self.model._meta.app_label, self.model._meta.object_name.lower())
         if self.limit_choices_to:
-            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.limit_choices_to.items()])
+            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in list(self.limit_choices_to.items())])
         else:
             url = ''
-        if not attrs.has_key('class'):
+        if 'class' not in attrs:
           attrs['class'] = 'vForeignKeyRawIdAdminField' # The JavaScript looks for this hook.
         output = [super(ModelRawIdWidget, self).render(name, value, attrs)]
         # TODO: "id_" is hard-coded here. This should instead use the correct
@@ -28,7 +28,7 @@ class ModelRawIdWidget(forms.TextInput):
         output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
         if value:
             output.append(self.label_for_value(value))
-        return mark_safe(u''.join(output))
+        return mark_safe(''.join(output))
     
     def label_for_value(self, value):
         return '&nbsp;<strong>%s</strong>' % \

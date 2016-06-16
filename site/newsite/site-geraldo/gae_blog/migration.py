@@ -4,13 +4,13 @@ from google.appengine.ext import db
 
 from django.utils import simplejson
 
-from models import Entry
+from .models import Entry
 
 def import_from_json(data, show=False):
     ret = []
 
     if show:
-        print len([i for i in Entry.all()])
+        print(len([i for i in Entry.all()]))
 
     # Deserialize
     objects = simplejson.loads(data)
@@ -28,7 +28,7 @@ def import_from_json(data, show=False):
 
         msg = '%d %s'%(obj['pk'], obj['fields']['title'])
         if show:
-            print msg
+            print(msg)
         else:
             ret.append(msg)
 
@@ -63,7 +63,7 @@ def import_from_json(data, show=False):
             new_url = '/media/img/upload/%s'%IMAGES[m.group(1)]
 
             if show:
-                print '\t', new_url
+                print('\t', new_url)
 
             text = text.replace(url, new_url)
 
@@ -75,7 +75,7 @@ def import_from_json(data, show=False):
 
     msg = [i.slug for i in Entry.all()]
     if show:
-        print msg
+        print(msg)
     else:
         ret.append(' '.join([i for i in msg]))
 

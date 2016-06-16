@@ -27,12 +27,12 @@ class FilteredSelectMultiple(forms.SelectMultiple):
 
     def render(self, name, value, attrs=None, choices=()):
         output = [super(FilteredSelectMultiple, self).render(name, value, attrs, choices)]
-        output.append(u'<script type="text/javascript">addEvent(window, "load", function(e) {')
+        output.append('<script type="text/javascript">addEvent(window, "load", function(e) {')
         # TODO: "id_" is hard-coded here. This should instead use the correct
         # API to determine the ID dynamically.
-        output.append(u'SelectFilter.init("id_%s", "%s", %s, "%s"); });</script>\n' % \
+        output.append('SelectFilter.init("id_%s", "%s", %s, "%s"); });</script>\n' % \
             (name, self.verbose_name.replace('"', '\\"'), int(self.is_stacked), settings.ADMIN_MEDIA_PREFIX))
-        return mark_safe(u''.join(output))
+        return mark_safe(''.join(output))
 
 class AdminDateWidget(forms.TextInput):
     class Media:
@@ -61,15 +61,15 @@ class AdminSplitDateTime(forms.SplitDateTimeWidget):
         forms.MultiWidget.__init__(self, widgets, attrs)
 
     def format_output(self, rendered_widgets):
-        return mark_safe(u'<p class="datetime">%s %s<br />%s %s</p>' % \
+        return mark_safe('<p class="datetime">%s %s<br />%s %s</p>' % \
             (_('Date:'), rendered_widgets[0], _('Time:'), rendered_widgets[1]))
 
 class AdminRadioFieldRenderer(RadioFieldRenderer):
     def render(self):
         """Outputs a <ul> for this set of radio fields."""
-        return mark_safe(u'<ul%s>\n%s\n</ul>' % (
+        return mark_safe('<ul%s>\n%s\n</ul>' % (
             flatatt(self.attrs),
-            u'\n'.join([u'<li>%s</li>' % force_unicode(w) for w in self]))
+            '\n'.join(['<li>%s</li>' % force_unicode(w) for w in self]))
         )
 
 class AdminRadioSelect(forms.RadioSelect):
@@ -88,7 +88,7 @@ class AdminFileWidget(forms.FileInput):
             output.append('%s <a target="_blank" href="%s%s">%s</a> <br />%s ' % \
                 (_('Currently:'), settings.MEDIA_URL, value, value, _('Change:')))
         output.append(super(AdminFileWidget, self).render(name, value, attrs))
-        return mark_safe(u''.join(output))
+        return mark_safe(''.join(output))
 
 class ForeignKeyRawIdWidget(forms.TextInput):
     """
@@ -102,10 +102,10 @@ class ForeignKeyRawIdWidget(forms.TextInput):
     def render(self, name, value, attrs=None):
         related_url = '../../../%s/%s/' % (self.rel.to._meta.app_label, self.rel.to._meta.object_name.lower())
         if self.rel.limit_choices_to:
-            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.rel.limit_choices_to.items()])
+            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in list(self.rel.limit_choices_to.items())])
         else:
             url = ''
-        if not attrs.has_key('class'):
+        if 'class' not in attrs:
           attrs['class'] = 'vForeignKeyRawIdAdminField' # The JavaScript looks for this hook.
         output = [super(ForeignKeyRawIdWidget, self).render(name, value, attrs)]
         # TODO: "id_" is hard-coded here. This should instead use the correct
@@ -115,7 +115,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
         if value:
             output.append(self.label_for_value(value))
-        return mark_safe(u''.join(output))
+        return mark_safe(''.join(output))
     
     def label_for_value(self, value):
         return '&nbsp;<strong>%s</strong>' % \
@@ -190,10 +190,10 @@ class RelatedFieldWidgetWrapper(forms.Widget):
         if rel_to in self.admin_site._registry: # If the related object has an admin interface:
             # TODO: "id_" is hard-coded here. This should instead use the correct
             # API to determine the ID dynamically.
-            output.append(u'<a href="%sadd/" class="add-another" id="add_id_%s" onclick="return showAddAnotherPopup(this);"> ' % \
+            output.append('<a href="%sadd/" class="add-another" id="add_id_%s" onclick="return showAddAnotherPopup(this);"> ' % \
                 (related_url, name))
-            output.append(u'<img src="%simg/admin/icon_addlink.gif" width="10" height="10" alt="Add Another"/></a>' % settings.ADMIN_MEDIA_PREFIX)
-        return mark_safe(u''.join(output))
+            output.append('<img src="%simg/admin/icon_addlink.gif" width="10" height="10" alt="Add Another"/></a>' % settings.ADMIN_MEDIA_PREFIX)
+        return mark_safe(''.join(output))
 
     def build_attrs(self, extra_attrs=None, **kwargs):
         "Helper function for building an attribute dictionary."

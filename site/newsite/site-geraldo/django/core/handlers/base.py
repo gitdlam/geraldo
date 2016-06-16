@@ -32,16 +32,16 @@ class BaseHandler(object):
             try:
                 dot = middleware_path.rindex('.')
             except ValueError:
-                raise exceptions.ImproperlyConfigured, '%s isn\'t a middleware module' % middleware_path
+                raise exceptions.ImproperlyConfigured('%s isn\'t a middleware module' % middleware_path)
             mw_module, mw_classname = middleware_path[:dot], middleware_path[dot+1:]
             try:
                 mod = __import__(mw_module, {}, {}, [''])
-            except ImportError, e:
-                raise exceptions.ImproperlyConfigured, 'Error importing middleware %s: "%s"' % (mw_module, e)
+            except ImportError as e:
+                raise exceptions.ImproperlyConfigured('Error importing middleware %s: "%s"' % (mw_module, e))
             try:
                 mw_class = getattr(mod, mw_classname)
             except AttributeError:
-                raise exceptions.ImproperlyConfigured, 'Middleware module "%s" does not define a "%s" class' % (mw_module, mw_classname)
+                raise exceptions.ImproperlyConfigured('Middleware module "%s" does not define a "%s" class' % (mw_module, mw_classname))
 
             try:
                 mw_instance = mw_class()
@@ -84,7 +84,7 @@ class BaseHandler(object):
 
             try:
                 response = callback(request, *callback_args, **callback_kwargs)
-            except Exception, e:
+            except Exception as e:
                 # If the view raised an exception, run it through exception
                 # middleware, and if the exception middleware returns a
                 # response, use that. Otherwise, reraise the exception.
@@ -97,13 +97,13 @@ class BaseHandler(object):
             # Complain if the view returned None (a common error).
             if response is None:
                 try:
-                    view_name = callback.func_name # If it's a function
+                    view_name = callback.__name__ # If it's a function
                 except AttributeError:
                     view_name = callback.__class__.__name__ + '.__call__' # If it's a class
-                raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (callback.__module__, view_name)
+                raise ValueError("The view %s.%s didn't return an HttpResponse object." % (callback.__module__, view_name))
 
             return response
-        except http.Http404, e:
+        except http.Http404 as e:
             if settings.DEBUG:
                 from django.views import debug
                 return debug.technical_404_response(request, e)
@@ -191,10 +191,10 @@ def get_script_name(environ):
     # rewrites. Unfortunately not every webserver (lighttpd!) passes this
     # information through all the time, so FORCE_SCRIPT_NAME, above, is still
     # needed.
-    script_url = environ.get('SCRIPT_URL', u'')
+    script_url = environ.get('SCRIPT_URL', '')
     if not script_url:
-        script_url = environ.get('REDIRECT_URL', u'')
+        script_url = environ.get('REDIRECT_URL', '')
     if script_url:
         return force_unicode(script_url[:-len(environ.get('PATH_INFO', ''))])
-    return force_unicode(environ.get('SCRIPT_NAME', u''))
+    return force_unicode(environ.get('SCRIPT_NAME', ''))
 

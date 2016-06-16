@@ -57,7 +57,7 @@ class Command(BaseCommand):
     new_args = argv[0:1]
     new_args.extend(['--datastore_path', datastore_path])
     new_args.extend(['--history_path', history_path])
-    new_args.extend([os.getcwdu()])
+    new_args.extend([os.getcwd()])
 
     # Add email settings
     from django.conf import settings

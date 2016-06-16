@@ -42,7 +42,7 @@ def installed_models(table_list):
         converter = lambda x: x.upper()
     else:
         converter = lambda x: x
-    return set([m for m in all_models if converter(m._meta.db_table) in map(converter, table_list)])
+    return set([m for m in all_models if converter(m._meta.db_table) in list(map(converter, table_list))])
 
 def sequence_list():
     "Returns a list of information about all DB sequences for all models in all apps."
@@ -87,7 +87,7 @@ def sql_create(app, style):
     for model in app_models:
         output, references = sql_model_create(model, style, known_models)
         final_output.extend(output)
-        for refto, refs in references.items():
+        for refto, refs in list(references.items()):
             pending_references.setdefault(refto, []).extend(refs)
             if refto in known_models:
                 final_output.extend(sql_for_pending_references(refto, style, pending_references))
@@ -446,9 +446,9 @@ def custom_sql_for_model(model):
             fp = open(sql_file, 'U')
             for statement in statements.split(fp.read().decode(settings.FILE_CHARSET)):
                 # Remove any comments from the file
-                statement = re.sub(ur"--.*([\n\Z]|$)", "", statement)
+                statement = re.sub(r"--.*([\n\Z]|$)", "", statement)
                 if statement.strip():
-                    output.append(statement + u";")
+                    output.append(statement + ";")
             fp.close()
 
     return output
@@ -483,7 +483,7 @@ def emit_post_sync_signal(created_models, verbosity, interactive):
     for app in models.get_apps():
         app_name = app.__name__.split('.')[-2]
         if verbosity >= 2:
-            print "Running post-sync handlers for application", app_name
+            print("Running post-sync handlers for application", app_name)
         dispatcher.send(signal=models.signals.post_syncdb, sender=app,
             app=app, created_models=created_models,
             verbosity=verbosity, interactive=interactive)

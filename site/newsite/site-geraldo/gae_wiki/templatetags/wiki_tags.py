@@ -50,12 +50,12 @@ def parse_wiki(text):
             lista.order(field)
 
         if tag:
-            lista = filter(lambda o: tag in o.tags, lista)
+            lista = [o for o in lista if tag in o.tags]
 
         # Monta HTML
         html_tmp = '<ul class="wikis">'
         for obj in lista[:int(count)]:
-            html_tmp += '<li><a href="%s">%s</a></li>'%(obj.get_absolute_url(), unicode(obj))
+            html_tmp += '<li><a href="%s">%s</a></li>'%(obj.get_absolute_url(), str(obj))
         html_tmp += '</ul>'
 
         # Aplica resultado no texto

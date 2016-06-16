@@ -8,12 +8,12 @@ from django.utils.datastructures import SortedDict
 from django.utils.text import get_text_list, capfirst
 from django.utils.translation import ugettext_lazy as _
 
-from util import ValidationError, ErrorList
-from forms import BaseForm, get_declared_fields
-from fields import Field, ChoiceField, IntegerField, EMPTY_VALUES
-from widgets import Select, SelectMultiple, HiddenInput, MultipleHiddenInput
-from widgets import media_property
-from formsets import BaseFormSet, formset_factory, DELETION_FIELD_NAME
+from .util import ValidationError, ErrorList
+from .forms import BaseForm, get_declared_fields
+from .fields import Field, ChoiceField, IntegerField, EMPTY_VALUES
+from .widgets import Select, SelectMultiple, HiddenInput, MultipleHiddenInput
+from .widgets import media_property
+from .formsets import BaseFormSet, formset_factory, DELETION_FIELD_NAME
 
 __all__ = (
     'ModelForm', 'BaseModelForm', 'model_to_dict', 'fields_for_model',
@@ -224,7 +224,7 @@ class BaseModelForm(BaseForm):
         
         # Gather a list of checks for fields declared as unique and add them to
         # the list of checks. Again, skip fields not on the form.
-        for name, field in self.fields.items():
+        for name, field in list(self.fields.items()):
             try:
                 f = self.instance._meta.get_field_by_name(name)[0]
             except FieldDoesNotExist:
@@ -265,18 +265,18 @@ class BaseModelForm(BaseForm):
                     field_label = self.fields[field_name].label
                     # Insert the error into the error dict, very sneaky
                     self._errors[field_name] = ErrorList([
-                        _(u"%(model_name)s with this %(field_label)s already exists.") % \
-                        {'model_name': unicode(model_name),
-                         'field_label': unicode(field_label)}
+                        _("%(model_name)s with this %(field_label)s already exists.") % \
+                        {'model_name': str(model_name),
+                         'field_label': str(field_label)}
                     ])
                 # unique_together
                 else:
                     field_labels = [self.fields[field_name].label for field_name in unique_check]
                     field_labels = get_text_list(field_labels, _('and'))
                     form_errors.append(
-                        _(u"%(model_name)s with this %(field_label)s already exists.") % \
-                        {'model_name': unicode(model_name),
-                         'field_label': unicode(field_labels)}
+                        _("%(model_name)s with this %(field_label)s already exists.") % \
+                        {'model_name': str(model_name),
+                         'field_label': str(field_labels)}
                     )
                 
                 # Remove the data from the cleaned_data dict since it was invalid
@@ -301,8 +301,8 @@ class BaseModelForm(BaseForm):
             fail_message = 'changed'
         return save_instance(self, self.instance, self._meta.fields, fail_message, commit)
 
-class ModelForm(BaseModelForm):
-    __metaclass__ = ModelFormMetaclass
+class ModelForm(BaseModelForm, metaclass=ModelFormMetaclass):
+    pass
 
 def modelform_factory(model, form=ModelForm, fields=None, exclude=None,
                        formfield_callback=lambda f: f.formfield()):
@@ -556,7 +556,7 @@ class ModelChoiceIterator(object):
 
     def __iter__(self):
         if self.field.empty_label is not None:
-            yield (u"", self.field.empty_label)
+            yield ("", self.field.empty_label)
         if self.field.cache_choices:
             if self.field.choice_cache is None:
                 self.field.choice_cache = [
@@ -587,11 +587,11 @@ class ModelChoiceField(ChoiceField):
     # This class is a subclass of ChoiceField for purity, but it doesn't
     # actually use any of ChoiceField's implementation.
     default_error_messages = {
-        'invalid_choice': _(u'Select a valid choice. That choice is not one of'
-                            u' the available choices.'),
+        'invalid_choice': _('Select a valid choice. That choice is not one of'
+                            ' the available choices.'),
     }
 
-    def __init__(self, queryset, empty_label=u"---------", cache_choices=False,
+    def __init__(self, queryset, empty_label="---------", cache_choices=False,
                  required=True, widget=None, label=None, initial=None,
                  help_text=None, to_field_name=None, *args, **kwargs):
         self.empty_label = empty_label
@@ -657,9 +657,9 @@ class ModelMultipleChoiceField(ModelChoiceField):
     widget = SelectMultiple
     hidden_widget = MultipleHiddenInput
     default_error_messages = {
-        'list': _(u'Enter a list of values.'),
-        'invalid_choice': _(u'Select a valid choice. %s is not one of the'
-                            u' available choices.'),
+        'list': _('Enter a list of values.'),
+        'invalid_choice': _('Select a valid choice. %s is not one of the'
+                            ' available choices.'),
     }
 
     def __init__(self, queryset, cache_choices=False, required=True,

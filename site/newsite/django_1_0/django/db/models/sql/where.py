@@ -7,7 +7,7 @@ from django.utils import tree
 from django.db import connection
 from django.db.models.fields import Field
 from django.db.models.query_utils import QueryWrapper
-from datastructures import EmptyResultSet, FullResultSet
+from .datastructures import EmptyResultSet, FullResultSet
 
 # Connection types
 AND = 'AND'

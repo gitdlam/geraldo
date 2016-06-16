@@ -1,16 +1,16 @@
-import copy, types, new
+import copy, types
 
 try: 
     set 
 except NameError: 
     from sets import Set as set     # Python 2.3 fallback 
 
-from utils import calculate_size, get_attr_value, landscape, format_date, memoize,\
+from .utils import calculate_size, get_attr_value, landscape, format_date, memoize,\
         BAND_WIDTH, BAND_HEIGHT, CROSS_COLS, CROSS_ROWS, cm, A4, black, TA_LEFT, TA_CENTER,\
         TA_RIGHT
-from exceptions import EmptyQueryset, ObjectNotFound, ManyObjectsFound,\
+from .exceptions import EmptyQueryset, ObjectNotFound, ManyObjectsFound,\
         AttributeNotFound, NotYetImplemented
-from cache import DEFAULT_CACHE_STATUS, CACHE_BACKEND, CACHE_FILE_ROOT
+from .cache import DEFAULT_CACHE_STATUS, CACHE_BACKEND, CACHE_FILE_ROOT
 
 class GeraldoObject(object):
     """Base class inherited by all report classes, including band, subreports,
@@ -238,13 +238,13 @@ class BaseReport(GeraldoObject):
         ret = []
 
         # Bands
-        ret.extend(filter(bool, [
+        ret.extend(list(filter(bool, [
             self.band_begin,
             self.band_summary,
             self.band_page_header,
             self.band_page_footer,
             self.band_detail
-        ]))
+        ])))
 
         # Groups
         if isinstance(self.groups, (list, tuple)):
@@ -252,7 +252,7 @@ class BaseReport(GeraldoObject):
 
         # Borders
         if isinstance(self.borders, dict):
-            ret.extend(filter(lambda e: isinstance(e, Element),self.borders.values()))
+            ret.extend([e for e in list(self.borders.values()) if isinstance(e, Element)])
 
         return ret
 
@@ -269,8 +269,8 @@ class BaseReport(GeraldoObject):
             self.groups.remove(obj)
 
         # Borders
-        if isinstance(self.borders, dict) and obj in self.borders.values():
-            for k,v in self.borders.items():
+        if isinstance(self.borders, dict) and obj in list(self.borders.values()):
+            for k,v in list(self.borders.items()):
                 if v == obj:
                     self.borders.pop(k)
 
@@ -289,7 +289,7 @@ class BaseReport(GeraldoObject):
 
         # Borders
         if isinstance(self.borders, dict):
-            for v in self.borders.values():
+            for v in list(self.borders.values()):
                 if isinstance(v, GeraldoObject):
                     v.parent = self
 
@@ -360,15 +360,13 @@ def get_report_class_by_registered_id(reg_id):
 
     return None
 
-class Report(BaseReport):
+class Report(BaseReport, metaclass=ReportMetaclass):
     """This class must be inherited to be used as a new report.
     
     A report has bands and is driven by a QuerySet. It can have a title and
     margins definitions.
     
     Depends on ReportLab to work properly"""
-
-    __metaclass__ = ReportMetaclass
 
     # Report properties
     title = ''
@@ -444,15 +442,15 @@ class Report(BaseReport):
         It doesn't returns nothing because Process doesn't."""
 
         import tempfile, random, os
-        from utils import run_under_process
+        from .utils import run_under_process
 
         # Checks 'filename' argument
-        if 'filename' in kwargs and not isinstance(kwargs['filename'], basestring):
+        if 'filename' in kwargs and not isinstance(kwargs['filename'], str):
             # Stores file-like object
             filelike = kwargs.pop('filename')
 
             # Make a randomic temporary filename
-            chars = map(chr, range(ord('a'), ord('z')) + range(ord('0'), ord('9')))
+            chars = list(map(chr, list(range(ord('a'), ord('z'))) + list(range(ord('0'), ord('9')))))
             filename = ''.join([random.choice(chars) for c in range(40)])
             kwargs['filename'] = os.path.join(tempfile.gettempdir(), filename)
         else:
@@ -544,7 +542,7 @@ class SubReport(BaseReport):
     get_queryset = None # This must be a lambda function
 
     def __init__(self, **kwargs):
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             # Validates backward incompatibility for 'detail_band'
             if k == 'detail_band':
                 k = 'band_detail'
@@ -607,11 +605,11 @@ class SubReport(BaseReport):
 
     def get_children(self):
         ret = super(SubReport, self).get_children()
-        ret.extend(filter(bool, [
+        ret.extend(list(filter(bool, [
             self.band_detail,
             self.band_header,
             self.band_footer,
-            ]))
+            ])))
 
         return ret
 
@@ -652,7 +650,7 @@ class ReportBand(GeraldoObject):
     after_print = None
 
     def __init__(self, **kwargs):
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             setattr(self, k, v)
 
         # Default values for elements, child bands and default style lists
@@ -682,7 +680,7 @@ class ReportBand(GeraldoObject):
 
         # Borders
         if isinstance(self.borders, dict):
-            ret.extend(filter(lambda e: isinstance(e, Element),self.borders.values()))
+            ret.extend([e for e in list(self.borders.values()) if isinstance(e, Element)])
 
         return ret
 
@@ -696,8 +694,8 @@ class ReportBand(GeraldoObject):
             self.child_bands.remove(obj)
 
         # Borders
-        if isinstance(self.borders, dict) and obj in self.borders.values():
-            for k,v in self.borders.items():
+        if isinstance(self.borders, dict) and obj in list(self.borders.values()):
+            for k,v in list(self.borders.items()):
                 if v == obj:
                     self.borders.pop(k)
 
@@ -714,7 +712,7 @@ class ReportBand(GeraldoObject):
 
         # Borders
         if isinstance(self.borders, dict):
-            for v in self.borders.values():
+            for v in list(self.borders.values()):
                 if isinstance(v, GeraldoObject):
                     v.parent = self
 
@@ -758,7 +756,7 @@ class ReportGroup(GeraldoObject):
     force_new_page = False
 
     def __init__(self, **kwargs):
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             setattr(self, k, v)
 
         # Transforms band classes to band objects
@@ -779,10 +777,10 @@ class ReportGroup(GeraldoObject):
             self.band_footer = self.band_footer()
 
     def get_children(self):
-        return filter(bool, [
+        return list(filter(bool, [
             self.band_header,
             self.band_footer,
-            ])
+            ]))
 
     def remove_child(self, obj):
         # Bands
@@ -896,7 +894,7 @@ class Element(GeraldoObject):
 
     _repr_for_cache_attrs = ('left','top','height','width','visible')
     def repr_for_cache_hash_key(self):
-        return unicode(dict([(attr, getattr(self, attr)) for attr in self._repr_for_cache_attrs]))
+        return str(dict([(attr, getattr(self, attr)) for attr in self._repr_for_cache_attrs]))
 
 class ManyElements(GeraldoObject):
     """Class that makes the objects creation more dynamic."""
@@ -923,7 +921,7 @@ class ManyElements(GeraldoObject):
     def get_elements(self, cross_cols=None):
         """Returns the elements (or create them if they don't exist."""
 
-        from cross_reference import CrossReferenceMatrix
+        from .cross_reference import CrossReferenceMatrix
 
         count = self.count
 
@@ -943,7 +941,7 @@ class ManyElements(GeraldoObject):
             kwargs = self.element_kwargs.copy()
 
             # Set attributes before creation
-            for k,v in kwargs.items():
+            for k,v in list(kwargs.items()):
                 if v == CROSS_COLS:
                     try:
                         kwargs[k] = cross_cols[num]

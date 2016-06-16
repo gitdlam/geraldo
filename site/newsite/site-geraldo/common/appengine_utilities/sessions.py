@@ -31,7 +31,7 @@ import time
 import datetime
 import random
 import sha
-import Cookie
+import http.cookies
 import pickle
 import __main__
 
@@ -136,7 +136,7 @@ class Session(object):
         self.cache = {}
         self.sid = None
         string_cookie = os.environ.get('HTTP_COOKIE', '')
-        self.cookie = Cookie.SimpleCookie()
+        self.cookie = http.cookies.SimpleCookie()
         self.cookie.load(string_cookie)
         # check for existing cookie
         if self.cookie.get(cookie_name):
@@ -189,11 +189,11 @@ class Session(object):
         # the session is accessed. This also handles the write for all
         # session data above.
         self.session.put()
-        print self.cookie
+        print(self.cookie)
 
         # fire up a Flash object if integration is enabled
         if self.integrate_flash:
-            import flash
+            from . import flash
             self.flash = flash.Flash(cookie=self.cookie)
 
         # randomly delete old stale sessions in the datastore (see
@@ -261,7 +261,7 @@ class Session(object):
         elif keyname in ('sid', 'flash'):
             raise ValueError(keyname + ' is a reserved keyname.')
 
-        if type(keyname) != type([str, unicode]):
+        if type(keyname) != type([str, str]):
             return str(keyname)
         return keyname
 

@@ -15,7 +15,7 @@ class FixedOffset(tzinfo):
     "Fixed offset in minutes east from UTC."
     def __init__(self, offset):
         self.__offset = timedelta(minutes=offset)
-        self.__name = u"%+03d%02d" % (offset // 60, offset % 60)
+        self.__name = "%+03d%02d" % (offset // 60, offset % 60)
 
     def __repr__(self):
         return self.__name

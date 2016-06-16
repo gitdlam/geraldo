@@ -41,7 +41,7 @@ class AdminForm(object):
         self.prepopulated_fields = [{
             'field': form[field_name],
             'dependencies': [form[f] for f in dependencies]
-        } for field_name, dependencies in prepopulated_fields.items()]
+        } for field_name, dependencies in list(prepopulated_fields.items())]
 
     def __iter__(self):
         for name, options in self.fieldsets:
@@ -62,7 +62,7 @@ class Fieldset(object):
     def __init__(self, form, name=None, fields=(), classes=(), description=None):
         self.form = form
         self.name, self.fields = name, fields
-        self.classes = u' '.join(classes)
+        self.classes = ' '.join(classes)
         self.description = description
 
     def _media(self):
@@ -79,7 +79,7 @@ class Fieldset(object):
 class Fieldline(object):
     def __init__(self, form, field):
         self.form = form # A django.forms.Form instance
-        if isinstance(field, basestring):
+        if isinstance(field, str):
             self.fields = [field]
         else:
             self.fields = field
@@ -89,7 +89,7 @@ class Fieldline(object):
             yield AdminField(self.form, field, is_first=(i == 0))
 
     def errors(self):
-        return mark_safe(u'\n'.join([self.form[f].errors.as_ul() for f in self.fields]))
+        return mark_safe('\n'.join([self.form[f].errors.as_ul() for f in self.fields]))
 
 class AdminField(object):
     def __init__(self, form, field, is_first):
@@ -100,15 +100,15 @@ class AdminField(object):
     def label_tag(self):
         classes = []
         if self.is_checkbox:
-            classes.append(u'vCheckboxLabel')
+            classes.append('vCheckboxLabel')
             contents = escape(self.field.label)
         else:
-            contents = force_unicode(escape(self.field.label)) + u':'
+            contents = force_unicode(escape(self.field.label)) + ':'
         if self.field.field.required:
-            classes.append(u'required')
+            classes.append('required')
         if not self.is_first:
-            classes.append(u'inline')
-        attrs = classes and {'class': u' '.join(classes)} or {}
+            classes.append('inline')
+        attrs = classes and {'class': ' '.join(classes)} or {}
         return self.field.label_tag(contents=contents, attrs=attrs)
 
 class BaseModelAdmin(object):
@@ -194,9 +194,8 @@ class BaseModelAdmin(object):
         return None
     declared_fieldsets = property(_declared_fieldsets)
 
-class ModelAdmin(BaseModelAdmin):
+class ModelAdmin(BaseModelAdmin, metaclass=forms.MediaDefiningClass):
     "Encapsulates all admin options and functionality for a given model."
-    __metaclass__ = forms.MediaDefiningClass
 
     list_display = ('__str__',)
     list_display_links = ()
@@ -308,7 +307,7 @@ class ModelAdmin(BaseModelAdmin):
         if self.declared_fieldsets:
             return self.declared_fieldsets
         form = self.get_form(request)
-        return [(None, {'fields': form.base_fields.keys()})]
+        return [(None, {'fields': list(form.base_fields.keys())})]
 
     def get_form(self, request, obj=None):
         """
@@ -347,17 +346,17 @@ class ModelAdmin(BaseModelAdmin):
         msg = _('The %(name)s "%(obj)s" was added successfully.') % {'name': opts.verbose_name, 'obj': new_object}
         # Here, we distinguish between different save types by checking for
         # the presence of keys in request.POST.
-        if request.POST.has_key("_continue"):
+        if "_continue" in request.POST:
             request.user.message_set.create(message=msg + ' ' + _("You may edit it again below."))
-            if request.POST.has_key("_popup"):
+            if "_popup" in request.POST:
                 post_url_continue += "?_popup=1"
             return HttpResponseRedirect(post_url_continue % pk_value)
 
-        if request.POST.has_key("_popup"):
+        if "_popup" in request.POST:
             return HttpResponse('<script type="text/javascript">opener.dismissAddAnotherPopup(window, "%s", "%s");</script>' % \
                 # escape() calls force_unicode.
                 (escape(pk_value), escape(new_object)))
-        elif request.POST.has_key("_addanother"):
+        elif "_addanother" in request.POST:
             request.user.message_set.create(message=msg + ' ' + (_("You may add another %s below.") % opts.verbose_name))
             return HttpResponseRedirect(request.path)
         else:
@@ -415,16 +414,16 @@ class ModelAdmin(BaseModelAdmin):
         LogEntry.objects.log_action(request.user.id, ContentType.objects.get_for_model(self.model).id, pk_value, force_unicode(new_object), CHANGE, change_message)
 
         msg = _('The %(name)s "%(obj)s" was changed successfully.') % {'name': opts.verbose_name, 'obj': new_object}
-        if request.POST.has_key("_continue"):
+        if "_continue" in request.POST:
             request.user.message_set.create(message=msg + ' ' + _("You may edit it again below."))
-            if request.REQUEST.has_key('_popup'):
+            if '_popup' in request.REQUEST:
                 return HttpResponseRedirect(request.path + "?_popup=1")
             else:
                 return HttpResponseRedirect(request.path)
-        elif request.POST.has_key("_saveasnew"):
+        elif "_saveasnew" in request.POST:
             request.user.message_set.create(message=_('The %(name)s "%(obj)s" was added successfully. You may edit it again below.') % {'name': opts.verbose_name, 'obj': new_object})
             return HttpResponseRedirect("../%s/" % pk_value)
-        elif request.POST.has_key("_addanother"):
+        elif "_addanother" in request.POST:
             request.user.message_set.create(message=msg + ' ' + (_("You may add another %s below.") % opts.verbose_name))
             return HttpResponseRedirect("../add/")
         else:
@@ -481,12 +480,12 @@ class ModelAdmin(BaseModelAdmin):
             form = ModelForm(request.POST, request.FILES)
             for FormSet in self.get_formsets(request):
                 inline_formset = FormSet(data=request.POST, files=request.FILES,
-                    instance=obj, save_as_new=request.POST.has_key("_saveasnew"))
+                    instance=obj, save_as_new="_saveasnew" in request.POST)
                 inline_formsets.append(inline_formset)
             if all_valid(inline_formsets) and form.is_valid():
                 return self.save_add(request, form, inline_formsets, '../%s/')
         else:
-            form = ModelForm(initial=dict(request.GET.items()))
+            form = ModelForm(initial=dict(list(request.GET.items())))
             for FormSet in self.get_formsets(request):
                 inline_formset = FormSet(instance=obj)
                 inline_formsets.append(inline_formset)
@@ -505,7 +504,7 @@ class ModelAdmin(BaseModelAdmin):
         context = {
             'title': _('Add %s') % opts.verbose_name,
             'adminform': adminForm,
-            'is_popup': request.REQUEST.has_key('_popup'),
+            'is_popup': '_popup' in request.REQUEST,
             'show_delete': False,
             'media': mark_safe(media),
             'inline_admin_formsets': inline_admin_formsets,
@@ -535,7 +534,7 @@ class ModelAdmin(BaseModelAdmin):
         if obj is None:
             raise Http404('%s object with primary key %r does not exist.' % (opts.verbose_name, escape(object_id)))
 
-        if request.POST and request.POST.has_key("_saveasnew"):
+        if request.POST and "_saveasnew" in request.POST:
             return self.add_view(request, form_url='../../add/')
 
         ModelForm = self.get_form(request, obj)
@@ -569,7 +568,7 @@ class ModelAdmin(BaseModelAdmin):
             'adminform': adminForm,
             'object_id': object_id,
             'original': obj,
-            'is_popup': request.REQUEST.has_key('_popup'),
+            'is_popup': '_popup' in request.REQUEST,
             'media': mark_safe(media),
             'inline_admin_formsets': inline_admin_formsets,
             'errors': AdminErrorList(form, inline_formsets),
@@ -594,7 +593,7 @@ class ModelAdmin(BaseModelAdmin):
             # parameter via the query string. If wacky parameters were given and
             # the 'invalid=1' parameter was already in the query string, something
             # is screwed up with the database, so display an error page.
-            if ERROR_FLAG in request.GET.keys():
+            if ERROR_FLAG in list(request.GET.keys()):
                 return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
         
@@ -634,7 +633,7 @@ class ModelAdmin(BaseModelAdmin):
 
         # Populate deleted_objects, a data structure of all related objects that
         # will also be deleted.
-        deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), quote(object_id), escape(obj))), []]
+        deleted_objects = [mark_safe('%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), quote(object_id), escape(obj))), []]
         perms_needed = sets.Set()
         get_deleted_objects(deleted_objects, perms_needed, request.user, obj, opts, 1, self.admin_site)
 
@@ -732,7 +731,7 @@ class InlineModelAdmin(BaseModelAdmin):
         if self.declared_fieldsets:
             return self.declared_fieldsets
         form = self.get_formset(request).form
-        return [(None, {'fields': form.base_fields.keys()})]
+        return [(None, {'fields': list(form.base_fields.keys())})]
 
 class StackedInline(InlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'
@@ -793,8 +792,8 @@ class AdminErrorList(forms.util.ErrorList):
     """
     def __init__(self, form, inline_formsets):
         if form.is_bound:
-            self.extend(form.errors.values())
+            self.extend(list(form.errors.values()))
             for inline_formset in inline_formsets:
                 self.extend(inline_formset.non_form_errors())
                 for errors_in_inline_form in inline_formset.errors:
-                    self.extend(errors_in_inline_form.values())
+                    self.extend(list(errors_in_inline_form.values()))

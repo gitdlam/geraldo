@@ -4,9 +4,9 @@ Classes representing uploaded files.
 
 import os
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 from django.conf import settings
 from django.core.files.base import File
@@ -90,11 +90,11 @@ class TemporaryUploadedFile(UploadedFile):
     def tell(self, *args):          return self._file.tell(*args)
     def __iter__(self):             return iter(self._file)
     def readlines(self, size=None): return self._file.readlines(size)
-    def xreadlines(self):           return self._file.xreadlines()
+    def xreadlines(self):           return self._file
     def close(self):
         try:
             return self._file.close()
-        except OSError, e:
+        except OSError as e:
             if e.errno == 2:
                 # Means the file was moved or deleted before the tempfile could unlink it.
                 # Still sets self._file.close_called and calls self._file.file.close()

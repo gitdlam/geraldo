@@ -32,7 +32,7 @@ class InternationalArticle(models.Model):
     def __unicode__(self):
         return self.headline
 
-__test__ = {'API_TESTS':ur"""
+__test__ = {'API_TESTS':r"""
 # Create an Article.
 >>> from datetime import datetime
 >>> a = Article(headline='Area man programs in Python', pub_date=datetime(2005, 7, 28))

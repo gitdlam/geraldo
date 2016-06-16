@@ -26,7 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import os
-import Cookie
+import http.cookies
 import pickle
 
 COOKIE_NAME = 'appengine-utilities-flash'
@@ -63,7 +63,7 @@ class Flash(object):
         # load cookie
         if cookie is None:
             browser_cookie = os.environ.get('HTTP_COOKIE', '')
-            self.cookie = Cookie.SimpleCookie()
+            self.cookie = http.cookies.SimpleCookie()
             self.cookie.load(browser_cookie)
         else:
             self.cookie = cookie
@@ -77,7 +77,7 @@ class Flash(object):
             self.cookie[COOKIE_NAME] = ''
             self.cookie[COOKIE_NAME]['path'] = '/'
             self.cookie[COOKIE_NAME]['expires'] = 0
-            print self.cookie
+            print(self.cookie)
         else:
             # default 'msg' attribute to None
             self.__dict__['msg'] = None
@@ -92,6 +92,6 @@ class Flash(object):
             self.__dict__['msg'] = value
             self.__dict__['cookie'][COOKIE_NAME] = pickle.dumps(value)
             self.__dict__['cookie'][COOKIE_NAME]['path'] = '/'
-            print self.cookie
+            print(self.cookie)
         else:
             raise ValueError('You can only set the "msg" attribute.')

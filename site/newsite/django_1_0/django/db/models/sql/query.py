@@ -19,8 +19,9 @@ from django.db.models.query_utils import select_related_descend
 from django.db.models.sql.where import WhereNode, EverythingNode, AND, OR
 from django.db.models.sql.datastructures import Count
 from django.core.exceptions import FieldError
-from datastructures import EmptyResultSet, Empty, MultiJoin
-from constants import *
+from .datastructures import EmptyResultSet, Empty, MultiJoin
+from .constants import *
+import collections
 
 try:
     set
@@ -216,7 +217,7 @@ class Query(object):
         """
         Performs a COUNT() query using the current filter constraints.
         """
-        from subqueries import CountQuery
+        from .subqueries import CountQuery
         obj = self.clone()
         obj.clear_ordering(True)
         obj.clear_limits()
@@ -414,7 +415,7 @@ class Query(object):
         """
         qn = self.quote_name_unless_alias
         qn2 = self.connection.ops.quote_name
-        result = ['(%s) AS %s' % (col, qn2(alias)) for alias, col in self.extra_select.iteritems()]
+        result = ['(%s) AS %s' % (col, qn2(alias)) for alias, col in self.extra_select.items()]
         aliases = set(self.extra_select.keys())
         if with_aliases:
             col_aliases = aliases.copy()
@@ -750,7 +751,7 @@ class Query(object):
                 col.relabel_aliases(change_map)
 
         # 2. Rename the alias in the internal table/alias datastructures.
-        for old_alias, new_alias in change_map.iteritems():
+        for old_alias, new_alias in change_map.items():
             alias_data = list(self.alias_map[old_alias])
             alias_data[RHS_ALIAS] = new_alias
 
@@ -776,7 +777,7 @@ class Query(object):
                     break
 
         # 3. Update any joins that refer to the old alias.
-        for alias, data in self.alias_map.iteritems():
+        for alias, data in self.alias_map.items():
             lhs = data[LHS_ALIAS]
             if lhs in change_map:
                 data = list(data)
@@ -825,7 +826,7 @@ class Query(object):
         Returns the number of tables in this query with a non-zero reference
         count.
         """
-        return len([1 for count in self.alias_refcount.itervalues() if count])
+        return len([1 for count in self.alias_refcount.values() if count])
 
     def join(self, connection, always_create=False, exclusions=(),
             promote=False, outer_if_first=False, nullable=False, reuse=None):
@@ -1030,7 +1031,7 @@ class Query(object):
                 raise ValueError("Cannot use None as a query value")
             lookup_type = 'isnull'
             value = True
-        elif callable(value):
+        elif isinstance(value, collections.Callable):
             value = value()
 
         opts = self.get_meta()
@@ -1040,7 +1041,7 @@ class Query(object):
         try:
             field, target, opts, join_list, last = self.setup_joins(parts, opts,
                     alias, True, allow_many, can_reuse=can_reuse)
-        except MultiJoin, e:
+        except MultiJoin as e:
             self.split_exclude(filter_expr, LOOKUP_SEP.join(parts[:e.level]))
             return
         final = len(join_list)
@@ -1092,10 +1093,10 @@ class Query(object):
             # join list) an outer join.
             join_it = iter(join_list)
             table_it = iter(self.tables)
-            join_it.next(), table_it.next()
+            next(join_it), next(table_it)
             table_promote = False
             for join in join_it:
-                table = table_it.next()
+                table = next(table_it)
                 if join == table and self.alias_refcount[join] > 1:
                     continue
                 join_promote = self.promote_alias(join)
@@ -1444,7 +1445,7 @@ class Query(object):
         except MultiJoin:
             raise FieldError("Invalid field name: '%s'" % name)
         except FieldError:
-            names = opts.get_all_field_names() + self.extra_select.keys()
+            names = opts.get_all_field_names() + list(self.extra_select.keys())
             names.sort()
             raise FieldError("Cannot resolve keyword %r into field. "
                     "Choices are: %s" % (name, ", ".join(names)))
@@ -1657,7 +1658,7 @@ def empty_iter():
     """
     Returns an iterator containing no results.
     """
-    yield iter([]).next()
+    yield next(iter([]))
 
 def order_modified_iter(cursor, trim, sentinel):
     """

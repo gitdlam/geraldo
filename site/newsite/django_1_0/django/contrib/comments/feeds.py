@@ -11,7 +11,7 @@ class LatestFreeCommentsFeed(Feed):
     def title(self):
         if not hasattr(self, '_site'):
             self._site = Site.objects.get_current()
-        return u"%s comments" % self._site.name
+        return "%s comments" % self._site.name
 
     def link(self):
         if not hasattr(self, '_site'):
@@ -21,7 +21,7 @@ class LatestFreeCommentsFeed(Feed):
     def description(self):
         if not hasattr(self, '_site'):
             self._site = Site.objects.get_current()
-        return u"Latest comments on %s" % self._site.name
+        return "Latest comments on %s" % self._site.name
 
     def get_query_set(self):
         return self.comments_class.objects.filter(site__pk=settings.SITE_ID, is_public=True)

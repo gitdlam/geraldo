@@ -1,5 +1,5 @@
 import base64
-import cPickle as pickle
+import pickle as pickle
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -58,7 +58,7 @@ class Session(models.Model):
         pickled, tamper_check = encoded_data[:-32], encoded_data[-32:]
         if md5_constructor(pickled + settings.SECRET_KEY).hexdigest() != tamper_check:
             from django.core.exceptions import SuspiciousOperation
-            raise SuspiciousOperation, "User tampered with session cookie."
+            raise SuspiciousOperation("User tampered with session cookie.")
         try:
             return pickle.loads(pickled)
         # Unpickling can cause a variety of exceptions. If something happens,

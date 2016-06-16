@@ -150,7 +150,7 @@ class DispatcherTests(unittest.TestCase):
         connect(fails, Any, a)
         result = robust.sendRobust('this',a, a=a)
         err = result[0][1]
-        self.assert_(isinstance(err, ValueError))
+        self.assertTrue(isinstance(err, ValueError))
         self.assertEqual(err.args, ('this',))
 
 def getSuite():

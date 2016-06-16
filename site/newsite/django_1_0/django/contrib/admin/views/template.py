@@ -32,7 +32,7 @@ template_validator = staff_member_required(template_validator)
 class TemplateValidator(oldforms.Manipulator):
     def __init__(self, settings_modules):
         self.settings_modules = settings_modules
-        site_list = Site.objects.in_bulk(settings_modules.keys()).values()
+        site_list = list(Site.objects.in_bulk(list(settings_modules.keys())).values())
         self.fields = (
             oldforms.SelectField('site', is_required=True, choices=[(s.id, s.name) for s in site_list]),
             oldforms.LargeTextField('template', is_required=True, rows=25, validator_list=[self.isValidTemplate]),
@@ -65,8 +65,8 @@ class TemplateValidator(oldforms.Manipulator):
         try:
             tmpl = loader.get_template_from_string(field_data)
             tmpl.render(template.Context({}))
-        except template.TemplateSyntaxError, e:
+        except template.TemplateSyntaxError as e:
             error = e
         template.builtins.remove(register)
         if error:
-            raise validators.ValidationError, e.args
+            raise validators.ValidationError(e.args)

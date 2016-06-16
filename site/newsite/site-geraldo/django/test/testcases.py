@@ -1,6 +1,6 @@
 import re
 import unittest
-from urlparse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 from xml.dom.minidom import parseString, Node
 
 from django.conf import settings
@@ -74,7 +74,7 @@ class OutputChecker(doctest.OutputChecker):
             return norm_whitespace(child_text(element))
 
         def attrs_dict(element):
-            return dict(element.attributes.items())
+            return dict(list(element.attributes.items()))
 
         def check_element(want_element, got_element):
             if want_element.tagName != got_element.tagName:
@@ -270,7 +270,7 @@ class TestCase(unittest.TestCase):
                 "Found %d instances of '%s' in response (expected %d)" %
                     (real_count, text, count))
         else:
-            self.failUnless(real_count != 0,
+            self.assertTrue(real_count != 0,
                             "Couldn't find '%s' in response" % text)
 
     def assertNotContains(self, response, text, status_code=200):
@@ -309,7 +309,7 @@ class TestCase(unittest.TestCase):
                 if field:
                     if field in context[form].errors:
                         field_errors = context[form].errors[field]
-                        self.failUnless(err in field_errors,
+                        self.assertTrue(err in field_errors,
                                         "The field '%s' on form '%s' in"
                                         " context %d does not contain the"
                                         " error '%s' (actual errors: %s)" %
@@ -324,7 +324,7 @@ class TestCase(unittest.TestCase):
                                       (form, i, field))
                 else:
                     non_field_errors = context[form].non_field_errors()
-                    self.failUnless(err in non_field_errors,
+                    self.assertTrue(err in non_field_errors,
                         "The form '%s' in context %d does not contain the"
                         " non-field error '%s' (actual errors: %s)" %
                             (form, i, err, non_field_errors))
@@ -340,10 +340,10 @@ class TestCase(unittest.TestCase):
         template_names = [t.name for t in to_list(response.template)]
         if not template_names:
             self.fail('No templates used to render the response')
-        self.failUnless(template_name in template_names,
-            (u"Template '%s' was not a template used to render the response."
-             u" Actual template(s) used: %s") % (template_name,
-                                                 u', '.join(template_names)))
+        self.assertTrue(template_name in template_names,
+            ("Template '%s' was not a template used to render the response."
+             " Actual template(s) used: %s") % (template_name,
+                                                 ', '.join(template_names)))
 
     def assertTemplateNotUsed(self, response, template_name):
         """
@@ -351,6 +351,6 @@ class TestCase(unittest.TestCase):
         rendering the response.
         """
         template_names = [t.name for t in to_list(response.template)]
-        self.failIf(template_name in template_names,
-            (u"Template '%s' was used unexpectedly in rendering the"
-             u" response") % template_name)
+        self.assertFalse(template_name in template_names,
+            ("Template '%s' was used unexpectedly in rendering the"
+             " response") % template_name)

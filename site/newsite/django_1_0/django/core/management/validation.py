@@ -25,7 +25,7 @@ def get_validation_errors(outfile, app=None):
 
     e = ModelErrorCollection(outfile)
 
-    for (app_name, error) in get_app_errors().items():
+    for (app_name, error) in list(get_app_errors().items()):
         e.add(app_name, error)
 
     for cls in models.get_models(app):
@@ -52,7 +52,7 @@ def get_validation_errors(outfile, app=None):
                 except ImportError:
                     e.add(opts, '"%s": To use ImageFields, you need to install the Python Imaging Library. Get it at http://www.pythonware.com/products/pil/ .' % f.name)
             if f.choices:
-                if isinstance(f.choices, basestring) or not is_iterable(f.choices):
+                if isinstance(f.choices, str) or not is_iterable(f.choices):
                     e.add(opts, '"%s": "choices" should be iterable (e.g., a tuple or list).' % f.name)
                 else:
                     for c in f.choices:
@@ -74,7 +74,7 @@ def get_validation_errors(outfile, app=None):
                     e.add(opts, "'%s' has relation with model %s, which has not been installed" % (f.name, f.rel.to))
                 # it is a string and we could not find the model it refers to
                 # so skip the next section
-                if isinstance(f.rel.to, (str, unicode)):
+                if isinstance(f.rel.to, str):
                     continue
 
                 rel_opts = f.rel.to._meta
@@ -110,7 +110,7 @@ def get_validation_errors(outfile, app=None):
                 e.add(opts, "'%s' has m2m relation with model %s, which has not been installed" % (f.name, f.rel.to))
                 # it is a string and we could not find the model it refers to
                 # so skip the next section
-                if isinstance(f.rel.to, (str, unicode)):
+                if isinstance(f.rel.to, str):
                     continue
 
             rel_opts = f.rel.to._meta

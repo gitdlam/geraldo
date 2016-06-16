@@ -24,17 +24,17 @@ def do_autopaginate(parser, token):
         try:
             paginate_by = int(split[2])
         except ValueError:
-            raise template.TemplateSyntaxError(u'Got %s, but expected integer.' % split[2])
+            raise template.TemplateSyntaxError('Got %s, but expected integer.' % split[2])
         return AutoPaginateNode(split[1], paginate_by=paginate_by)
     elif len(split) == 4:
         try:
             paginate_by = int(split[2])
         except ValueError:
-            raise template.TemplateSyntaxError(u'Got %s, but expected integer.' % split[2])
+            raise template.TemplateSyntaxError('Got %s, but expected integer.' % split[2])
         try:
             orphans = int(split[3])
         except ValueError:
-            raise template.TemplateSyntaxError(u'Got %s, but expected integer.' % split[3])           
+            raise template.TemplateSyntaxError('Got %s, but expected integer.' % split[3])           
         return AutoPaginateNode(split[1], paginate_by=paginate_by, orphans=orphans)
     else:
         raise template.TemplateSyntaxError('%r tag takes one required argument and one optional argument' % split[0])
@@ -70,11 +70,11 @@ class AutoPaginateNode(template.Node):
         except InvalidPage:
             context[key] = []
             context['invalid_page'] = True
-            return u''
+            return ''
         context[key] = page_obj.object_list
         context['paginator'] = paginator
         context['page_obj'] = page_obj
-        return u''
+        return ''
 
 def paginate(context, window=DEFAULT_WINDOW):
     """
@@ -173,7 +173,7 @@ def paginate(context, window=DEFAULT_WINDOW):
             getvars = context['request'].GET.copy()
             if 'page' in getvars:
                 del getvars['page']
-            if len(getvars.keys()) > 0:
+            if len(list(getvars.keys())) > 0:
                 to_return['getvars'] = "&%s" % getvars.urlencode()
             else:
                 to_return['getvars'] = ''

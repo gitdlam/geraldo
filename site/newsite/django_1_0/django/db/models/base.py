@@ -2,7 +2,7 @@ import copy
 import types
 import sys
 import os
-from itertools import izip
+
 try:
     set
 except NameError:
@@ -85,7 +85,7 @@ class ModelBase(type):
             return m
 
         # Add all attributes to the class.
-        for obj_name, obj in attrs.items():
+        for obj_name, obj in list(attrs.items()):
             new_class.add_to_class(obj_name, obj)
 
         # Do the appropriate setup for any model parents.
@@ -164,9 +164,7 @@ class ModelBase(type):
         dispatcher.send(signal=signals.class_prepared, sender=cls)
 
 
-class Model(object):
-    __metaclass__ = ModelBase
-
+class Model(object, metaclass=ModelBase):
     def __init__(self, *args, **kwargs):
         dispatcher.send(signal=signals.pre_init, sender=self.__class__, args=args, kwargs=kwargs)
 
@@ -185,11 +183,11 @@ class Model(object):
             # when an iter throws it. So if the first iter throws it, the second
             # is *not* consumed. We rely on this, so don't change the order
             # without changing the logic.
-            for val, field in izip(args, fields_iter):
+            for val, field in zip(args, fields_iter):
                 setattr(self, field.attname, val)
         else:
             # Slower, kwargs-ready version.
-            for val, field in izip(args, fields_iter):
+            for val, field in zip(args, fields_iter):
                 setattr(self, field.attname, val)
                 kwargs.pop(field.name, None)
                 # Maintain compatibility with existing calls.
@@ -229,18 +227,18 @@ class Model(object):
             setattr(self, field.attname, val)
 
         if kwargs:
-            for prop in kwargs.keys():
+            for prop in list(kwargs.keys()):
                 try:
                     if isinstance(getattr(self.__class__, prop), property):
                         setattr(self, prop, kwargs.pop(prop))
                 except AttributeError:
                     pass
             if kwargs:
-                raise TypeError, "'%s' is an invalid keyword argument for this function" % kwargs.keys()[0]
+                raise TypeError("'%s' is an invalid keyword argument for this function" % list(kwargs.keys())[0])
         dispatcher.send(signal=signals.post_init, sender=self.__class__, instance=self)
 
     def __repr__(self):
-        return smart_str(u'<%s: %s>' % (self.__class__.__name__, unicode(self)))
+        return smart_str('<%s: %s>' % (self.__class__.__name__, str(self)))
 
     def __str__(self):
         if hasattr(self, '__unicode__'):
@@ -297,7 +295,7 @@ class Model(object):
         # that might have come from the parent class - we just save the
         # attributes we have been given to the class we have been given.
         if not raw:
-            for parent, field in meta.parents.items():
+            for parent, field in list(meta.parents.items()):
                 # At this point, parent's primary key field may be unknown
                 # (for example, from administration form which doesn't fill
                 # this field). If so, fill it.
@@ -313,7 +311,7 @@ class Model(object):
         pk_val = self._get_pk_val(meta)
         # Note: the comparison with '' is required for compatibility with
         # oldforms-style model creation.
-        pk_set = pk_val is not None and smart_unicode(pk_val) != u''
+        pk_set = pk_val is not None and smart_unicode(pk_val) != ''
         record_exists = True
         manager = cls._default_manager
         if pk_set:
@@ -365,7 +363,7 @@ class Model(object):
         for f in self._meta.fields:
             try:
                 setattr(self, f.attname, f.to_python(getattr(self, f.attname, f.get_default())))
-            except validators.ValidationError, e:
+            except validators.ValidationError as e:
                 error_dict[f.name] = e.messages
                 invalid_python[f.name] = 1
         for f in self._meta.fields:
@@ -406,12 +404,12 @@ class Model(object):
         # traversing to the most remote parent classes -- those with no parents
         # themselves -- and then adding those instances to the collection. That
         # will include all the child instances down to "self".
-        parent_stack = self._meta.parents.values()
+        parent_stack = list(self._meta.parents.values())
         while parent_stack:
             link = parent_stack.pop()
             parent_obj = getattr(self, link.name)
             if parent_obj._meta.parents:
-                parent_stack.extend(parent_obj._meta.parents.values())
+                parent_stack.extend(list(parent_obj._meta.parents.values()))
                 continue
             # At this point, parent_obj is base class (no ancestor models). So
             # delete it and all its descendents.
@@ -443,7 +441,7 @@ class Model(object):
         try:
             return qs[0]
         except IndexError:
-            raise self.DoesNotExist, "%s matching query does not exist." % self.__class__._meta.object_name
+            raise self.DoesNotExist("%s matching query does not exist." % self.__class__._meta.object_name)
 
     def _get_next_or_previous_in_order(self, is_next):
         cachename = "__%s_order_cache" % is_next
@@ -469,8 +467,8 @@ class Model(object):
 
     def _get_FIELD_url(self, field):
         if getattr(self, field.attname): # Value is not blank.
-            import urlparse
-            return urlparse.urljoin(settings.MEDIA_URL, getattr(self, field.attname)).replace('\\', '/')
+            import urllib.parse
+            return urllib.parse.urljoin(settings.MEDIA_URL, getattr(self, field.attname)).replace('\\', '/')
         return ''
 
     def _get_FIELD_size(self, field):
@@ -497,7 +495,7 @@ class Model(object):
             from django.core.files.uploadedfile import SimpleUploadedFile
             raw_field = SimpleUploadedFile.from_dict(raw_field)
 
-        elif isinstance(raw_field, basestring):
+        elif isinstance(raw_field, str):
             import warnings
             warnings.warn(
                 message = "Representing uploaded files as strings is deprecated. Use django.core.files.uploadedfile.SimpleUploadedFile instead.",

@@ -57,7 +57,7 @@ sys.path = [PARENT_DIR,] + sys.path
 # Try to import the appengine code from the system path.
 try:
   from google.appengine.api import apiproxy_stub_map
-except ImportError, e:
+except ImportError as e:
   # Not on the system path. Build a list of alternative paths where it may be.
   # First look within the project for a local copy, then look for where the Mac
   # OS SDK installs it.
@@ -77,7 +77,7 @@ except ImportError, e:
     program_files = shell.SHGetPathFromIDList(id_list)
     paths.append(os.path.join(program_files, 'Google',
                               'google_appengine'))
-  except ImportError, e:
+  except ImportError as e:
     # Not windows.
     pass
   # Loop through all possible paths and look for the SDK dir.
@@ -241,7 +241,7 @@ def InstallDjangoModuleReplacements():
 
   try:
     _disconnectSignal()
-  except CheckedException, e:
+  except CheckedException as e:
     logging.debug("Django rollback handler appears to be already disabled.")
 
 def PatchDjangoSerializationModules():
@@ -420,7 +420,7 @@ def FindCommandsInZipfile(management_dir):
 
 def RemoveCommands(command_dict):
   """Removes incompatible commands from the specified command dictionary."""
-  for cmd in command_dict.keys():
+  for cmd in list(command_dict.keys()):
     if cmd.startswith("sql"):
       del command_dict[cmd]
     elif cmd in INCOMPATIBLE_COMMANDS:

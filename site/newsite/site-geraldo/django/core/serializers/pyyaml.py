@@ -4,7 +4,7 @@ YAML serializer.
 Requires PyYaml (http://pyyaml.org/), but that's checked for in __init__.
 """
 
-from StringIO import StringIO
+from io import StringIO
 import yaml
 
 from django.db import models
@@ -42,7 +42,7 @@ def Deserializer(stream_or_string, **options):
     """
     Deserialize a stream or string of YAML data.
     """
-    if isinstance(stream_or_string, basestring):
+    if isinstance(stream_or_string, str):
         stream = StringIO(stream_or_string)
     else:
         stream = stream_or_string

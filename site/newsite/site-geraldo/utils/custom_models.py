@@ -9,7 +9,7 @@ class CustomModel(db.Model):
 
     def __unicode__(self):
         try:
-            return unicode(str(self))
+            return str(str(self))
         except TypeError:
             return 'not defined'
 
@@ -25,7 +25,7 @@ class CustomModel(db.Model):
 
         q = cls.all()
 
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             q = q.filter(k+' =', v)
 
         if q.count():
@@ -33,10 +33,10 @@ class CustomModel(db.Model):
         else:
             obj = cls()
 
-            for k, v in kwargs.items():
+            for k, v in list(kwargs.items()):
                 setattr(obj, k, v)
 
-        for k, v in values.items():
+        for k, v in list(values.items()):
             setattr(obj, k, v)
 
         obj.put()

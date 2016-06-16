@@ -19,7 +19,7 @@ class CreateObjectTest(TestCase):
         self.assertRedirects(response, '/accounts/login/?next=%s' % view_url)
         # Now login and try again.
         login = self.client.login(username='testclient', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
         response = self.client.get(view_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'views/article_form.html')
@@ -44,7 +44,7 @@ class CreateObjectTest(TestCase):
         response = self.client.post(view_url, {
             'title': 'My First Article',
         })
-        self.assertFormError(response, 'form', 'slug', [u'This field is required.'])
+        self.assertFormError(response, 'form', 'slug', ['This field is required.'])
         self.assertTemplateUsed(response, 'views/article_form.html')
         self.assertEqual(num_articles, Article.objects.count(),
                          "Number of Articles should not have changed.")
@@ -75,8 +75,8 @@ class UpdateDeleteObjectTest(TestCase):
         """
         response = self.client.get('/views/create_update/update/article/old_article/')
         self.assertTemplateUsed(response, 'views/article_form.html')
-        self.assertEquals(unicode(response.context['form']['title']),
-            u'<input id="id_title" type="text" name="title" value="Old Article" maxlength="100" />')
+        self.assertEqual(str(response.context['form']['title']),
+            '<input id="id_title" type="text" name="title" value="Old Article" maxlength="100" />')
 
     def test_update_object(self):
         """
@@ -89,7 +89,7 @@ class UpdateDeleteObjectTest(TestCase):
             'date_created': datetime.datetime(2007, 6, 25),
         })
         article = Article.objects.get(pk=1)
-        self.assertEquals(article.title, "Another Article")
+        self.assertEqual(article.title, "Another Article")
 
     def test_delete_object_confirm(self):
         """

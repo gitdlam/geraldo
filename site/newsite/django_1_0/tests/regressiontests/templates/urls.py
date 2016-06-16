@@ -11,5 +11,5 @@ urlpatterns = patterns('',
     url(r'^named-client/(\d+)/$', views.client, name="named.client"),
 
     # Unicode strings are permitted everywhere.
-    url(ur'^Юникод/(\w+)/$', views.client, name=u"метка_оператора"),
+    url(r'^Юникод/(\w+)/$', views.client, name="метка_оператора"),
 )

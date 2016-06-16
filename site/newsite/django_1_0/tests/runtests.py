@@ -59,11 +59,11 @@ class InvalidModelTestCase(unittest.TestCase):
     def runTest(self):
         from django.core.management.validation import get_validation_errors
         from django.db.models.loading import load_app
-        from cStringIO import StringIO
+        from io import StringIO
 
         try:
             module = load_app(self.model_label)
-        except Exception, e:
+        except Exception as e:
             self.fail('Unable to load invalid model module')
 
         # Make sure sys.stdout is not a tty so that we get errors without
@@ -82,8 +82,8 @@ class InvalidModelTestCase(unittest.TestCase):
         unexpected = [err for err in actual if err not in expected]
         missing = [err for err in expected if err not in actual]
 
-        self.assert_(not unexpected, "Unexpected Errors: " + '\n'.join(unexpected))
-        self.assert_(not missing, "Missing Errors: " + '\n'.join(missing))
+        self.assertTrue(not unexpected, "Unexpected Errors: " + '\n'.join(unexpected))
+        self.assertTrue(not missing, "Missing Errors: " + '\n'.join(missing))
 
 def django_tests(verbosity, interactive, test_labels):
     from django.conf import settings
@@ -126,12 +126,12 @@ def django_tests(verbosity, interactive, test_labels):
             # this model and add it to the list to test.
             if not test_labels or model_name in set([label.split('.')[0] for label in test_labels]):
                 if verbosity >= 1:
-                    print "Importing model %s" % model_name
+                    print("Importing model %s" % model_name)
                 mod = load_app(model_label)
                 if mod:
                     if model_label not in settings.INSTALLED_APPS:
                         settings.INSTALLED_APPS.append(model_label)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Error while importing %s:" % model_name + ''.join(traceback.format_exception(*sys.exc_info())[1:]))
             continue
 

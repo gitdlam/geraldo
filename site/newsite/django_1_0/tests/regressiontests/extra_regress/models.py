@@ -9,7 +9,7 @@ class RevisionableModel(models.Model):
     title = models.CharField(blank=True, max_length=255)
 
     def __unicode__(self):
-        return u"%s (%s, %s)" % (self.title, self.id, self.base.id)
+        return "%s (%s, %s)" % (self.title, self.id, self.base.id)
 
     def save(self):
         super(RevisionableModel, self).save()

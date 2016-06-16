@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 objects.extend(model._default_manager.all())
         try:
             return serializers.serialize(format, objects, indent=indent)
-        except Exception, e:
+        except Exception as e:
             if show_traceback:
                 raise
             raise CommandError("Unable to serialize database: %s" % e)

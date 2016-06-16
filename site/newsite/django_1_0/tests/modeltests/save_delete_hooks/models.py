@@ -12,17 +12,17 @@ class Person(models.Model):
     last_name = models.CharField(max_length=20)
 
     def __unicode__(self):
-        return u"%s %s" % (self.first_name, self.last_name)
+        return "%s %s" % (self.first_name, self.last_name)
 
     def save(self):
-        print "Before save"
+        print("Before save")
         super(Person, self).save() # Call the "real" save() method
-        print "After save"
+        print("After save")
 
     def delete(self):
-        print "Before deletion"
+        print("Before deletion")
         super(Person, self).delete() # Call the "real" delete() method
-        print "After deletion"
+        print("After deletion")
 
 __test__ = {'API_TESTS':"""
 >>> p1 = Person(first_name='John', last_name='Smith')

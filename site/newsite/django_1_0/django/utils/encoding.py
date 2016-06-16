@@ -1,5 +1,5 @@
 import types
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import datetime
 from django.utils.functional import Promise
 
@@ -41,20 +41,20 @@ def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
 
     If strings_only is True, don't convert (some) non-string-like objects.
     """
-    if strings_only and isinstance(s, (types.NoneType, int, long, datetime.datetime, datetime.date, datetime.time, float)):
+    if strings_only and isinstance(s, (type(None), int, datetime.datetime, datetime.date, datetime.time, float)):
         return s
     try:
-        if not isinstance(s, basestring,):
+        if not isinstance(s, str,):
             if hasattr(s, '__unicode__'):
-                s = unicode(s)
+                s = str(s)
             else:
-                s = unicode(str(s), encoding, errors)
-        elif not isinstance(s, unicode):
+                s = str(str(s), encoding, errors)
+        elif not isinstance(s, str):
             # Note: We use .decode() here, instead of unicode(s, encoding,
             # errors), so that if s is a SafeString, it ends up being a
             # SafeUnicode at the end.
             s = s.decode(encoding, errors)
-    except UnicodeDecodeError, e:
+    except UnicodeDecodeError as e:
         raise DjangoUnicodeDecodeError(s, *e.args)
     return s
 
@@ -64,16 +64,16 @@ def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
 
     If strings_only is True, don't convert (some) non-string-like objects.
     """
-    if strings_only and isinstance(s, (types.NoneType, int)):
+    if strings_only and isinstance(s, (type(None), int)):
         return s
     if isinstance(s, Promise):
-        return unicode(s).encode(encoding, errors)
-    elif not isinstance(s, basestring):
+        return str(s).encode(encoding, errors)
+    elif not isinstance(s, str):
         try:
             return str(s)
         except UnicodeEncodeError:
-            return unicode(s).encode(encoding, errors)
-    elif isinstance(s, unicode):
+            return str(s).encode(encoding, errors)
+    elif isinstance(s, str):
         return s.encode(encoding, errors)
     elif s and encoding != 'utf-8':
         return s.decode('utf-8', errors).encode(encoding, errors)
@@ -96,5 +96,5 @@ def iri_to_uri(iri):
     # section 3.1 of RFC 3987.
     if iri is None:
         return iri
-    return urllib.quote(smart_str(iri), safe='/#%[]=:;$&()+,!?*')
+    return urllib.parse.quote(smart_str(iri), safe='/#%[]=:;$&()+,!?*')
 

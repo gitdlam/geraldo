@@ -19,9 +19,9 @@ class FakeSessionCookieMiddleware(object):
     http://www.stereoplex.com/two-voices/cookieless-django-sessions-and-authentication-without-cookies
     """
     def process_request(self, request):
-        if request.GET.has_key(settings.SESSION_COOKIE_NAME):
+        if settings.SESSION_COOKIE_NAME in request.GET:
             request.COOKIES[settings.SESSION_COOKIE_NAME] = request.GET[settings.SESSION_COOKIE_NAME]
-        elif request.POST.has_key(settings.SESSION_COOKIE_NAME):
+        elif settings.SESSION_COOKIE_NAME in request.POST:
             request.COOKIES[settings.SESSION_COOKIE_NAME] = request.POST[settings.SESSION_COOKIE_NAME]
 
 class ProtectAntiRobotsMiddleware(object):

@@ -31,9 +31,9 @@
 import os, sys, time
 
 try:
-    import thread
+    import _thread
 except ImportError:
-    import dummy_thread as thread
+    import _dummy_thread as thread
 
 # This import does nothing, but it's necessary to avoid some race conditions
 # in the threading module. See http://code.djangoproject.com/ticket/2330 .
@@ -49,7 +49,7 @@ def reloader_thread():
     mtimes = {}
     win = (sys.platform == "win32")
     while RUN_RELOADER:
-        for filename in filter(lambda v: v, map(lambda m: getattr(m, "__file__", None), sys.modules.values())):
+        for filename in [v for v in [getattr(m, "__file__", None) for m in list(sys.modules.values())] if v]:
             if filename.endswith(".pyc") or filename.endswith("*.pyo"):
                 filename = filename[:-1]
             if not os.path.exists(filename):
@@ -82,7 +82,7 @@ def main(main_func, args=None, kwargs=None):
             args = ()
         if kwargs is None:
             kwargs = {}
-        thread.start_new_thread(main_func, args, kwargs)
+        _thread.start_new_thread(main_func, args, kwargs)
         try:
             reloader_thread()
         except KeyboardInterrupt:

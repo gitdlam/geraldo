@@ -27,7 +27,7 @@ def do_get_report_url(parser, token):
 
         report_path = parts[1]
     except KeyError:
-        raise template.TemplateSyntaxError, "You must inform report path"
+        raise template.TemplateSyntaxError("You must inform report path")
 
     return ReportUrlNode(report_path)
 

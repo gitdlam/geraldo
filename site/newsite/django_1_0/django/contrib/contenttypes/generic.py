@@ -58,7 +58,7 @@ class GenericForeignKey(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError, u"%s must be accessed via instance" % self.name
+            raise AttributeError("%s must be accessed via instance" % self.name)
 
         try:
             return getattr(instance, self.cache_attr)
@@ -82,7 +82,7 @@ class GenericForeignKey(object):
 
     def __set__(self, instance, value):
         if instance is None:
-            raise AttributeError, u"%s must be accessed via instance" % self.related.opts.object_name
+            raise AttributeError("%s must be accessed via instance" % self.related.opts.object_name)
 
         ct = None
         fk = None
@@ -173,7 +173,7 @@ class ReverseGenericRelatedObjectsDescriptor(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         # This import is done here to avoid circular import importing this module
         from django.contrib.contenttypes.models import ContentType
@@ -202,7 +202,7 @@ class ReverseGenericRelatedObjectsDescriptor(object):
 
     def __set__(self, instance, value):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         manager = self.__get__(instance)
         manager.clear()

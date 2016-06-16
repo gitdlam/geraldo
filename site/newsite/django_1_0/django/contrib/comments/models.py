@@ -40,7 +40,7 @@ class CommentManager(models.Manager):
         ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], ['First category', 'Second category'])
         """
         rating_range, options = rating_string.split('|', 1)
-        rating_range = range(int(rating_range[6:].split('-')[0]), int(rating_range[6:].split('-')[1])+1)
+        rating_range = list(range(int(rating_range[6:].split('-')[0]), int(rating_range[6:].split('-')[1])+1))
         choices = [c.replace('_', ' ') for c in options.split('|')]
         return rating_range, choices
 

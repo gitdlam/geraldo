@@ -3,6 +3,7 @@ import datetime
 import os
 import re
 import time
+import collections
 try:
     import decimal
 except ImportError:
@@ -232,7 +233,7 @@ class Field(object):
     def get_default(self):
         "Returns the default value for this field."
         if self.has_default():
-            if callable(self.default):
+            if isinstance(self.default, collections.Callable):
                 return self.default()
             return force_unicode(self.default, strings_only=True)
         if not self.empty_strings_allowed or (self.null and not connection.features.interprets_empty_strings_as_nulls):
@@ -306,7 +307,7 @@ class Field(object):
         defaults = {'required': not self.blank, 'label': capfirst(self.verbose_name), 'help_text': self.help_text}
         if self.has_default():
             defaults['initial'] = self.get_default()
-            if callable(self.default):
+            if isinstance(self.default, collections.Callable):
                 defaults['show_hidden_initial'] = True
         if self.choices:
             # Fields with choices get special treatment. 
@@ -319,7 +320,7 @@ class Field(object):
             # Many of the subclass-specific formfield arguments (min_value,
             # max_value) don't apply for choice fields, so be sure to only pass
             # the values that TypedChoiceField will understand.
-            for k in kwargs.keys():
+            for k in list(kwargs.keys()):
                 if k not in ('coerce', 'empty_value', 'choices', 'required',
                              'widget', 'label', 'initial', 'help_text',
                              'error_messages'):
@@ -402,7 +403,7 @@ class CharField(Field):
         return "CharField"
 
     def to_python(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         if value is None:
             if self.null:
@@ -425,7 +426,7 @@ class CommaSeparatedIntegerField(CharField):
             'regex': '^[\d,]+$',
             'max_length': self.max_length,
             'error_messages': {
-                'invalid': _(u'Enter only digits separated by commas.'),
+                'invalid': _('Enter only digits separated by commas.'),
             }
         }
         defaults.update(kwargs)
@@ -461,10 +462,10 @@ class DateField(Field):
         # sure it's a valid date.
         # We could use time.strptime here and catch errors, but datetime.date
         # produces much friendlier error messages.
-        year, month, day = map(int, value.split('-'))
+        year, month, day = list(map(int, value.split('-')))
         try:
             return datetime.date(year, month, day)
-        except ValueError, e:
+        except ValueError as e:
             msg = _('Invalid date: %s') % _(str(e))
             raise exceptions.ValidationError(msg)
 
@@ -586,7 +587,7 @@ class DecimalField(Field):
                 _("This value must be a decimal number."))
 
     def _format(self, value):
-        if isinstance(value, basestring) or value is None:
+        if isinstance(value, str) or value is None:
             return value
         else:
             return self.format_number(value)

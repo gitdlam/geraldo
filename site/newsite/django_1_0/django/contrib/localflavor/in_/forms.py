@@ -11,7 +11,7 @@ import re
 
 class INZipCodeField(RegexField):
     default_error_messages = {
-        'invalid': gettext(u'Enter a zip code in the format XXXXXXX.'),
+        'invalid': gettext('Enter a zip code in the format XXXXXXX.'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -25,14 +25,14 @@ class INStateField(Field):
     registration abbreviation for the given state or union territory
     """
     default_error_messages = {
-        'invalid': u'Enter a Indian state or territory.',
+        'invalid': 'Enter a Indian state or territory.',
     }
 
     def clean(self, value):
-        from in_states import STATES_NORMALIZED
+        from .in_states import STATES_NORMALIZED
         super(INStateField, self).clean(value)
         if value in EMPTY_VALUES:
-            return u''
+            return ''
         try:
             value = value.strip().lower()
         except AttributeError:
@@ -50,6 +50,6 @@ class INStateSelect(Select):
     choices.
     """
     def __init__(self, attrs=None):
-        from in_states import STATE_CHOICES
+        from .in_states import STATE_CHOICES
         super(INStateSelect, self).__init__(attrs, choices=STATE_CHOICES)
 

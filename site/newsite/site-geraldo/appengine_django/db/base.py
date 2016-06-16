@@ -71,7 +71,7 @@ def destroy_datastore(datastore_path, history_path):
     if not path: continue
     try:
       os.remove(path)
-    except OSError, e:
+    except OSError as e:
       if e.errno != 2:
         logging.error("Failed to clear datastore: %s" % e)
 

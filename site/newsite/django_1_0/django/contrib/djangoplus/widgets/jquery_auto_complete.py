@@ -29,12 +29,12 @@ class JQueryAutoComplete(forms.TextInput):
             #self.options = JSONEncoder().encode(options)
             opt_list = []
 
-            for k, v in options.items():
+            for k, v in list(options.items()):
                 opt = '"%s":'%k
 
                 if k == 'select':
                     opt += v
-                elif type(v) == types.StringType:
+                elif type(v) == bytes:
                     opt += '"%s"'%v
                 else:
                     opt += JSONEncoder().encode(v)
@@ -57,7 +57,7 @@ class JQueryAutoComplete(forms.TextInput):
         if self.options:
             options += ',%s' % self.options
 
-        return u'$(\'#%s\').autocomplete(%s%s);' % (field_id, source, options)
+        return '$(\'#%s\').autocomplete(%s%s);' % (field_id, source, options)
 
     def render(self, name, value=None, attrs=None):
         final_attrs = self.build_attrs(attrs, name=name)
@@ -67,7 +67,7 @@ class JQueryAutoComplete(forms.TextInput):
             else:
                 final_attrs['value'] = escape(smart_unicode(value))
 
-        if not self.attrs.has_key('id'):
+        if 'id' not in self.attrs:
             final_attrs['id'] = 'id_%s' % name    
 
         return mark_safe('<input type="text" %(attrs)s/> <script type="text/javascript" defer="defer"> %(js)s </script>' % {

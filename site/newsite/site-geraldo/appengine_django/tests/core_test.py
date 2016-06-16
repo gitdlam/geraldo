@@ -28,7 +28,7 @@ class AppengineDjangoTest(unittest.TestCase):
 
   def testAppidProvided(self):
     """Tests that application ID and configuration has been loaded."""
-    self.assert_(appid is not None)
+    self.assertTrue(appid is not None)
 
   def testAppserverDetection(self):
     """Tests that the appserver detection flag is present and correct."""

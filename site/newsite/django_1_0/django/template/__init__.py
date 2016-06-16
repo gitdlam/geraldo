@@ -59,6 +59,7 @@ from django.utils.encoding import smart_unicode, force_unicode
 from django.utils.translation import ugettext as _
 from django.utils.safestring import SafeData, EscapeData, mark_safe, mark_for_escaping
 from django.utils.html import escape
+import collections
 
 __all__ = ('Template', 'Context', 'RequestContext', 'compile_string')
 
@@ -103,10 +104,10 @@ invalid_var_format_string = None
 class TemplateSyntaxError(Exception):
     def __str__(self):
         try:
-            import cStringIO as StringIO
+            import io as StringIO
         except ImportError:
-            import StringIO
-        output = StringIO.StringIO()
+            import io
+        output = io.StringIO()
         output.write(Exception.__str__(self))
         # Check if we wrapped an exception and print that too.
         if hasattr(self, 'exc_info'):
@@ -129,7 +130,7 @@ class VariableDoesNotExist(Exception):
         self.params = params
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def __unicode__(self):
         return self.msg % tuple([force_unicode(p, errors='replace') for p in self.params])
@@ -178,7 +179,7 @@ class Template(object):
 def compile_string(template_string, origin):
     "Compiles template_string into NodeList ready for rendering"
     if settings.TEMPLATE_DEBUG:
-        from debug import DebugLexer, DebugParser
+        from .debug import DebugLexer, DebugParser
         lexer_class, parser_class = DebugLexer, DebugParser
     else:
         lexer_class, parser_class = Lexer, Parser
@@ -269,7 +270,7 @@ class Parser(object):
                     self.invalid_block_tag(token, command)
                 try:
                     compiled_result = compile_func(self, token)
-                except TemplateSyntaxError, e:
+                except TemplateSyntaxError as e:
                     if not self.compile_function_error(token, e):
                         raise
                 self.extend_nodelist(nodelist, compiled_result, token)
@@ -686,7 +687,7 @@ class Variable(object):
             except (TypeError, AttributeError, KeyError):
                 try: # attribute lookup
                     current = getattr(current, bit)
-                    if callable(current):
+                    if isinstance(current, collections.Callable):
                         if getattr(current, 'alters_data', False):
                             current = settings.TEMPLATE_STRING_IF_INVALID
                         else:
@@ -696,7 +697,7 @@ class Variable(object):
                                 # GOTCHA: This will also catch any TypeError
                                 # raised in the function itself.
                                 current = settings.TEMPLATE_STRING_IF_INVALID # invalid method call
-                            except Exception, e:
+                            except Exception as e:
                                 if getattr(e, 'silent_variable_failure', False):
                                     current = settings.TEMPLATE_STRING_IF_INVALID
                                 else:
@@ -710,7 +711,7 @@ class Variable(object):
                             TypeError,  # unsubscriptable object
                             ):
                         raise VariableDoesNotExist("Failed lookup for key [%s] in %r", (bit, current)) # missing attribute
-                except Exception, e:
+                except Exception as e:
                     if getattr(e, 'silent_variable_failure', False):
                         current = settings.TEMPLATE_STRING_IF_INVALID
                     else:
@@ -816,7 +817,7 @@ class Library(object):
             # @register.tag()
             return self.tag_function
         elif name != None and compile_function == None:
-            if(callable(name)):
+            if(isinstance(name, collections.Callable)):
                 # @register.tag
                 return self.tag_function(name)
             else:
@@ -840,7 +841,7 @@ class Library(object):
             # @register.filter()
             return self.filter_function
         elif filter_func == None:
-            if(callable(name)):
+            if(isinstance(name, collections.Callable)):
                 # @register.filter
                 return self.filter_function(name)
             else:
@@ -864,7 +865,7 @@ class Library(object):
 
         class SimpleNode(Node):
             def __init__(self, vars_to_resolve):
-                self.vars_to_resolve = map(Variable, vars_to_resolve)
+                self.vars_to_resolve = list(map(Variable, vars_to_resolve))
 
             def render(self, context):
                 resolved_vars = [var.resolve(context) for var in self.vars_to_resolve]
@@ -886,7 +887,7 @@ class Library(object):
 
             class InclusionNode(Node):
                 def __init__(self, vars_to_resolve):
-                    self.vars_to_resolve = map(Variable, vars_to_resolve)
+                    self.vars_to_resolve = list(map(Variable, vars_to_resolve))
 
                 def render(self, context):
                     resolved_vars = [var.resolve(context) for var in self.vars_to_resolve]
@@ -899,7 +900,7 @@ class Library(object):
 
                     if not getattr(self, 'nodelist', False):
                         from django.template.loader import get_template, select_template
-                        if not isinstance(file_name, basestring) and is_iterable(file_name):
+                        if not isinstance(file_name, str) and is_iterable(file_name):
                             t = select_template(file_name)
                         else:
                             t = get_template(file_name)
@@ -918,7 +919,7 @@ def get_library(module_name):
     if not lib:
         try:
             mod = __import__(module_name, {}, {}, [''])
-        except ImportError, e:
+        except ImportError as e:
             raise InvalidTemplateLibrary("Could not load template library from %s, %s" % (module_name, e))
         try:
             lib = mod.register

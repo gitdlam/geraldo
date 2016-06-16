@@ -26,7 +26,7 @@ def query_class(QueryClass, Database):
 
     class OracleQuery(QueryClass):
         def resolve_columns(self, row, fields=()):
-            index_start = len(self.extra_select.keys())
+            index_start = len(list(self.extra_select.keys()))
             values = [self.convert_values(v, None) for v in row[:index_start]]
             for value, field in map(None, row[index_start:], fields):
                 values.append(self.convert_values(value, field))
@@ -42,7 +42,7 @@ def query_class(QueryClass, Database):
             # string instead of null, but only if the field accepts the
             # empty string.
             if value is None and isinstance(field, Field) and field.empty_strings_allowed:
-                value = u''
+                value = ''
             # Convert 1 or 0 to True or False
             elif value in (1, 0) and isinstance(field, (BooleanField, NullBooleanField)):
                 value = bool(value)

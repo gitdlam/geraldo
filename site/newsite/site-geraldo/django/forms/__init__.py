@@ -10,8 +10,8 @@ TODO:
     "This form field requires foo.js" and form.js_includes()
 """
 
-from util import ValidationError
-from widgets import *
-from fields import *
-from forms import *
-from models import *
+from .util import ValidationError
+from .widgets import *
+from .fields import *
+from .forms import *
+from .models import *

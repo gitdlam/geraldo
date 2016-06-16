@@ -8,9 +8,9 @@ from django.db import models
 from django.core.serializers.python import Serializer as PythonSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 import yaml
 
 class Serializer(PythonSerializer):
@@ -44,7 +44,7 @@ def Deserializer(stream_or_string, **options):
     """
     Deserialize a stream or string of YAML data.
     """
-    if isinstance(stream_or_string, basestring):
+    if isinstance(stream_or_string, str):
         stream = StringIO(stream_or_string)
     else:
         stream = stream_or_string

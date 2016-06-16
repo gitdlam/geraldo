@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.xheaders import populate_xheaders
 from django.db.models.fields import DateTimeField
 from django.http import Http404, HttpResponse
+import collections
 
 def archive_index(request, queryset, date_field, num_latest=15,
         template_name=None, template_loader=loader,
@@ -27,7 +28,7 @@ def archive_index(request, queryset, date_field, num_latest=15,
         queryset = queryset.filter(**{'%s__lte' % date_field: datetime.datetime.now()})
     date_list = queryset.dates(date_field, 'year')[::-1]
     if not date_list and not allow_empty:
-        raise Http404, "No %s available" % model._meta.verbose_name
+        raise Http404("No %s available" % model._meta.verbose_name)
 
     if date_list and num_latest:
         latest = queryset.order_by('-'+date_field)[:num_latest]
@@ -41,8 +42,8 @@ def archive_index(request, queryset, date_field, num_latest=15,
         'date_list' : date_list,
         template_object_name : latest,
     }, context_processors)
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value
@@ -89,8 +90,8 @@ def archive_year(request, year, queryset, date_field, template_name=None,
         'year': year,
         '%s_list' % template_object_name: object_list,
     }, context_processors)
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value
@@ -158,8 +159,8 @@ def archive_month(request, year, month, queryset, date_field,
         'next_month': next_month,
         'previous_month': first_day - datetime.timedelta(days=1),
     }, context_processors)
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value
@@ -209,8 +210,8 @@ def archive_week(request, year, week, queryset, date_field,
         '%s_list' % template_object_name: object_list,
         'week': date,
     })
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value
@@ -273,8 +274,8 @@ def archive_day(request, year, month, day, queryset, date_field,
         'previous_day': date - datetime.timedelta(days=1),
         'next_day': next_day,
     }, context_processors)
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value
@@ -327,11 +328,11 @@ def object_detail(request, year, month, day, queryset, date_field,
     elif slug and slug_field:
         lookup_kwargs['%s__exact' % slug_field] = slug
     else:
-        raise AttributeError, "Generic detail view must be called with either an object_id or a slug/slugfield"
+        raise AttributeError("Generic detail view must be called with either an object_id or a slug/slugfield")
     try:
         obj = queryset.get(**lookup_kwargs)
     except ObjectDoesNotExist:
-        raise Http404, "No %s found for" % model._meta.verbose_name
+        raise Http404("No %s found for" % model._meta.verbose_name)
     if not template_name:
         template_name = "%s/%s_detail.html" % (model._meta.app_label, model._meta.object_name.lower())
     if template_name_field:
@@ -342,8 +343,8 @@ def object_detail(request, year, month, day, queryset, date_field,
     c = RequestContext(request, {
         template_object_name: obj,
     }, context_processors)
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value

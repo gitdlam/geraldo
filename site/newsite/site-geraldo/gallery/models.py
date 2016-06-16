@@ -7,7 +7,7 @@ from django.core.cache import cache
 
 from utils.custom_models import CustomModel
 
-import app_settings
+from . import app_settings
 
 class Item(CustomModel):
     title = db.StringProperty()
@@ -23,7 +23,7 @@ class Item(CustomModel):
 
     def put(self):
         if not self.slug:
-            self.slug = unicode(slugify(self.title))
+            self.slug = str(slugify(self.title))
 
         # Delete from cache
         cache.delete(Item.get_cache_key(self.slug))

@@ -90,7 +90,7 @@ def manipulator_valid_rel_key(f, self, field_data, all_data):
     try:
         klass._default_manager.get(**{f.rel.field_name: field_data})
     except klass.DoesNotExist:
-        raise validators.ValidationError, _("Please enter a valid %s.") % f.verbose_name
+        raise validators.ValidationError(_("Please enter a valid %s.") % f.verbose_name)
 
 #HACK
 class RelatedField(object):
@@ -107,7 +107,7 @@ class RelatedField(object):
             self.rel.related_name = self.rel.related_name % {'class': cls.__name__.lower()}
 
         other = self.rel.to
-        if isinstance(other, basestring):
+        if isinstance(other, str):
             add_lazy_relation(cls, self, other)
         else:
             self.do_related_class(other, cls)
@@ -150,7 +150,7 @@ class RelatedField(object):
             return [pk_trace(v) for v in value]
         elif lookup_type == 'isnull':
             return []
-        raise TypeError, "Related Field has invalid lookup: %s" % lookup_type
+        raise TypeError("Related Field has invalid lookup: %s" % lookup_type)
 
     def _get_related_query_name(self, opts):
         # This method defines the name that can be used to identify this
@@ -171,7 +171,7 @@ class SingleRelatedObjectDescriptor(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError, "%s must be accessed via instance" % self.related.opts.object_name
+            raise AttributeError("%s must be accessed via instance" % self.related.opts.object_name)
 
         try:
             return getattr(instance, self.cache_name)
@@ -183,7 +183,7 @@ class SingleRelatedObjectDescriptor(object):
 
     def __set__(self, instance, value):
         if instance is None:
-            raise AttributeError, "%s must be accessed via instance" % self.related.opts.object_name
+            raise AttributeError("%s must be accessed via instance" % self.related.opts.object_name)
 
         # The similarity of the code below to the code in
         # ReverseSingleRelatedObjectDescriptor is annoying, but there's a bunch
@@ -219,7 +219,7 @@ class ReverseSingleRelatedObjectDescriptor(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError, "%s must be accessed via instance" % self.field.name
+            raise AttributeError("%s must be accessed via instance" % self.field.name)
         cache_name = self.field.get_cache_name()
         try:
             return getattr(instance, cache_name)
@@ -241,7 +241,7 @@ class ReverseSingleRelatedObjectDescriptor(object):
 
     def __set__(self, instance, value):
         if instance is None:
-            raise AttributeError, "%s must be accessed via instance" % self._field.name
+            raise AttributeError("%s must be accessed via instance" % self._field.name)
 
         # If null=True, we can assign null here, but otherwise the value needs
         # to be an instance of the related class.
@@ -276,7 +276,7 @@ class ForeignRelatedObjectsDescriptor(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         rel_field = self.related.field
         rel_model = self.related.model
@@ -311,7 +311,7 @@ class ForeignRelatedObjectsDescriptor(object):
                             setattr(obj, rel_field.name, None)
                             obj.save()
                         else:
-                            raise rel_field.rel.to.DoesNotExist, "%r is not related to %r." % (obj, instance)
+                            raise rel_field.rel.to.DoesNotExist("%r is not related to %r." % (obj, instance))
                 remove.alters_data = True
 
                 def clear(self):
@@ -330,7 +330,7 @@ class ForeignRelatedObjectsDescriptor(object):
 
     def __set__(self, instance, value):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         manager = self.__get__(instance)
         # If the foreign key can support nulls, then completely clear the related set.
@@ -466,7 +466,7 @@ class ManyRelatedObjectsDescriptor(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         # Dynamically create a class that subclasses the related
         # model's default manager.
@@ -489,7 +489,7 @@ class ManyRelatedObjectsDescriptor(object):
 
     def __set__(self, instance, value):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         manager = self.__get__(instance)
         manager.clear()
@@ -507,7 +507,7 @@ class ReverseManyRelatedObjectsDescriptor(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         # Dynamically create a class that subclasses the related
         # model's default manager.
@@ -530,7 +530,7 @@ class ReverseManyRelatedObjectsDescriptor(object):
 
     def __set__(self, instance, value):
         if instance is None:
-            raise AttributeError, "Manager must be accessed via instance"
+            raise AttributeError("Manager must be accessed via instance")
 
         manager = self.__get__(instance)
         manager.clear()
@@ -544,7 +544,7 @@ class ManyToOneRel(object):
         try:
             to._meta
         except AttributeError: # to._meta doesn't exist, so it must be RECURSIVE_RELATIONSHIP_CONSTANT
-            assert isinstance(to, basestring), "'to' must be either a model, a model name or the string %r" % RECURSIVE_RELATIONSHIP_CONSTANT
+            assert isinstance(to, str), "'to' must be either a model, a model name or the string %r" % RECURSIVE_RELATIONSHIP_CONSTANT
         self.to, self.field_name = to, field_name
         self.num_in_admin, self.edit_inline = num_in_admin, edit_inline
         self.min_num_in_admin, self.max_num_in_admin = min_num_in_admin, max_num_in_admin
@@ -600,7 +600,7 @@ class ForeignKey(RelatedField, Field):
         try:
             to_name = to._meta.object_name.lower()
         except AttributeError: # to._meta doesn't exist, so it must be RECURSIVE_RELATIONSHIP_CONSTANT
-            assert isinstance(to, basestring), "%s(%r) is invalid. First parameter to ForeignKey must be either a model, a model name, or the string %r" % (self.__class__.__name__, to, RECURSIVE_RELATIONSHIP_CONSTANT)
+            assert isinstance(to, str), "%s(%r) is invalid. First parameter to ForeignKey must be either a model, a model name, or the string %r" % (self.__class__.__name__, to, RECURSIVE_RELATIONSHIP_CONSTANT)
         else:
             to_field = to_field or to._meta.pk.name
         kwargs['verbose_name'] = kwargs.get('verbose_name', '')
@@ -671,7 +671,7 @@ class ForeignKey(RelatedField, Field):
     def contribute_to_class(self, cls, name):
         super(ForeignKey, self).contribute_to_class(cls, name)
         setattr(cls, self.name, ReverseSingleRelatedObjectDescriptor(self))
-        if isinstance(self.rel.to, basestring):
+        if isinstance(self.rel.to, str):
             target = self.rel.to
         else:
             target = self.rel.to._meta.db_table
@@ -763,18 +763,18 @@ class ManyToManyField(RelatedField, Field):
         "Validates that the value is a valid list of foreign keys"
         mod = self.rel.to
         try:
-            pks = map(int, field_data.split(','))
+            pks = list(map(int, field_data.split(',')))
         except ValueError:
             # the CommaSeparatedIntegerField validator will catch this error
             return
         objects = mod._default_manager.in_bulk(pks)
         if len(objects) != len(pks):
             badkeys = [k for k in pks if k not in objects]
-            raise validators.ValidationError, ungettext("Please enter valid %(self)s IDs. The value %(value)r is invalid.",
+            raise validators.ValidationError(ungettext("Please enter valid %(self)s IDs. The value %(value)r is invalid.",
                     "Please enter valid %(self)s IDs. The values %(value)r are invalid.", len(badkeys)) % {
                 'self': self.verbose_name,
                 'value': len(badkeys) == 1 and badkeys[0] or tuple(badkeys),
-            }
+            })
 
     def flatten_data(self, follow, obj = None):
         new_data = {}
@@ -798,7 +798,7 @@ class ManyToManyField(RelatedField, Field):
         # Set up the accessor for the m2m table name for the relation
         self.m2m_db_table = curry(self._get_m2m_db_table, cls._meta)
 
-        if isinstance(self.rel.to, basestring):
+        if isinstance(self.rel.to, str):
             target = self.rel.to
         else:
             target = self.rel.to._meta.db_table

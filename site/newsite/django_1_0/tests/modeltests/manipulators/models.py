@@ -12,7 +12,7 @@ class Musician(models.Model):
     last_name = models.CharField(max_length=30)
 
     def __unicode__(self):
-        return u"%s %s" % (self.first_name, self.last_name)
+        return "%s %s" % (self.first_name, self.last_name)
 
 class Album(models.Model):
     name = models.CharField(max_length=100)
@@ -22,7 +22,7 @@ class Album(models.Model):
     def __unicode__(self):
         return self.name
 
-__test__ = {'API_TESTS':u"""
+__test__ = {'API_TESTS':"""
 >>> from django.utils.datastructures import MultiValueDict
 
 # Create a Musician object via the default AddManipulator.

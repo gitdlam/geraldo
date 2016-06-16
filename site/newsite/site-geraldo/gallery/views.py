@@ -11,9 +11,9 @@ from utils.decorators import page, admin_required
 from utils.users import post_message
 from utils.shortcuts import get_object_or_404
 
-from models import Item
-from forms import FormItem
-import app_settings
+from .models import Item
+from .forms import FormItem
+from . import app_settings
 
 @page('gallery/index.html')
 def gallery_index(request):

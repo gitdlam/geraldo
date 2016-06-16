@@ -53,7 +53,7 @@ if os.name == 'nt':
         def write(self, s):             return self.file.write(s)
         def __iter__(self):             return iter(self.file)
         def readlines(self, size=None): return self.file.readlines(size)
-        def xreadlines(self):           return self.file.xreadlines()
+        def xreadlines(self):           return self.file
 
     NamedTemporaryFile = TemporaryFile
 else:

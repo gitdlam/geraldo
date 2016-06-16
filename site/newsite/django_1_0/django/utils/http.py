@@ -1,4 +1,4 @@
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from email.Utils import formatdate
 
 from django.utils.encoding import smart_str, force_unicode
@@ -11,9 +11,9 @@ def urlquote(url, safe='/'):
     can safely be used as part of an argument to a subsequent iri_to_uri() call
     without double-quoting occurring.
     """
-    return force_unicode(urllib.quote(smart_str(url), safe))
+    return force_unicode(urllib.parse.quote(smart_str(url), safe))
 
-urlquote = allow_lazy(urlquote, unicode)
+urlquote = allow_lazy(urlquote, str)
 
 def urlquote_plus(url, safe=''):
     """
@@ -22,8 +22,8 @@ def urlquote_plus(url, safe=''):
     returned string can safely be used as part of an argument to a subsequent
     iri_to_uri() call without double-quoting occurring.
     """
-    return force_unicode(urllib.quote_plus(smart_str(url), safe))
-urlquote_plus = allow_lazy(urlquote_plus, unicode)
+    return force_unicode(urllib.parse.quote_plus(smart_str(url), safe))
+urlquote_plus = allow_lazy(urlquote_plus, str)
 
 def urlencode(query, doseq=0):
     """
@@ -32,8 +32,8 @@ def urlencode(query, doseq=0):
     then encoded as per normal.
     """
     if hasattr(query, 'items'):
-        query = query.items()
-    return urllib.urlencode(
+        query = list(query.items())
+    return urllib.parse.urlencode(
         [(smart_str(k),
          isinstance(v, (list,tuple)) and [smart_str(i) for i in v] or smart_str(v))
             for k, v in query],

@@ -12,14 +12,14 @@ try:
         from sqlite3 import dbapi2 as Database
     except ImportError:
         from pysqlite2 import dbapi2 as Database
-except ImportError, e:
+except ImportError as e:
     import sys
     from django.core.exceptions import ImproperlyConfigured
     if sys.version_info < (2, 5, 0):
         module = 'pysqlite2'
     else:
         module = 'sqlite3'
-    raise ImproperlyConfigured, "Error loading %s module: %s" % (module, e)
+    raise ImproperlyConfigured("Error loading %s module: %s" % (module, e))
 
 try:
     import decimal
@@ -112,7 +112,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if self.connection is None:
             if not settings.DATABASE_NAME:
                 from django.core.exceptions import ImproperlyConfigured
-                raise ImproperlyConfigured, "Please fill out DATABASE_NAME in the settings module before using the database."
+                raise ImproperlyConfigured("Please fill out DATABASE_NAME in the settings module before using the database.")
             kwargs = {
                 'database': settings.DATABASE_NAME,
                 'detect_types': Database.PARSE_DECLTYPES | Database.PARSE_COLNAMES,

@@ -15,6 +15,7 @@ from django.utils.encoding import iri_to_uri, force_unicode, smart_str
 from django.utils.functional import memoize
 from django.utils.regex_helper import normalize
 from django.utils.thread_support import currentThread
+import collections
 
 try:
     reversed
@@ -47,14 +48,14 @@ def get_callable(lookup_view, can_fail=False):
     If can_fail is True, lookup_view might be a URL pattern label, so errors
     during the import fail and the string is returned.
     """
-    if not callable(lookup_view):
+    if not isinstance(lookup_view, collections.Callable):
         try:
             # Bail early for non-ASCII strings (they can't be functions).
             lookup_view = lookup_view.encode('ascii')
             mod_name, func_name = get_mod_func(lookup_view)
             if func_name != '':
                 lookup_view = getattr(__import__(mod_name, {}, {}, ['']), func_name)
-                if not callable(lookup_view):
+                if not isinstance(lookup_view, collections.Callable):
                     raise AttributeError("'%s.%s' is not a callable." % (mod_name, func_name))
         except (ImportError, AttributeError):
             if not can_fail:
@@ -87,7 +88,7 @@ class RegexURLPattern(object):
         # which represents the path to a module and a view function name, or a
         # callable object (view).
         self.regex = re.compile(regex, re.UNICODE)
-        if callable(callback):
+        if isinstance(callback, collections.Callable):
             self._callback = callback
         else:
             self._callback = None
@@ -127,12 +128,12 @@ class RegexURLPattern(object):
             return self._callback
         try:
             self._callback = get_callable(self._callback_str)
-        except ImportError, e:
+        except ImportError as e:
             mod_name, _ = get_mod_func(self._callback_str)
-            raise ViewDoesNotExist, "Could not import %s. Error was: %s" % (mod_name, str(e))
-        except AttributeError, e:
+            raise ViewDoesNotExist("Could not import %s. Error was: %s" % (mod_name, str(e)))
+        except AttributeError as e:
             mod_name, func_name = get_mod_func(self._callback_str)
-            raise ViewDoesNotExist, "Tried %s in module %s. Error was: %s" % (func_name, mod_name, str(e))
+            raise ViewDoesNotExist("Tried %s in module %s. Error was: %s" % (func_name, mod_name, str(e)))
         return self._callback
     callback = property(_get_callback)
 
@@ -157,7 +158,7 @@ class RegexURLResolver(object):
                     p_pattern = p_pattern[1:]
                 if isinstance(pattern, RegexURLResolver):
                     parent = normalize(pattern.regex.pattern)
-                    for name, (matches, pat) in pattern.reverse_dict.iteritems():
+                    for name, (matches, pat) in pattern.reverse_dict.items():
                         new_matches = []
                         for piece, p_args in parent:
                             new_matches.extend([(piece + suffix, p_args + args)
@@ -178,17 +179,17 @@ class RegexURLResolver(object):
             for pattern in self.urlconf_module.urlpatterns:
                 try:
                     sub_match = pattern.resolve(new_path)
-                except Resolver404, e:
+                except Resolver404 as e:
                     tried.extend([(pattern.regex.pattern + '   ' + t) for t in e.args[0]['tried']])
                 else:
                     if sub_match:
-                        sub_match_dict = dict([(smart_str(k), v) for k, v in match.groupdict().items()])
+                        sub_match_dict = dict([(smart_str(k), v) for k, v in list(match.groupdict().items())])
                         sub_match_dict.update(self.default_kwargs)
-                        for k, v in sub_match[2].iteritems():
+                        for k, v in sub_match[2].items():
                             sub_match_dict[smart_str(k)] = v
                         return sub_match[0], sub_match[1], sub_match_dict
                     tried.append(pattern.regex.pattern)
-            raise Resolver404, {'tried': tried, 'path': new_path}
+            raise Resolver404({'tried': tried, 'path': new_path})
 
     def _get_urlconf_module(self):
         try:
@@ -207,8 +208,8 @@ class RegexURLResolver(object):
         mod_name, func_name = get_mod_func(callback)
         try:
             return getattr(__import__(mod_name, {}, {}, ['']), func_name), {}
-        except (ImportError, AttributeError), e:
-            raise ViewDoesNotExist, "Tried %s. Error was: %s" % (callback, str(e))
+        except (ImportError, AttributeError) as e:
+            raise ViewDoesNotExist("Tried %s. Error was: %s" % (callback, str(e)))
 
     def resolve404(self):
         return self._resolve_special('404')
@@ -221,7 +222,7 @@ class RegexURLResolver(object):
             raise ValueError("Don't mix *args and **kwargs in call to reverse()!")
         try:
             lookup_view = get_callable(lookup_view, True)
-        except (ImportError, AttributeError), e:
+        except (ImportError, AttributeError) as e:
             raise NoReverseMatch("Error importing '%s': %s." % (lookup_view, e))
         possibilities, pattern = self.reverse_dict.get(lookup_view, [(), ()])
         for result, params in possibilities:
@@ -229,13 +230,13 @@ class RegexURLResolver(object):
                 if len(args) != len(params):
                     continue
                 unicode_args = [force_unicode(val) for val in args]
-                candidate =  result % dict(zip(params, unicode_args))
+                candidate =  result % dict(list(zip(params, unicode_args)))
             else:
                 if set(kwargs.keys()) != set(params):
                     continue
-                unicode_kwargs = dict([(k, force_unicode(v)) for (k, v) in kwargs.items()])
+                unicode_kwargs = dict([(k, force_unicode(v)) for (k, v) in list(kwargs.items())])
                 candidate = result % unicode_kwargs
-            if re.search(u'^%s' % pattern, candidate, re.UNICODE):
+            if re.search('^%s' % pattern, candidate, re.UNICODE):
                 return candidate
         raise NoReverseMatch("Reverse for '%s' with arguments '%s' and keyword "
                 "arguments '%s' not found." % (lookup_view, args, kwargs))
@@ -248,7 +249,7 @@ def reverse(viewname, urlconf=None, args=None, kwargs=None, prefix=None):
     kwargs = kwargs or {}
     if prefix is None:
         prefix = get_script_prefix()
-    return iri_to_uri(u'%s%s' % (prefix, get_resolver(urlconf).reverse(viewname,
+    return iri_to_uri('%s%s' % (prefix, get_resolver(urlconf).reverse(viewname,
             *args, **kwargs)))
 
 def clear_url_caches():
@@ -271,5 +272,5 @@ def get_script_prefix():
     wishes to construct their own URLs manually (although accessing the request
     instance is normally going to be a lot cleaner).
     """
-    return _prefixes.get(currentThread(), u'/')
+    return _prefixes.get(currentThread(), '/')
 

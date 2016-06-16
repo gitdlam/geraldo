@@ -106,10 +106,10 @@ class AdminScriptTestCase(unittest.TestCase):
 
     def assertNoOutput(self, stream):
         "Utility assertion: assert that the given stream is empty"
-        self.assertEquals(len(stream), 0, "Stream should be empty: actually contains '%s'" % stream)
+        self.assertEqual(len(stream), 0, "Stream should be empty: actually contains '%s'" % stream)
     def assertOutput(self, stream, msg):
         "Utility assertion: assert that the given message exists in the output"
-        self.failUnless(msg in stream, "'%s' does not match actual output text '%s'" % (msg, stream))
+        self.assertTrue(msg in stream, "'%s' does not match actual output text '%s'" % (msg, stream))
 
 ##########################################################################
 # DJANGO ADMIN TESTS

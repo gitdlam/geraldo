@@ -70,7 +70,7 @@ class CommandsTest(unittest.TestCase):
     fd = subprocess.PIPE
 
     child = subprocess.Popen(["./manage.py", command] + args, stdin=fd,
-                             stdout=fd, stderr=fd, cwd=os.getcwdu())
+                             stdout=fd, stderr=fd, cwd=os.getcwd())
     if input:
       child.stdin.write(input)
       child.stdin.close()
@@ -113,7 +113,7 @@ class CommandsTest(unittest.TestCase):
     fd, tempname = tempfile.mkstemp()
     os.write(fd, stdout)
     os.close(fd)
-    self.assertEquals(0, rc,
+    self.assertEqual(0, rc,
                       "%s did not return successfully (rc: %d): Output in %s" %
                       (command, rc, tempname))
     os.unlink(tempname)
@@ -174,10 +174,10 @@ class CommandsTest(unittest.TestCase):
     now we just assume that if it is present it will work.
     """
     cmd_list = self.getCommands()
-    self.assert_("update" in cmd_list)
+    self.assertTrue("update" in cmd_list)
 
   def testZipCommandListFiltersCorrectly(self):
     """When running under a zipfile test that only valid commands are found."""
     cmd_list = self.getCommands()
-    self.assert_("__init__" not in cmd_list)
-    self.assert_("base" not in cmd_list)
+    self.assertTrue("__init__" not in cmd_list)
+    self.assertTrue("base" not in cmd_list)

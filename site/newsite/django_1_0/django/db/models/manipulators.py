@@ -29,7 +29,7 @@ class ManipulatorDescriptor(object):
 
     def __get__(self, instance, model=None):
         if instance != None:
-            raise AttributeError, "Manipulator cannot be accessed via instance"
+            raise AttributeError("Manipulator cannot be accessed via instance")
         else:
             if not self.man:
                 # Create a class that inherits from the "Manipulator" class
@@ -139,7 +139,7 @@ class AutomaticManipulator(oldforms.Manipulator):
             child_follow = self.follow.get(related.name, None)
 
             if child_follow:
-                obj_list = expanded_data.get(related.var_name, {}).items()
+                obj_list = list(expanded_data.get(related.var_name, {}).items())
                 if not obj_list:
                     continue
 
@@ -229,7 +229,7 @@ class AutomaticManipulator(oldforms.Manipulator):
 
         # Save the order, if applicable.
         if self.change and self.opts.get_ordered_objects():
-            order = new_data['order_'] and map(int, new_data['order_'].split(',')) or []
+            order = new_data['order_'] and list(map(int, new_data['order_'].split(','))) or []
             for rel_opts in self.opts.get_ordered_objects():
                 getattr(new_object, 'set_%s_order' % rel_opts.object_name.lower())(order)
         return new_object
@@ -301,8 +301,8 @@ def manipulator_validator_unique_together(field_name_list, opts, self, field_dat
     if hasattr(self, 'original_object') and self.original_object._get_pk_val() == old_obj._get_pk_val():
         pass
     else:
-        raise validators.ValidationError, _("%(object)s with this %(type)s already exists for the given %(field)s.") % \
-            {'object': capfirst(opts.verbose_name), 'type': field_list[0].verbose_name, 'field': get_text_list([f.verbose_name for f in field_list[1:]], _('and'))}
+        raise validators.ValidationError(_("%(object)s with this %(type)s already exists for the given %(field)s.") % \
+            {'object': capfirst(opts.verbose_name), 'type': field_list[0].verbose_name, 'field': get_text_list([f.verbose_name for f in field_list[1:]], _('and'))})
 
 def manipulator_validator_unique_for_date(from_field, date_field, opts, lookup_type, self, field_data, all_data):
     from django.db.models.fields.related import ManyToOneRel
@@ -329,5 +329,5 @@ def manipulator_validator_unique_for_date(from_field, date_field, opts, lookup_t
         else:
             format_string = (lookup_type == 'date') and '%B %d, %Y' or '%B %Y'
             date_val = datetime_safe.new_datetime(date_val)
-            raise validators.ValidationError, "Please enter a different %s. The one you entered is already being used for %s." % \
-                (from_field.verbose_name, date_val.strftime(format_string))
+            raise validators.ValidationError("Please enter a different %s. The one you entered is already being used for %s." % \
+                (from_field.verbose_name, date_val.strftime(format_string)))

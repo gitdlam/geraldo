@@ -60,50 +60,50 @@ def create_test_db(settings, connection, verbosity=1, autoclobber=False):
     cursor = connection.cursor()
     if _test_database_create(settings):
         if verbosity >= 1:
-            print 'Creating test database...'
+            print('Creating test database...')
         try:
             _create_test_db(cursor, parameters, verbosity)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Got an error creating the test database: %s\n" % e)
             if not autoclobber:
-                confirm = raw_input("It appears the test database, %s, already exists. Type 'yes' to delete it, or 'no' to cancel: " % TEST_DATABASE_NAME)
+                confirm = input("It appears the test database, %s, already exists. Type 'yes' to delete it, or 'no' to cancel: " % TEST_DATABASE_NAME)
             if autoclobber or confirm == 'yes':
                 try:
                     if verbosity >= 1:
-                        print "Destroying old test database..."
+                        print("Destroying old test database...")
                     _destroy_test_db(cursor, parameters, verbosity)
                     if verbosity >= 1:
-                        print "Creating test database..."
+                        print("Creating test database...")
                     _create_test_db(cursor, parameters, verbosity)
-                except Exception, e:
+                except Exception as e:
                     sys.stderr.write("Got an error recreating the test database: %s\n" % e)
                     sys.exit(2)
             else:
-                print "Tests cancelled."
+                print("Tests cancelled.")
                 sys.exit(1)
 
     if _test_user_create(settings):
         if verbosity >= 1:
-            print "Creating test user..."
+            print("Creating test user...")
         try:
             _create_test_user(cursor, parameters, verbosity)
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Got an error creating the test user: %s\n" % e)
             if not autoclobber:
-                confirm = raw_input("It appears the test user, %s, already exists. Type 'yes' to delete it, or 'no' to cancel: " % TEST_DATABASE_USER)
+                confirm = input("It appears the test user, %s, already exists. Type 'yes' to delete it, or 'no' to cancel: " % TEST_DATABASE_USER)
             if autoclobber or confirm == 'yes':
                 try:
                     if verbosity >= 1:
-                        print "Destroying old test user..."
+                        print("Destroying old test user...")
                     _destroy_test_user(cursor, parameters, verbosity)
                     if verbosity >= 1:
-                        print "Creating test user..."
+                        print("Creating test user...")
                     _create_test_user(cursor, parameters, verbosity)
-                except Exception, e:
+                except Exception as e:
                     sys.stderr.write("Got an error recreating the test user: %s\n" % e)
                     sys.exit(2)
             else:
-                print "Tests cancelled."
+                print("Tests cancelled.")
                 sys.exit(1)
 
     connection.close()
@@ -144,17 +144,17 @@ def destroy_test_db(settings, connection, old_database_name, verbosity=1):
     time.sleep(1) # To avoid "database is being accessed by other users" errors.
     if _test_user_create(settings):
         if verbosity >= 1:
-            print 'Destroying test user...'
+            print('Destroying test user...')
         _destroy_test_user(cursor, parameters, verbosity)
     if _test_database_create(settings):
         if verbosity >= 1:
-            print 'Destroying test database...'
+            print('Destroying test database...')
         _destroy_test_db(cursor, parameters, verbosity)
     connection.close()
 
 def _create_test_db(cursor, parameters, verbosity):
     if verbosity >= 2:
-        print "_create_test_db(): dbname = %s" % parameters['dbname']
+        print("_create_test_db(): dbname = %s" % parameters['dbname'])
     statements = [
         """CREATE TABLESPACE %(tblspace)s
            DATAFILE '%(tblspace)s.dbf' SIZE 20M
@@ -169,7 +169,7 @@ def _create_test_db(cursor, parameters, verbosity):
 
 def _create_test_user(cursor, parameters, verbosity):
     if verbosity >= 2:
-        print "_create_test_user(): username = %s" % parameters['user']
+        print("_create_test_user(): username = %s" % parameters['user'])
     statements = [
         """CREATE USER %(user)s
            IDENTIFIED BY %(password)s
@@ -182,7 +182,7 @@ def _create_test_user(cursor, parameters, verbosity):
 
 def _destroy_test_db(cursor, parameters, verbosity):
     if verbosity >= 2:
-        print "_destroy_test_db(): dbname=%s" % parameters['dbname']
+        print("_destroy_test_db(): dbname=%s" % parameters['dbname'])
     statements = [
         'DROP TABLESPACE %(tblspace)s INCLUDING CONTENTS AND DATAFILES CASCADE CONSTRAINTS',
         'DROP TABLESPACE %(tblspace_temp)s INCLUDING CONTENTS AND DATAFILES CASCADE CONSTRAINTS',
@@ -191,8 +191,8 @@ def _destroy_test_db(cursor, parameters, verbosity):
 
 def _destroy_test_user(cursor, parameters, verbosity):
     if verbosity >= 2:
-        print "_destroy_test_user(): user=%s" % parameters['user']
-        print "Be patient.  This can take some time..."
+        print("_destroy_test_user(): user=%s" % parameters['user'])
+        print("Be patient.  This can take some time...")
     statements = [
         'DROP USER %(user)s CASCADE',
     ]
@@ -202,10 +202,10 @@ def _execute_statements(cursor, statements, parameters, verbosity):
     for template in statements:
         stmt = template % parameters
         if verbosity >= 2:
-            print stmt
+            print(stmt)
         try:
             cursor.execute(stmt)
-        except Exception, err:
+        except Exception as err:
             sys.stderr.write("Failed (%s)\n" % (err))
             raise
 

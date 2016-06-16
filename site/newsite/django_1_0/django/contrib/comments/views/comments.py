@@ -46,16 +46,16 @@ class AuthenticationForm(oldforms.Manipulator):
 
     def hasCookiesEnabled(self, field_data, all_data):
         if self.request and not self.request.session.test_cookie_worked():
-            raise validators.ValidationError, _("Your Web browser doesn't appear to have cookies enabled. Cookies are required for logging in.")
+            raise validators.ValidationError(_("Your Web browser doesn't appear to have cookies enabled. Cookies are required for logging in."))
 
     def isValidUser(self, field_data, all_data):
         username = field_data
         password = all_data.get('password', None)
         self.user_cache = authenticate(username=username, password=password)
         if self.user_cache is None:
-            raise validators.ValidationError, _("Please enter a correct username and password. Note that both fields are case-sensitive.")
+            raise validators.ValidationError(_("Please enter a correct username and password. Note that both fields are case-sensitive."))
         elif not self.user_cache.is_active:
-            raise validators.ValidationError, _("This account is inactive.")
+            raise validators.ValidationError(_("This account is inactive."))
 
     def get_user_id(self):
         if self.user_cache:
@@ -235,15 +235,15 @@ def post_comment(request, extra_context=None, context_processors=None):
     """
     if extra_context is None: extra_context = {}
     if not request.POST:
-        raise Http404, _("Only POSTs are allowed")
+        raise Http404(_("Only POSTs are allowed"))
     try:
         options, target, security_hash = request.POST['options'], request.POST['target'], request.POST['gonzo']
     except KeyError:
-        raise Http404, _("One or more of the required fields wasn't submitted")
+        raise Http404(_("One or more of the required fields wasn't submitted"))
     photo_options = request.POST.get('photo_options', '')
     rating_options = normalize_newlines(request.POST.get('rating_options', ''))
     if Comment.objects.get_security_hash(options, photo_options, rating_options, target) != security_hash:
-        raise Http404, _("Somebody tampered with the comment form (security violation)")
+        raise Http404(_("Somebody tampered with the comment form (security violation)"))
     # Now we can be assured the data is valid.
     if rating_options:
         rating_range, rating_choices = Comment.objects.get_rating_options(base64.decodestring(rating_options))
@@ -253,7 +253,7 @@ def post_comment(request, extra_context=None, context_processors=None):
     try:
         obj = ContentType.objects.get(pk=content_type_id).get_object_for_this_type(pk=object_id)
     except ObjectDoesNotExist:
-        raise Http404, _("The comment form had an invalid 'target' parameter -- the object ID was invalid")
+        raise Http404(_("The comment form had an invalid 'target' parameter -- the object ID was invalid"))
     option_list = options.split(',') # options is something like 'pa,ra'
     new_data = request.POST.copy()
     new_data['content_type_id'] = content_type_id
@@ -304,7 +304,7 @@ def post_comment(request, extra_context=None, context_processors=None):
             comment = manipulator.save(new_data)
         return HttpResponseRedirect("../posted/?c=%s:%s" % (content_type_id, object_id))
     else:
-        raise Http404, _("The comment form didn't provide either 'preview' or 'post'")
+        raise Http404(_("The comment form didn't provide either 'preview' or 'post'"))
 
 def post_free_comment(request, extra_context=None, context_processors=None):
     """
@@ -328,19 +328,19 @@ def post_free_comment(request, extra_context=None, context_processors=None):
     """
     if extra_context is None: extra_context = {}
     if not request.POST:
-        raise Http404, _("Only POSTs are allowed")
+        raise Http404(_("Only POSTs are allowed"))
     try:
         options, target, security_hash = request.POST['options'], request.POST['target'], request.POST['gonzo']
     except KeyError:
-        raise Http404, _("One or more of the required fields wasn't submitted")
+        raise Http404(_("One or more of the required fields wasn't submitted"))
     if Comment.objects.get_security_hash(options, '', '', target) != security_hash:
-        raise Http404, _("Somebody tampered with the comment form (security violation)")
+        raise Http404(_("Somebody tampered with the comment form (security violation)"))
     content_type_id, object_id = target.split(':') # target is something like '52:5157'
     content_type = ContentType.objects.get(pk=content_type_id)
     try:
         obj = content_type.get_object_for_this_type(pk=object_id)
     except ObjectDoesNotExist:
-        raise Http404, _("The comment form had an invalid 'target' parameter -- the object ID was invalid")
+        raise Http404(_("The comment form had an invalid 'target' parameter -- the object ID was invalid"))
     option_list = options.split(',')
     new_data = request.POST.copy()
     new_data['content_type_id'] = content_type_id
@@ -369,7 +369,7 @@ def post_free_comment(request, extra_context=None, context_processors=None):
             comment = manipulator.save(new_data)
         return HttpResponseRedirect("../posted/?c=%s:%s" % (content_type_id, object_id))
     else:
-        raise Http404, _("The comment form didn't provide either 'preview' or 'post'")
+        raise Http404(_("The comment form didn't provide either 'preview' or 'post'"))
 
 def comment_was_posted(request, extra_context=None, context_processors=None):
     """

@@ -166,12 +166,12 @@ def lazy(func, *resultclasses):
             cls.__dispatch = {}
             for resultclass in resultclasses:
                 cls.__dispatch[resultclass] = {}
-                for (k, v) in resultclass.__dict__.items():
+                for (k, v) in list(resultclass.__dict__.items()):
                     if hasattr(cls, k):
                         continue
                     setattr(cls, k, cls.__promise__(resultclass, k, v))
             cls._delegate_str = str in resultclasses
-            cls._delegate_unicode = unicode in resultclasses
+            cls._delegate_unicode = str in resultclasses
             assert not (cls._delegate_str and cls._delegate_unicode), "Cannot call lazy() with both str and unicode return types."
             if cls._delegate_unicode:
                 cls.__unicode__ = cls.__unicode_cast
@@ -207,7 +207,7 @@ def lazy(func, *resultclasses):
             if self._delegate_str:
                 s = str(self.__func(*self.__args, **self.__kw))
             elif self._delegate_unicode:
-                s = unicode(self.__func(*self.__args, **self.__kw))
+                s = str(self.__func(*self.__args, **self.__kw))
             else:
                 s = self.__func(*self.__args, **self.__kw)
             if isinstance(rhs, Promise):
@@ -219,7 +219,7 @@ def lazy(func, *resultclasses):
             if self._delegate_str:
                 return str(self) % rhs
             elif self._delegate_unicode:
-                return unicode(self) % rhs
+                return str(self) % rhs
             else:
                 raise AssertionError('__mod__ not supported for non-string types')
 
@@ -244,7 +244,7 @@ def allow_lazy(func, *resultclasses):
     function when needed.
     """
     def wrapper(*args, **kwargs):
-        for arg in list(args) + kwargs.values():
+        for arg in list(args) + list(kwargs.values()):
             if isinstance(arg, Promise):
                 break
         else:

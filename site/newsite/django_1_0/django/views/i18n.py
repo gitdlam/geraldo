@@ -119,7 +119,7 @@ def javascript_catalog(request, domain='djangojs', packages=None):
                 activate(request.GET['language'])
     if packages is None:
         packages = ['django.conf']
-    if type(packages) in (str, unicode):
+    if type(packages) in (str, str):
         packages = packages.split('+')
     packages = [p for p in packages if p == 'django.conf' or p in settings.INSTALLED_APPS]
     default_locale = to_locale(settings.LANGUAGE_CODE)
@@ -170,10 +170,10 @@ def javascript_catalog(request, domain='djangojs', packages=None):
         src.append(SimplePlural)
     csrc = []
     pdict = {}
-    for k, v in t.items():
+    for k, v in list(t.items()):
         if k == '':
             continue
-        if type(k) in (str, unicode):
+        if type(k) in (str, str):
             csrc.append("catalog['%s'] = '%s';\n" % (javascript_quote(k), javascript_quote(v)))
         elif type(k) == tuple:
             if k[0] not in pdict:
@@ -182,9 +182,9 @@ def javascript_catalog(request, domain='djangojs', packages=None):
                 pdict[k[0]] = max(k[1], pdict[k[0]])
             csrc.append("catalog['%s'][%d] = '%s';\n" % (javascript_quote(k[0]), k[1], javascript_quote(v)))
         else:
-            raise TypeError, k
+            raise TypeError(k)
     csrc.sort()
-    for k,v in pdict.items():
+    for k,v in list(pdict.items()):
         src.append("catalog['%s'] = [%s];\n" % (javascript_quote(k), ','.join(["''"]*(v+1))))
     src.extend(csrc)
     src.append(LibFoot)

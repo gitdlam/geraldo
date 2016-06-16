@@ -17,7 +17,7 @@ class ZAIDField(Field):
     check for the birthdate
     """
     default_error_messages = {
-        'invalid': _(u'Enter a valid South African ID number'),
+        'invalid': _('Enter a valid South African ID number'),
     }
 
     def clean(self, value):
@@ -27,7 +27,7 @@ class ZAIDField(Field):
         super(ZAIDField, self).clean(value)
 
         if value in EMPTY_VALUES:
-            return u''
+            return ''
 
         match = re.match(id_re, value)
 
@@ -51,7 +51,7 @@ class ZAIDField(Field):
 
 class ZAPostCodeField(RegexField):
     default_error_messages = {
-        'invalid': _(u'Enter a valid South African postal code'),
+        'invalid': _('Enter a valid South African postal code'),
     }
 
     def __init__(self, *args, **kwargs):

@@ -386,10 +386,10 @@ AttributeError: This QueryDict instance is immutable
 >>> q = QueryDict('foo=bar&foo=\xff')
 
 >>> q['foo']
-u'\ufffd'
+u'\\ufffd'
 
 >>> q.getlist('foo')
-[u'bar', u'\ufffd']
+[u'bar', u'\\ufffd']
 
 
 ###################################### 

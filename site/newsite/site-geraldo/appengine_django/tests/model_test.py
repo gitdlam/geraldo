@@ -44,7 +44,7 @@ class ModelTest(unittest.TestCase):
 
   def testModelRegisteredWithDjango(self):
     """Tests that a combined model class has been registered with Django."""
-    self.assert_(RegistrationTestModel in get_models())
+    self.assertTrue(RegistrationTestModel in get_models())
 
   def testDatastoreModelProperties(self):
     """Tests that a combined model class still has datastore properties."""
@@ -53,11 +53,11 @@ class ModelTest(unittest.TestCase):
   def testDjangoModelClass(self):
     """Tests the parts of a model required by Django are correctly stubbed."""
     # Django requires model options to be found at ._meta.
-    self.assert_(isinstance(RegistrationTestModel._meta, ModelOptions))
+    self.assertTrue(isinstance(RegistrationTestModel._meta, ModelOptions))
     # Django requires a manager at .objects
-    self.assert_(isinstance(RegistrationTestModel.objects, ModelManager))
+    self.assertTrue(isinstance(RegistrationTestModel.objects, ModelManager))
     # Django requires ._default_manager.
-    self.assert_(hasattr(RegistrationTestModel, "_default_manager"))
+    self.assertTrue(hasattr(RegistrationTestModel, "_default_manager"))
 
   def testDjangoModelFields(self):
     """Tests that a combined model class has (faked) Django fields."""
@@ -67,7 +67,7 @@ class ModelTest(unittest.TestCase):
     for field in fields:
       # The Django serialization code looks for rel to determine if the field
       # is a relationship/reference to another model.
-      self.assert_(hasattr(field, "rel"))
+      self.assertTrue(hasattr(field, "rel"))
       # serialize is required to tell Django to serialize the field.
       self.assertEqual(True, field.serialize)
       if field.name == "property3":
@@ -101,7 +101,7 @@ class ModelTest(unittest.TestCase):
     obj = RegistrationTestModel(key_name="test")
     obj.put()
     pk = obj._get_pk_val()
-    self.assert_(pk)
+    self.assertTrue(pk)
     new_obj = RegistrationTestModel.get(pk)
     self.assertEqual(obj.key(), new_obj.key())
 

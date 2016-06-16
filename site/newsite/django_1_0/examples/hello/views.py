@@ -21,7 +21,7 @@ def metadata(request):
     r = HttpResponse('<h1>All about you</h1>')
     r.write("<p>Here's all known metadata about your request, according to <code>request.META</code>:</p>")
     r.write('<table>')
-    meta_items = request.META.items()
+    meta_items = list(request.META.items())
     meta_items.sort()
     for k, v in meta_items:
         r.write('<tr><th>%s</th><td>%r</td></tr>' % (k, v))
@@ -33,7 +33,7 @@ def get_data(request):
     r = HttpResponse()
     if request.GET:
         r.write('<p>GET data found! Here it is:</p>')
-        r.write('<ul>%s</ul>' % ''.join(['<li><strong>%s:</strong> %r</li>' % (escape(k), escape(v)) for k, v in request.GET.items()]))
+        r.write('<ul>%s</ul>' % ''.join(['<li><strong>%s:</strong> %r</li>' % (escape(k), escape(v)) for k, v in list(request.GET.items())]))
     r.write('<form action="" method="get">')
     r.write('<p>First name: <input type="text" name="first_name"></p>')
     r.write('<p>Last name: <input type="text" name="last_name"></p>')
@@ -46,7 +46,7 @@ def post_data(request):
     r = HttpResponse()
     if request.POST:
         r.write('<p>POST data found! Here it is:</p>')
-        r.write('<ul>%s</ul>' % ''.join(['<li><strong>%s:</strong> %r</li>' % (escape(k), escape(v)) for k, v in request.POST.items()]))
+        r.write('<ul>%s</ul>' % ''.join(['<li><strong>%s:</strong> %r</li>' % (escape(k), escape(v)) for k, v in list(request.POST.items())]))
     r.write('<form action="" method="post">')
     r.write('<p>First name: <input type="text" name="first_name"></p>')
     r.write('<p>Last name: <input type="text" name="last_name"></p>')

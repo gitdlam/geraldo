@@ -25,16 +25,16 @@ import os
 import sys
 import logging
 
-from appengine_django import InstallAppengineHelperForDjango
-from appengine_django import have_django_zip
-from appengine_django import django_zip_path
+from .appengine_django import InstallAppengineHelperForDjango
+from .appengine_django import have_django_zip
+from .appengine_django import django_zip_path
 InstallAppengineHelperForDjango()
 
 # Google App Engine imports.
 from google.appengine.ext.webapp import util
 
 # Import the part of Django that we use here.
-import django.core.handlers.wsgi
+from . import django.core.handlers.wsgi
 
 def main():
   # Ensure the Django zipfile is in the path if required.

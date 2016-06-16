@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-unicode_tests = ur"""
+unicode_tests = r"""
 Templates can be created from unicode strings.
 >>> from django.template import *
 >>> from django.utils.safestring import SafeData

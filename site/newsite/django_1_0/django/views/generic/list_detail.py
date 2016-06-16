@@ -3,6 +3,7 @@ from django.http import Http404, HttpResponse
 from django.core.xheaders import populate_xheaders
 from django.core.paginator import Paginator, InvalidPage
 from django.core.exceptions import ObjectDoesNotExist
+import collections
 
 def object_list(request, queryset, paginate_by=None, page=None,
         allow_empty=True, template_name=None, template_loader=loader,
@@ -89,8 +90,8 @@ def object_list(request, queryset, paginate_by=None, page=None,
         }, context_processors)
         if not allow_empty and len(queryset) == 0:
             raise Http404
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value
@@ -120,11 +121,11 @@ def object_detail(request, queryset, object_id=None, slug=None,
     elif slug and slug_field:
         queryset = queryset.filter(**{slug_field: slug})
     else:
-        raise AttributeError, "Generic detail view must be called with either an object_id or a slug/slug_field."
+        raise AttributeError("Generic detail view must be called with either an object_id or a slug/slug_field.")
     try:
         obj = queryset.get()
     except ObjectDoesNotExist:
-        raise Http404, "No %s found matching the query" % (model._meta.verbose_name)
+        raise Http404("No %s found matching the query" % (model._meta.verbose_name))
     if not template_name:
         template_name = "%s/%s_detail.html" % (model._meta.app_label, model._meta.object_name.lower())
     if template_name_field:
@@ -135,8 +136,8 @@ def object_detail(request, queryset, object_id=None, slug=None,
     c = RequestContext(request, {
         template_object_name: obj,
     }, context_processors)
-    for key, value in extra_context.items():
-        if callable(value):
+    for key, value in list(extra_context.items()):
+        if isinstance(value, collections.Callable):
             c[key] = value()
         else:
             c[key] = value

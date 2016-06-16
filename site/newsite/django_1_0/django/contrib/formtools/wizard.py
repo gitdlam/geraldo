@@ -9,7 +9,7 @@ from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-import cPickle as pickle
+import pickle as pickle
 import md5
 
 class FormWizard(object):

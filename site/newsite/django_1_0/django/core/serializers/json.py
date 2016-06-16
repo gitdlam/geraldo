@@ -7,10 +7,11 @@ from django.utils import simplejson
 from django.core.serializers.python import Serializer as PythonSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
 from django.utils import datetime_safe
+import collections
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 try:
     import decimal
 except ImportError:
@@ -28,14 +29,14 @@ class Serializer(PythonSerializer):
         simplejson.dump(self.objects, self.stream, cls=DjangoJSONEncoder, **self.options)
 
     def getvalue(self):
-        if callable(getattr(self.stream, 'getvalue', None)):
+        if isinstance(getattr(self.stream, 'getvalue', None), collections.Callable):
             return self.stream.getvalue()
 
 def Deserializer(stream_or_string, **options):
     """
     Deserialize a stream or string of JSON data.
     """
-    if isinstance(stream_or_string, basestring):
+    if isinstance(stream_or_string, str):
         stream = StringIO(stream_or_string)
     else:
         stream = stream_or_string

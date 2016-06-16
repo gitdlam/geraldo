@@ -43,7 +43,7 @@ class Relation(models.Model):
     right = models.ForeignKey(Record, related_name='right_set')
 
     def __unicode__(self):
-        return u"%s - %s" % (self.left.category.name, self.right.category.name)
+        return "%s - %s" % (self.left.category.name, self.right.category.name)
 
 
 __test__ = {'API_TESTS':"""

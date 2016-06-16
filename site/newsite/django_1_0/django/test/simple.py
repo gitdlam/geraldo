@@ -15,7 +15,7 @@ def get_tests(app_module):
     try:
         app_path = app_module.__name__.split('.')[:-1]
         test_module = __import__('.'.join(app_path + [TEST_MODULE]), {}, {}, TEST_MODULE)
-    except ImportError, e:
+    except ImportError as e:
         # Couldn't import tests.py. Was it due to a missing file, or
         # due to an import error in a tests.py that actually exists?
         import os.path

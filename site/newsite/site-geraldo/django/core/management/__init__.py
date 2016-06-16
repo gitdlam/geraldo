@@ -48,7 +48,7 @@ def find_management_module(app_name):
     # of the app_name but the project directory itself isn't on the path.
     try:
         f, path, descr = imp.find_module(part,path)
-    except ImportError,e:
+    except ImportError as e:
         if os.path.basename(os.getcwd()) != part:
             raise e
 
@@ -154,7 +154,7 @@ def call_command(name, *args, **options):
         else:
             klass = load_command_class(app_name, name)
     except KeyError:
-        raise CommandError, "Unknown command: %r" % name
+        raise CommandError("Unknown command: %r" % name)
     return klass.execute(*args, **options)
 
 class LaxOptionParser(OptionParser):
@@ -228,7 +228,7 @@ class ManagementUtility(object):
         """
         usage = ['',"Type '%s help <subcommand>' for help on a specific subcommand." % self.prog_name,'']
         usage.append('Available subcommands:')
-        commands = get_commands().keys()
+        commands = list(get_commands().keys())
         commands.sort()
         for cmd in commands:
             usage.append('  %s' % cmd)

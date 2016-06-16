@@ -10,7 +10,7 @@ from django.contrib.sites import models as site_app
 def create_default_site(app, created_models, verbosity):
     if Site in created_models:
         if verbosity >= 2:
-            print "Creating example.com Site object"
+            print("Creating example.com Site object")
         s = Site(domain="example.com", name="example.com")
         s.save()
     Site.objects.clear_cache()

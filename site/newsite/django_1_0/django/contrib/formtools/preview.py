@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-import cPickle as pickle
+import pickle as pickle
 import md5
 
 AUTO_ID = 'formtools_%s' # Each form here uses this as its auto_id parameter.

@@ -67,7 +67,7 @@ def Deserializer(object_list, **options):
     m2m_data = {}
 
     # Handle each field
-    for (field_name, field_value) in d["fields"].iteritems():
+    for (field_name, field_value) in d["fields"].items():
       if isinstance(field_value, str):
         field_value = smart_unicode(
             field_value, options.get("encoding",
@@ -79,7 +79,7 @@ def Deserializer(object_list, **options):
         # Resolve foreign key references.
         data[field.name] = resolve_key(Model._meta.module_name, field_value)
         if not data[field.name].name():
-          raise base.DeserializationError(u"Cannot load Reference with "
+          raise base.DeserializationError("Cannot load Reference with "
                                           "unnamed key: '%s'" % field_value)
       else:
         data[field.name] = field.validate(field_value)
@@ -115,7 +115,7 @@ def resolve_key(model, key_data):
   if isinstance(key_data, list):
     # The key_data is a from_path sequence.
     return db.Key.from_path(*key_data)
-  elif isinstance(key_data, basestring):
+  elif isinstance(key_data, str):
     if key_data.find("from_path") != -1:
       # key_data is encoded in repr(key) format
       return eval(key_data)
@@ -123,8 +123,8 @@ def resolve_key(model, key_data):
       try:
         # key_data encoded a str(key) format
         return db.Key(key_data)
-      except datastore_types.datastore_errors.BadKeyError, e:
+      except datastore_types.datastore_errors.BadKeyError as e:
         # Final try, assume it's a plain key name for the model.
         return db.Key.from_path(model, key_data)
   else:
-    raise base.DeserializationError(u"Invalid key data: '%s'" % key_data)
+    raise base.DeserializationError("Invalid key data: '%s'" % key_data)

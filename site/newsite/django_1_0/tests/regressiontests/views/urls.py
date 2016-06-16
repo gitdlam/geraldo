@@ -2,8 +2,8 @@ from os import path
 
 from django.conf.urls.defaults import *
 
-from models import *
-import views
+from .models import *
+from . import views
 
 
 base_dir = path.dirname(path.abspath(__file__))

@@ -13,13 +13,14 @@ from django.utils.encoding import force_unicode, smart_str
 from django.utils.translation import ugettext_lazy, ugettext as _
 from django import forms
 from django.db.models.loading import cache
+import collections
 
 class FieldFile(File):
     def __init__(self, instance, field, name):
         self.instance = instance
         self.field = field
         self.storage = field.storage
-        self._name = name or u''
+        self._name = name or ''
         self._closed = False
 
     def __eq__(self, other):
@@ -115,7 +116,7 @@ class FileDescriptor(object):
 
     def __get__(self, instance=None, owner=None):
         if instance is None:
-            raise AttributeError, "%s can only be accessed from %s instances." % (self.field.name(self.owner.__name__))
+            raise AttributeError("%s can only be accessed from %s instances." % (self.field.name(self.owner.__name__)))
         file = instance.__dict__[self.field.name]
         if not isinstance(file, FieldFile):
             # Create a new instance of FieldFile, based on a given file name
@@ -140,7 +141,7 @@ class FileField(Field):
 
         self.storage = storage or default_storage
         self.upload_to = upload_to
-        if callable(upload_to):
+        if isinstance(upload_to, collections.Callable):
             self.generate_filename = upload_to
 
         kwargs['max_length'] = kwargs.get('max_length', 100)
@@ -159,7 +160,7 @@ class FileField(Field):
         # Need to convert File objects provided via a form to unicode for database insertion
         if value is None:
             return None
-        return unicode(value)
+        return str(value)
 
     def contribute_to_class(self, cls, name):
         super(FileField, self).contribute_to_class(cls, name)

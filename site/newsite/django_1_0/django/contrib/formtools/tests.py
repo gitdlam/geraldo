@@ -4,8 +4,8 @@ from django import http
 from django.test import TestCase
 
 success_string = "Done was called!"
-test_data = {'field1': u'foo',
-             'field1_': u'asdf'}
+test_data = {'field1': 'foo',
+             'field1_': 'asdf'}
 
 
 class TestFormPreview(preview.FormPreview):
@@ -79,7 +79,7 @@ class PreviewTests(TestCase):
         # show we previously saw first stage of the form.
         test_data.update({'stage': 2})
         response = self.client.post('/test1/', test_data)
-        self.failIfEqual(response.content, success_string)
+        self.assertNotEqual(response.content, success_string)
         hash = self.preview.security_hash(None, TestForm(test_data))
         test_data.update({'hash': hash})
         response = self.client.post('/test1/', test_data)

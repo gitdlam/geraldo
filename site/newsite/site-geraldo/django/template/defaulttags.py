@@ -70,7 +70,7 @@ class FilterNode(Node):
 
 class FirstOfNode(Node):
     def __init__(self, vars):
-        self.vars = map(Variable, vars)
+        self.vars = list(map(Variable, vars))
 
     def render(self, context):
         for var in self.vars:
@@ -80,7 +80,7 @@ class FirstOfNode(Node):
                 continue
             if value:
                 return smart_unicode(value)
-        return u''
+        return ''
 
 class ForNode(Node):
     def __init__(self, loopvars, sequence, is_reversed, nodelist_loop):
@@ -141,7 +141,7 @@ class ForNode(Node):
             if unpack:
                 # If there are multiple loop variables, unpack the item into
                 # them.
-                context.update(dict(zip(self.loopvars, item)))
+                context.update(dict(list(zip(self.loopvars, item))))
             else:
                 context[self.loopvars[0]] = item
             for node in self.nodelist_loop:
@@ -160,7 +160,7 @@ class IfChangedNode(Node):
     def __init__(self, nodelist_true, nodelist_false, *varlist):
         self.nodelist_true, self.nodelist_false = nodelist_true, nodelist_false
         self._last_seen = None
-        self._varlist = map(Variable, varlist)
+        self._varlist = list(map(Variable, varlist))
         self._id = str(id(self))
 
     def render(self, context):
@@ -304,7 +304,7 @@ class SsiNode(Node):
             try:
                 t = Template(output, name=self.filepath)
                 return t.render(context)
-            except TemplateSyntaxError, e:
+            except TemplateSyntaxError as e:
                 if settings.DEBUG:
                     return "[Included template had syntax error: %s]" % e
                 else:
@@ -361,7 +361,7 @@ class URLNode(Node):
         from django.core.urlresolvers import reverse, NoReverseMatch
         args = [arg.resolve(context) for arg in self.args]
         kwargs = dict([(smart_str(k,'ascii'), v.resolve(context))
-                       for k, v in self.kwargs.items()])
+                       for k, v in list(self.kwargs.items())])
         
         
         # Try to look up the URL twice: once given the view name, and again
@@ -432,7 +432,7 @@ def autoescape(parser, token):
     if len(args) != 2:
         raise TemplateSyntaxError("'Autoescape' tag requires exactly one argument.")
     arg = args[1]
-    if arg not in (u'on', u'off'):
+    if arg not in ('on', 'off'):
         raise TemplateSyntaxError("'Autoescape' argument should be 'on' or 'off'")
     nodelist = parser.parse(('endautoescape',))
     parser.delete_first_token()
@@ -654,7 +654,7 @@ do_for = register.tag("for", do_for)
 def do_ifequal(parser, token, negate):
     bits = list(token.split_contents())
     if len(bits) != 3:
-        raise TemplateSyntaxError, "%r takes two arguments" % bits[0]
+        raise TemplateSyntaxError("%r takes two arguments" % bits[0])
     end_tag = 'end' + bits[0]
     nodelist_true = parser.parse(('else', end_tag))
     token = parser.next_token()
@@ -767,15 +767,15 @@ def do_if(parser, token):
     else:
         link_type = IfNode.LinkTypes.and_
         if ' or ' in bitstr:
-            raise TemplateSyntaxError, "'if' tags can't mix 'and' and 'or'"
+            raise TemplateSyntaxError("'if' tags can't mix 'and' and 'or'")
     for boolpair in boolpairs:
         if ' ' in boolpair:
             try:
                 not_, boolvar = boolpair.split()
             except ValueError:
-                raise TemplateSyntaxError, "'if' statement improperly formatted"
+                raise TemplateSyntaxError("'if' statement improperly formatted")
             if not_ != 'not':
-                raise TemplateSyntaxError, "Expected 'not' in if statement"
+                raise TemplateSyntaxError("Expected 'not' in if statement")
             boolvars.append((True, parser.compile_filter(boolvar)))
         else:
             boolvars.append((False, parser.compile_filter(boolpair)))
@@ -875,7 +875,7 @@ def load(parser, token):
         try:
             lib = get_library("django.templatetags.%s" % taglib)
             parser.add_library(lib)
-        except InvalidTemplateLibrary, e:
+        except InvalidTemplateLibrary as e:
             raise TemplateSyntaxError("'%s' is not a valid tag library: %s" %
                                       (taglib, e))
     return LoadNode()
@@ -895,7 +895,7 @@ def now(parser, token):
     """
     bits = token.contents.split('"')
     if len(bits) != 3:
-        raise TemplateSyntaxError, "'now' statement takes one argument"
+        raise TemplateSyntaxError("'now' statement takes one argument")
     format_string = bits[1]
     return NowNode(format_string)
 now = register.tag(now)
@@ -949,7 +949,7 @@ def regroup(parser, token):
     """
     firstbits = token.contents.split(None, 3)
     if len(firstbits) != 4:
-        raise TemplateSyntaxError, "'regroup' tag takes five arguments"
+        raise TemplateSyntaxError("'regroup' tag takes five arguments")
     target = parser.compile_filter(firstbits[1])
     if firstbits[2] != 'by':
         raise TemplateSyntaxError("second argument to 'regroup' tag must be 'by'")
@@ -1019,12 +1019,12 @@ def templatetag(parser, token):
     """
     bits = token.contents.split()
     if len(bits) != 2:
-        raise TemplateSyntaxError, "'templatetag' statement takes one argument"
+        raise TemplateSyntaxError("'templatetag' statement takes one argument")
     tag = bits[1]
     if tag not in TemplateTagNode.mapping:
         raise TemplateSyntaxError("Invalid templatetag argument: '%s'."
                                   " Must be one of: %s" %
-                                  (tag, TemplateTagNode.mapping.keys()))
+                                  (tag, list(TemplateTagNode.mapping.keys())))
     return TemplateTagNode(tag)
 templatetag = register.tag(templatetag)
 
@@ -1072,7 +1072,7 @@ def url(parser, token):
         bits = iter(bits[2:])
         for bit in bits:
             if bit == 'as':
-                asvar = bits.next()
+                asvar = next(bits)
                 break
             else:
                 for arg in bit.split(","):

@@ -12,7 +12,7 @@ class PEDepartmentSelect(Select):
     A Select widget that uses a list of Peruvian Departments as its choices.
     """
     def __init__(self, attrs=None):
-        from pe_department import DEPARTMENT_CHOICES
+        from .pe_department import DEPARTMENT_CHOICES
         super(PEDepartmentSelect, self).__init__(attrs, choices=DEPARTMENT_CHOICES)
 
 class PEDNIField(CharField):
@@ -34,7 +34,7 @@ class PEDNIField(CharField):
         """
         value = super(PEDNIField, self).clean(value)
         if value in EMPTY_VALUES:
-            return u''
+            return ''
         if not value.isdigit():
             raise ValidationError(self.error_messages['invalid'])
         if len(value) != 8:
@@ -62,7 +62,7 @@ class PERUCField(RegexField):
         """
         value = super(PERUCField, self).clean(value)
         if value in EMPTY_VALUES:
-            return u''
+            return ''
         if not value.isdigit():
             raise ValidationError(self.error_messages['invalid'])
         if len(value) != 11:

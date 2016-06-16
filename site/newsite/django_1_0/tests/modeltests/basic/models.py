@@ -394,10 +394,10 @@ year, including Jan. 1 and Dec. 31.
 [<Article: Article 11>, <Article: Article 12>]
 
 # Unicode data works, too.
->>> a = Article(headline=u'\u6797\u539f \u3081\u3050\u307f', pub_date=datetime(2005, 7, 28))
+>>> a = Article(headline=u'\\u6797\\u539f \\u3081\\u3050\\u307f', pub_date=datetime(2005, 7, 28))
 >>> a.save()
 >>> Article.objects.get(pk=a.id).headline
-u'\u6797\u539f \u3081\u3050\u307f'
+u'\\u6797\\u539f \\u3081\\u3050\\u307f'
 
 # Model instances have a hash function, so they can be used in sets or as
 # dictionary keys. Two models compare as equal if their primary keys are equal.

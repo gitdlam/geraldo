@@ -7,6 +7,7 @@ from django.dispatch import dispatcher
 from django.test import signals
 from django.template import Template
 from django.utils.translation import deactivate
+import collections
 
 # The prefix to put on the default database name when creating
 # the test database.
@@ -74,7 +75,7 @@ def teardown_test_environment():
 def _set_autocommit(connection):
     "Make sure a connection is in autocommit mode."
     if hasattr(connection.connection, "autocommit"):
-        if callable(connection.connection.autocommit):
+        if isinstance(connection.connection.autocommit, collections.Callable):
             connection.connection.autocommit(True)
         else:
             connection.connection.autocommit = True
@@ -107,7 +108,7 @@ def create_test_db(verbosity=1, autoclobber=False):
         return
 
     if verbosity >= 1:
-        print "Creating test database..."
+        print("Creating test database...")
     # If we're using SQLite, it's more convenient to test against an
     # in-memory database. Using the TEST_DATABASE_NAME setting you can still choose
     # to run on a physical database.
@@ -116,23 +117,23 @@ def create_test_db(verbosity=1, autoclobber=False):
             TEST_DATABASE_NAME = settings.TEST_DATABASE_NAME
             # Erase the old test database
             if verbosity >= 1:
-                print "Destroying old test database..."
+                print("Destroying old test database...")
             if os.access(TEST_DATABASE_NAME, os.F_OK):
                 if not autoclobber:
-                    confirm = raw_input("Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % TEST_DATABASE_NAME)
+                    confirm = input("Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % TEST_DATABASE_NAME)
                 if autoclobber or confirm == 'yes':
                   try:
                       if verbosity >= 1:
-                          print "Destroying old test database..."
+                          print("Destroying old test database...")
                       os.remove(TEST_DATABASE_NAME)
-                  except Exception, e:
+                  except Exception as e:
                       sys.stderr.write("Got an error deleting the old test database: %s\n" % e)
                       sys.exit(2)
                 else:
-                    print "Tests cancelled."
+                    print("Tests cancelled.")
                     sys.exit(1)
             if verbosity >= 1:
-                print "Creating test database..."
+                print("Creating test database...")
         else:
             TEST_DATABASE_NAME = ":memory:"
     else:
@@ -155,23 +156,23 @@ def create_test_db(verbosity=1, autoclobber=False):
         _set_autocommit(connection)
         try:
             cursor.execute("CREATE DATABASE %s %s" % (qn(TEST_DATABASE_NAME), suffix))
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("Got an error creating the test database: %s\n" % e)
             if not autoclobber:
-                confirm = raw_input("Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % TEST_DATABASE_NAME)
+                confirm = input("Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % TEST_DATABASE_NAME)
             if autoclobber or confirm == 'yes':
                 try:
                     if verbosity >= 1:
-                        print "Destroying old test database..."
+                        print("Destroying old test database...")
                     cursor.execute("DROP DATABASE %s" % qn(TEST_DATABASE_NAME))
                     if verbosity >= 1:
-                        print "Creating test database..."
+                        print("Creating test database...")
                     cursor.execute("CREATE DATABASE %s %s" % (qn(TEST_DATABASE_NAME), suffix))
-                except Exception, e:
+                except Exception as e:
                     sys.stderr.write("Got an error recreating the test database: %s\n" % e)
                     sys.exit(2)
             else:
-                print "Tests cancelled."
+                print("Tests cancelled.")
                 sys.exit(1)
 
     connection.close()
@@ -197,7 +198,7 @@ def destroy_test_db(old_database_name, verbosity=1):
         return
 
     if verbosity >= 1:
-        print "Destroying test database..."
+        print("Destroying test database...")
     connection.close()
     TEST_DATABASE_NAME = settings.DATABASE_NAME
     settings.DATABASE_NAME = old_database_name

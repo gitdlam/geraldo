@@ -29,7 +29,7 @@ class RelatedObject(object):
                 fol = follow.get(f.name, None)
                 if fol:
                     field_data = f.flatten_data(fol, rel_instance)
-                    for name, value in field_data.items():
+                    for name, value in list(field_data.items()):
                         instance_data['%s.%d.%s' % (self.var_name, i, name)] = value
             new_data.update(instance_data)
         return new_data

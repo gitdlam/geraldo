@@ -43,7 +43,7 @@ class AuthorProfile(models.Model):
     date_of_birth = models.DateField()
 
     def __unicode__(self):
-        return u"Profile of %s" % self.author
+        return "Profile of %s" % self.author
 
 class Actor(models.Model):
     name = models.CharField(max_length=20, primary_key=True)
@@ -194,17 +194,17 @@ __test__ = {'API_TESTS':"""
 
 # Let's serialize our movie
 >>> print serializers.serialize("json", [mv])
-[{"pk": 1, "model": "serializers.movie", "fields": {"actor": "Za\u017c\u00f3\u0142\u0107", "title": "G\u0119\u015bl\u0105 ja\u017a\u0144"}}]
+[{"pk": 1, "model": "serializers.movie", "fields": {"actor": "Za\\u017c\\u00f3\\u0142\\u0107", "title": "G\\u0119\\u015bl\\u0105 ja\\u017a\\u0144"}}]
 
 # Deserialization of movie
 >>> list(serializers.deserialize('json', serializers.serialize('json', [mv])))[0].object.title
-u'G\u0119\u015bl\u0105 ja\u017a\u0144'
+u'G\\u0119\\u015bl\\u0105 ja\\u017a\\u0144'
 
 # None is null after serialization to json
 # Primary key is None in case of not saved model
 >>> mv2 = Movie(title="Movie 2", actor=ac)
 >>> print serializers.serialize("json", [mv2])
-[{"pk": null, "model": "serializers.movie", "fields": {"actor": "Za\u017c\u00f3\u0142\u0107", "title": "Movie 2"}}]
+[{"pk": null, "model": "serializers.movie", "fields": {"actor": "Za\\u017c\\u00f3\\u0142\\u0107", "title": "Movie 2"}}]
 
 # Deserialization of null returns None for pk
 >>> print list(serializers.deserialize('json', serializers.serialize('json', [mv2])))[0].object.id

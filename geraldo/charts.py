@@ -12,9 +12,10 @@ from reportlab.graphics.charts.spider import SpiderChart as OriginalSpiderChart
 from reportlab.graphics.charts.legends import Legend
 from reportlab.lib.colors import HexColor, getAllNamedColors
 
-from utils import cm, memoize, get_attr_value
-from cross_reference import CrossReferenceMatrix, CROSS_COLS, CROSS_ROWS
-from graphics import Graphic
+from .utils import cm, memoize, get_attr_value
+from .cross_reference import CrossReferenceMatrix, CROSS_COLS, CROSS_ROWS
+from .graphics import Graphic
+import collections
 
 DEFAULT_TITLE_HEIGHT = 1*cm
 
@@ -42,7 +43,7 @@ class BaseChart(Graphic):
 
     def __init__(self, **kwargs):
         # Set instance attributes
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             if k == 'style':
                 setattr(self, 'chart_style', v)
             else:
@@ -102,7 +103,7 @@ class BaseChart(Graphic):
         colors.pop('black', None)
 
         # Returns only the colors values (without their names)
-        colors = colors.values()
+        colors = list(colors.values())
         
         # Shuffle colors list
         random.shuffle(colors)
@@ -160,7 +161,7 @@ class BaseChart(Graphic):
         # Legend object
         legend = Legend()
 
-        legend.colorNamePairs = zip(self.colors[:len(labels)], labels)
+        legend.colorNamePairs = list(zip(self.colors[:len(labels)], labels))
         legend.columnMaximum = len(legend.colorNamePairs)
         legend.deltay = 5
         legend.alignment = 'right'
@@ -169,7 +170,7 @@ class BaseChart(Graphic):
 
         # Sets legend extra attributes if legend_labels is a dictionary
         if isinstance(self.legend_labels, dict):
-            for k,v in self.legend_labels.items():
+            for k,v in list(self.legend_labels.items()):
                 if k != 'labels' and v:
                     setattr(legend, k, v)
 
@@ -191,12 +192,12 @@ class BaseChart(Graphic):
             labels = self.get_cross_data().rows()
 
         # Calculated labels
-        if callable(self.legend_labels):
+        if isinstance(self.legend_labels, collections.Callable):
             labels = [self.legend_labels(self, label, num) for num, label in enumerate(labels)]
-        elif isinstance(self.legend_labels, basestring):
+        elif isinstance(self.legend_labels, str):
             labels = [self.get_cross_data().first(self.legend_labels, col=label) for label in labels]
 
-        return map(unicode, labels)
+        return list(map(str, labels))
 
     def get_axis_labels(self):
         # Base labels
@@ -210,15 +211,15 @@ class BaseChart(Graphic):
             labels = self.get_cross_data().cols()
 
         # Calculated labels
-        if callable(self.axis_labels):
+        if isinstance(self.axis_labels, collections.Callable):
             labels = [self.axis_labels(self, label, num) for num, label in enumerate(labels)]
-        elif isinstance(self.axis_labels, basestring):
+        elif isinstance(self.axis_labels, str):
             if self.summarize_by == CROSS_ROWS:
                 labels = [self.get_cross_data().first(self.axis_labels, row=label) for label in labels]
             else:
                 labels = [self.get_cross_data().first(self.axis_labels, col=label) for label in labels]
 
-        return map(unicode, labels)
+        return list(map(str, labels))
 
     def make_title(self, drawing):
         if not self.title:
@@ -243,7 +244,7 @@ class BaseChart(Graphic):
             data = data or self.data
 
             # Transforms data to cross-reference matrix
-            if isinstance(data, basestring):
+            if isinstance(data, str):
                 data = get_attr_value(self.instance, data)
 
             if not isinstance(data, CrossReferenceMatrix):
@@ -290,24 +291,24 @@ class BaseChart(Graphic):
             if isinstance(value, (float, decimal.Decimal)):
                 value = int(round(value))
             elif isinstance(value, (list, tuple)):
-                value = map(int, map(round, value))
+                value = list(map(int, list(map(round, value))))
 
             return value
 
         # Replace None to Zero
         if self.replace_none_by_zero:
-            data = map(none_to_zero,  data)
+            data = list(map(none_to_zero,  data))
 
         # Truncate decimal places
         if self.round_values:
-            data = map(round_values,  data)
+            data = list(map(round_values,  data))
 
             # Stores major value in temporary variable to use it later
             if data:
                 if isinstance(data[0], int):
                     self._max_value = max(data)
                 elif isinstance(data[0], (list, tuple)):
-                    self._max_value = max(map(max, data))
+                    self._max_value = max(list(map(max, data)))
 
         return data
 
@@ -323,7 +324,7 @@ class BaseChart(Graphic):
     def set_chart_style(self, chart):
         # Setting additional chart attributes
         if self.chart_style:
-            for k,v in self.chart_style.items():
+            for k,v in list(self.chart_style.items()):
                 setattr(chart, k, v)
 
     def create_chart(self):
@@ -509,7 +510,7 @@ class PieChart(BaseChart):
             pos = data.index(max(data))
         elif isinstance(self.slice_popout, int):
             pos = self.slice_popout
-        elif callable(self.slice_popout):
+        elif isinstance(self.slice_popout, collections.Callable):
             pos = self.slice_popout(self, chart)
 
         if pos >= 0:
@@ -520,7 +521,7 @@ class PieChart(BaseChart):
 
         # Cells labels
         if isinstance(self.values_labels, dict):
-            for k,v in self.values_labels.items():
+            for k,v in list(self.values_labels.items()):
                 if k == 'labels' and v:
                     chart.labels = v
                 else:

@@ -45,7 +45,7 @@ class ATSocialSecurityNumberField(Field):
     """
 
     default_error_messages = {
-        'invalid': _(u'Enter a valid Austrian Social Security Number in XXXX XXXXXX format.'),
+        'invalid': _('Enter a valid Austrian Social Security Number in XXXX XXXXXX format.'),
     }
 
     def clean(self, value):
@@ -61,5 +61,5 @@ class ATSocialSecurityNumberField(Field):
         res = res % 11
         if res != int(check):
            raise ValidationError(self.error_messages['invalid'])
-        return u'%s%s %s'%(sqnr, check, date,)
+        return '%s%s %s'%(sqnr, check, date,)
 

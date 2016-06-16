@@ -8,7 +8,7 @@ import re
 
 try:
     import MySQLdb as Database
-except ImportError, e:
+except ImportError as e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading MySQLdb module: %s" % e)
 
@@ -81,7 +81,7 @@ class CursorWrapper(object):
     def execute(self, query, args=None):
         try:
             return self.cursor.execute(query, args)
-        except Database.OperationalError, e:
+        except Database.OperationalError as e:
             # Map some error codes to IntegrityError, since they seem to be
             # misclassified and Django would prefer the more logical place.
             if e[0] in self.codes_for_integrityerror:
@@ -91,7 +91,7 @@ class CursorWrapper(object):
     def executemany(self, query, args):
         try:
             return self.cursor.executemany(query, args)
-        except Database.OperationalError, e:
+        except Database.OperationalError as e:
             # Map some error codes to IntegrityError, since they seem to be
             # misclassified and Django would prefer the more logical place.
             if e[0] in self.codes_for_integrityerror:
@@ -138,7 +138,7 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def no_limit_value(self):
         # 2**64 - 1, as recommended by the MySQL documentation
-        return 18446744073709551615L
+        return 18446744073709551615
 
     def quote_name(self, name):
         if name.startswith("`") and name.endswith("`"):
@@ -180,7 +180,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             raise ValueError("MySQL backend does not support timezone-aware datetimes.")
 
         # MySQL doesn't support microseconds
-        return unicode(value.replace(microsecond=0))
+        return str(value.replace(microsecond=0))
 
     def value_to_db_time(self, value):
         if value is None:
@@ -191,7 +191,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             raise ValueError("MySQL backend does not support timezone-aware datetimes.")
         
         # MySQL doesn't support microseconds
-        return unicode(value.replace(microsecond=0))
+        return str(value.replace(microsecond=0))
 
     def year_lookup_bounds(self, value):
         # Again, no microseconds

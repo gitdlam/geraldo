@@ -57,7 +57,7 @@ class ReportSite(object):
         # Report path
         m = exp_report.match(path)
         if m:
-            app, model, name = m.groupdict().values()
+            app, model, name = list(m.groupdict().values())
 
             return self.report_view(request, app, model, name)
 
@@ -108,7 +108,7 @@ class ReportSite(object):
             order = None
 
         # Get filters
-        filter = dict([(str(k),v) for k,v in request.GET.items()\
+        filter = dict([(str(k),v) for k,v in list(request.GET.items())\
             if not k in ('o','ot','q','p')])
         
         # Get the queryset

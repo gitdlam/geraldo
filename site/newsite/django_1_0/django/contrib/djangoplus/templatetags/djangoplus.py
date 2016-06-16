@@ -24,7 +24,7 @@ def in_list(value,arg):
         return False
 
     # Verifica se um item estah contido noutro
-    if type(arg) == types.StringType:
+    if type(arg) == bytes:
         return value in arg.split(',')
     else:
         return value in arg
@@ -85,22 +85,22 @@ def is_minute_of(value,arg):
 
 @register.filter
 def dec_year(value,arg):
-    delta = type(arg) != types.IntType and int(arg) or arg
+    delta = type(arg) != int and int(arg) or arg
     return value - timedelta(365 * delta)
 
 @register.filter
 def dec_month(value,arg):
-    delta = type(arg) != types.IntType and int(arg) or arg
+    delta = type(arg) != int and int(arg) or arg
     return value - timedelta(30 * delta)
 
 @register.filter
 def inc_year(value,arg):
-    delta = type(arg) != types.IntType and int(arg) or arg
+    delta = type(arg) != int and int(arg) or arg
     return value + timedelta(365 * delta)
 
 @register.filter
 def inc_month(value,arg):
-    delta = type(arg) != types.IntType and int(arg) or arg
+    delta = type(arg) != int and int(arg) or arg
     return value + timedelta(30 * delta)
 
 @register.filter
@@ -116,11 +116,11 @@ def list_as_text(value, field=None):
 
         return ', '.join([get_value(i, field) for i in value])
     else:
-        return ', '.join([unicode(i) for i in value])
+        return ', '.join([str(i) for i in value])
 
 @register.filter
 def list_as_links(value):
-    return ', '.join(['<a href="%s">%s</a>'%(i.get_absolute_url(), unicode(i)) for i in value])
+    return ', '.join(['<a href="%s">%s</a>'%(i.get_absolute_url(), str(i)) for i in value])
 
 """
 reStructuredText
@@ -270,9 +270,9 @@ def do_dynamic_template(parser, token):
             is_group = True
         else:
             is_group = False
-    except ValueError, e:
-        raise template.TemplateSyntaxError, "%s requires 1 or 2 arguments" \
-                % token.contents.split()[0]
+    except ValueError as e:
+        raise template.TemplateSyntaxError("%s requires 1 or 2 arguments" \
+                % token.contents.split()[0])
 
     return DynamicTemplateRender(slugify(slug), is_group)
 

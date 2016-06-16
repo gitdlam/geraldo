@@ -206,12 +206,12 @@ class EmailMessage(object):
         conversions.
         """
         if to:
-            assert not isinstance(to, basestring), '"to" argument must be a list or tuple'
+            assert not isinstance(to, str), '"to" argument must be a list or tuple'
             self.to = list(to)
         else:
             self.to = []
         if bcc:
-            assert not isinstance(bcc, basestring), '"bcc" argument must be a list or tuple'
+            assert not isinstance(bcc, str), '"bcc" argument must be a list or tuple'
             self.bcc = list(bcc)
         else:
             self.bcc = []
@@ -246,7 +246,7 @@ class EmailMessage(object):
         msg['To'] = ', '.join(self.to)
         msg['Date'] = formatdate()
         msg['Message-ID'] = make_msgid()
-        for name, value in self.extra_headers.items():
+        for name, value in list(self.extra_headers.items()):
             msg[name] = value
         return msg
 

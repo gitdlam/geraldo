@@ -72,4 +72,4 @@ class BaseCache(object):
         # This is a separate method, rather than just a copy of has_key(),
         # so that it always has the same functionality as has_key(), even
         # if a subclass overrides it.
-        return self.has_key(key)
+        return key in self

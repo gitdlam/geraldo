@@ -84,7 +84,7 @@ class ESIdentityCardNumberField(RegexField):
     def clean(self, value):
         super(ESIdentityCardNumberField, self).clean(value)
         if value in EMPTY_VALUES:
-            return u''
+            return ''
         nif_get_checksum = lambda d: self.nif_control[int(d)%23]
 
         value = value.upper().replace(' ', '').replace('-', '')
@@ -96,13 +96,13 @@ class ESIdentityCardNumberField(RegexField):
             if letter2 == nif_get_checksum(number):
                 return value
             else:
-                raise ValidationError, self.error_messages['invalid_nif']
+                raise ValidationError(self.error_messages['invalid_nif'])
         elif letter1 in self.nie_types and letter2:
             # NIE
             if letter2 == nif_get_checksum(number):
                 return value
             else:
-                raise ValidationError, self.error_messages['invalid_nie']
+                raise ValidationError(self.error_messages['invalid_nie'])
         elif not self.only_nif and letter1 in self.cif_types and len(number) in [7, 8]:
             # CIF
             if not letter2:
@@ -111,9 +111,9 @@ class ESIdentityCardNumberField(RegexField):
             if letter2 in [checksum, self.cif_control[checksum]]:
                 return value
             else:
-                raise ValidationError, self.error_messages['invalid_cif']
+                raise ValidationError(self.error_messages['invalid_cif'])
         else:
-            raise ValidationError, self.error_messages['invalid']
+            raise ValidationError(self.error_messages['invalid'])
 
 class ESCCCField(RegexField):
     """
@@ -150,7 +150,7 @@ class ESCCCField(RegexField):
     def clean(self, value):
         super(ESCCCField, self).clean(value)
         if value in EMPTY_VALUES:
-            return u''
+            return ''
         control_str = [1, 2, 4, 8, 5, 10, 9, 7, 3, 6]
         m = re.match(r'^(\d{4})[ -]?(\d{4})[ -]?(\d{2})[ -]?(\d{10})$', value)
         entity, office, checksum, account = m.groups()
@@ -158,14 +158,14 @@ class ESCCCField(RegexField):
         if get_checksum('00' + entity + office) + get_checksum(account) == checksum:
             return value
         else:
-            raise ValidationError, self.error_messages['checksum']
+            raise ValidationError(self.error_messages['checksum'])
 
 class ESRegionSelect(Select):
     """
     A Select widget that uses a list of spanish regions as its choices.
     """
     def __init__(self, attrs=None):
-        from es_regions import REGION_CHOICES
+        from .es_regions import REGION_CHOICES
         super(ESRegionSelect, self).__init__(attrs, choices=REGION_CHOICES)
 
 class ESProvinceSelect(Select):
@@ -173,7 +173,7 @@ class ESProvinceSelect(Select):
     A Select widget that uses a list of spanish provinces as its choices.
     """
     def __init__(self, attrs=None):
-        from es_provinces import PROVINCE_CHOICES
+        from .es_provinces import PROVINCE_CHOICES
         super(ESProvinceSelect, self).__init__(attrs, choices=PROVINCE_CHOICES)
 
 

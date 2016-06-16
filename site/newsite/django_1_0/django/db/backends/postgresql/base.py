@@ -9,7 +9,7 @@ from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, util
 from django.db.backends.postgresql.operations import DatabaseOperations
 try:
     import psycopg as Database
-except ImportError, e:
+except ImportError as e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading psycopg module: %s" % e)
 
@@ -37,7 +37,7 @@ class UnicodeCursorWrapper(object):
         if isinstance(params, dict):
             result = {}
             charset = self.charset
-            for key, value in params.items():
+            for key, value in list(params.items()):
                 result[smart_str(key, charset)] = smart_str(value, charset)
             return result
         else:

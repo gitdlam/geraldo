@@ -19,9 +19,10 @@ from django.db.models.query_utils import select_related_descend
 from django.db.models.sql.where import WhereNode, EverythingNode, AND, OR
 from django.db.models.sql.datastructures import Count
 from django.core.exceptions import FieldError
-from datastructures import EmptyResultSet, Empty, MultiJoin
-from constants import *
+from .datastructures import EmptyResultSet, Empty, MultiJoin
+from .constants import *
 from django.core.cache import cache
+import collections
 
 try:
     set
@@ -219,7 +220,7 @@ class Query(object):
             else:
                 k = hashlib.sha1(k).hexdigest()
 
-            if cache.has_key(k) and cache.get(k):
+            if k in cache and cache.get(k):
                 sql_result = cache.get(k, [])
             else:
                 cache.set(k, [i for i in self.execute_sql(MULTI)], self.cache_timeout)
@@ -245,7 +246,7 @@ class Query(object):
         """
         Performs a COUNT() query using the current filter constraints.
         """
-        from subqueries import CountQuery
+        from .subqueries import CountQuery
         obj = self.clone()
         obj.clear_ordering(True)
         obj.clear_limits()
@@ -290,7 +291,7 @@ class Query(object):
 
         where, w_params = self.where.as_sql(qn=self.quote_name_unless_alias)
         params = []
-        for val in self.extra_select.itervalues():
+        for val in self.extra_select.values():
             params.extend(val[1])
 
         result = ['SELECT']
@@ -445,7 +446,7 @@ class Query(object):
         """
         qn = self.quote_name_unless_alias
         qn2 = self.connection.ops.quote_name
-        result = ['(%s) AS %s' % (col[0], qn2(alias)) for alias, col in self.extra_select.iteritems()]
+        result = ['(%s) AS %s' % (col[0], qn2(alias)) for alias, col in self.extra_select.items()]
         aliases = set(self.extra_select.keys())
         if with_aliases:
             col_aliases = aliases.copy()
@@ -814,7 +815,7 @@ class Query(object):
                 col.relabel_aliases(change_map)
 
         # 2. Rename the alias in the internal table/alias datastructures.
-        for old_alias, new_alias in change_map.iteritems():
+        for old_alias, new_alias in change_map.items():
             alias_data = list(self.alias_map[old_alias])
             alias_data[RHS_ALIAS] = new_alias
 
@@ -840,7 +841,7 @@ class Query(object):
                     break
 
         # 3. Update any joins that refer to the old alias.
-        for alias, data in self.alias_map.iteritems():
+        for alias, data in self.alias_map.items():
             lhs = data[LHS_ALIAS]
             if lhs in change_map:
                 data = list(data)
@@ -890,7 +891,7 @@ class Query(object):
         Returns the number of tables in this query with a non-zero reference
         count.
         """
-        return len([1 for count in self.alias_refcount.itervalues() if count])
+        return len([1 for count in self.alias_refcount.values() if count])
 
     def join(self, connection, always_create=False, exclusions=(),
             promote=False, outer_if_first=False, nullable=False, reuse=None):
@@ -1110,7 +1111,7 @@ class Query(object):
               connection.features.interprets_empty_strings_as_nulls):
             lookup_type = 'isnull'
             value = True
-        elif callable(value):
+        elif isinstance(value, collections.Callable):
             value = value()
 
         opts = self.get_meta()
@@ -1121,7 +1122,7 @@ class Query(object):
             field, target, opts, join_list, last, extra_filters = self.setup_joins(
                     parts, opts, alias, True, allow_many, can_reuse=can_reuse,
                     negate=negate, process_extras=process_extras)
-        except MultiJoin, e:
+        except MultiJoin as e:
             self.split_exclude(filter_expr, LOOKUP_SEP.join(parts[:e.level]),
                     can_reuse)
             return
@@ -1174,11 +1175,11 @@ class Query(object):
             # join list) an outer join.
             join_it = iter(join_list)
             table_it = iter(self.tables)
-            join_it.next(), table_it.next()
+            next(join_it), next(table_it)
             table_promote = False
             join_promote = False
             for join in join_it:
-                table = table_it.next()
+                table = next(table_it)
                 if join == table and self.alias_refcount[join] > 1:
                     continue
                 join_promote = self.promote_alias(join)
@@ -1542,7 +1543,7 @@ class Query(object):
         except MultiJoin:
             raise FieldError("Invalid field name: '%s'" % name)
         except FieldError:
-            names = opts.get_all_field_names() + self.extra_select.keys()
+            names = opts.get_all_field_names() + list(self.extra_select.keys())
             names.sort()
             raise FieldError("Cannot resolve keyword %r into field. "
                     "Choices are: %s" % (name, ", ".join(names)))
@@ -1640,12 +1641,12 @@ class Query(object):
                 param_iter = iter(select_params)
             else:
                 param_iter = iter([])
-            for name, entry in select.items():
+            for name, entry in list(select.items()):
                 entry = force_unicode(entry)
                 entry_params = []
                 pos = entry.find("%s")
                 while pos != -1:
-                    entry_params.append(param_iter.next())
+                    entry_params.append(next(param_iter))
                     pos = entry.find("%s", pos + 2)
                 select_pairs[name] = (entry, entry_params)
             # This is order preserving, since self.extra_select is a SortedDict.
@@ -1766,7 +1767,7 @@ def empty_iter():
     """
     Returns an iterator containing no results.
     """
-    yield iter([]).next()
+    yield next(iter([]))
 
 def order_modified_iter(cursor, trim, sentinel):
     """

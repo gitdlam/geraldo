@@ -2,7 +2,7 @@ from django import forms
 
 from google.appengine.ext import db
 
-from models import Wiki
+from .models import Wiki
 
 WIKI_FORMAT_CHOICES = (
     ('html','html'),
@@ -45,7 +45,7 @@ class FormWiki(forms.ModelForm):
         wiki.disable_comments = self.cleaned_data['disable_comments']
 
         if self.cleaned_data['temp_tags']:
-            wiki.tags = map(lambda tag: db.Category(tag), self.cleaned_data['temp_tags'].split(' '))
+            wiki.tags = [db.Category(tag) for tag in self.cleaned_data['temp_tags'].split(' ')]
         else:
             wiki.tags = []
 

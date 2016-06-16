@@ -134,16 +134,15 @@ class PropertiedClassWithDjango(db.PropertiedClass):
       # This metaclass only acts on subclasses of BaseModel.
       return
 
-    fields = [PropertyWrapper(p) for p in cls._properties.values()]
+    fields = [PropertyWrapper(p) for p in list(cls._properties.values())]
     cls._meta.local_fields = fields
 
 
-class BaseModel(db.Model):
+class BaseModel(db.Model, metaclass=PropertiedClassWithDjango):
   """Combined appengine and Django model.
 
   All models used in the application should derive from this class.
   """
-  __metaclass__ = PropertiedClassWithDjango
  
   def __eq__(self, other):
     if not isinstance(other, self.__class__):
@@ -155,7 +154,7 @@ class BaseModel(db.Model):
 
   def _get_pk_val(self):
     """Return the string representation of the model's key"""
-    return unicode(self.key())
+    return str(self.key())
 
   def __repr__(self):
     # Returns a string representation that can be used to construct an

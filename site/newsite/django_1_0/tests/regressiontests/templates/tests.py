@@ -17,15 +17,15 @@ from django.utils.translation import activate, deactivate, ugettext as _
 from django.utils.safestring import mark_safe
 from django.utils.tzinfo import LocalTimezone
 
-from unicode import unicode_tests
-from context import context_tests
+from .unicode import unicode_tests
+from .context import context_tests
 
 try:
-    from loaders import *
+    from .loaders import *
 except ImportError:
     pass # If setuptools isn't installed, that's fine. Just move on.
 
-import filters
+from . import filters
 
 # Some other tests we would like to run
 __test__ = {
@@ -86,7 +86,7 @@ class OtherClass:
 class UTF8Class:
     "Class whose __str__ returns non-ASCII data"
     def __str__(self):
-        return u'ŠĐĆŽćžšđ'.encode('utf-8')
+        return 'ŠĐĆŽćžšđ'.encode('utf-8')
 
 class Templates(unittest.TestCase):
     def test_loaders_security(self):
@@ -146,13 +146,13 @@ class Templates(unittest.TestCase):
             try:
                 return (template_tests[template_name][0] , "test:%s" % template_name)
             except KeyError:
-                raise template.TemplateDoesNotExist, template_name
+                raise template.TemplateDoesNotExist(template_name)
 
         old_template_loaders = loader.template_source_loaders
         loader.template_source_loaders = [test_template_loader]
 
         failures = []
-        tests = template_tests.items()
+        tests = list(template_tests.items())
         tests.sort()
 
         # Turn TEMPLATE_DEBUG off, because tests assume that.
@@ -185,7 +185,7 @@ class Templates(unittest.TestCase):
                 try:
                     test_template = loader.get_template(name)
                     output = self.render(test_template, vals)
-                except Exception, e:
+                except Exception as e:
                     if e.__class__ != result:
                         failures.append("Template test (TEMPLATE_STRING_IF_INVALID='%s'): %s -- FAILED. Got %s, exception: %s" % (invalid_str, name, e.__class__, e))
                     continue
@@ -360,7 +360,7 @@ class Templates(unittest.TestCase):
 
             # Make sure that any unicode strings are converted to bytestrings
             # in the final output.
-            'filter-syntax18': (r'{{ var }}', {'var': UTF8Class()}, u'\u0160\u0110\u0106\u017d\u0107\u017e\u0161\u0111'),
+            'filter-syntax18': (r'{{ var }}', {'var': UTF8Class()}, '\u0160\u0110\u0106\u017d\u0107\u017e\u0161\u0111'),
 
             # Numbers as filter arguments should work
             'filter-syntax19': ('{{ var|truncatewords:1 }}', {"var": "hello world"}, "hello ..."),
@@ -399,14 +399,14 @@ class Templates(unittest.TestCase):
             'cycle06': ('{% cycle a %}', {}, template.TemplateSyntaxError),
             'cycle07': ('{% cycle a,b,c as foo %}{% cycle bar %}', {}, template.TemplateSyntaxError),
             'cycle08': ('{% cycle a,b,c as foo %}{% cycle foo %}{{ foo }}{{ foo }}{% cycle foo %}{{ foo }}', {}, 'abbbcc'),
-            'cycle09': ("{% for i in test %}{% cycle a,b %}{{ i }},{% endfor %}", {'test': range(5)}, 'a0,b1,a2,b3,a4,'),
+            'cycle09': ("{% for i in test %}{% cycle a,b %}{{ i }},{% endfor %}", {'test': list(range(5))}, 'a0,b1,a2,b3,a4,'),
             # New format:
             'cycle10': ("{% cycle 'a' 'b' 'c' as abc %}{% cycle abc %}", {}, 'ab'),
             'cycle11': ("{% cycle 'a' 'b' 'c' as abc %}{% cycle abc %}{% cycle abc %}", {}, 'abc'),
             'cycle12': ("{% cycle 'a' 'b' 'c' as abc %}{% cycle abc %}{% cycle abc %}{% cycle abc %}", {}, 'abca'),
-            'cycle13': ("{% for i in test %}{% cycle 'a' 'b' %}{{ i }},{% endfor %}", {'test': range(5)}, 'a0,b1,a2,b3,a4,'),
+            'cycle13': ("{% for i in test %}{% cycle 'a' 'b' %}{{ i }},{% endfor %}", {'test': list(range(5))}, 'a0,b1,a2,b3,a4,'),
             'cycle14': ("{% cycle one two as foo %}{% cycle foo %}", {'one': '1','two': '2'}, '12'),
-            'cycle13': ("{% for i in test %}{% cycle aye bee %}{{ i }},{% endfor %}", {'test': range(5), 'aye': 'a', 'bee': 'b'}, 'a0,b1,a2,b3,a4,'),
+            'cycle13': ("{% for i in test %}{% cycle aye bee %}{{ i }},{% endfor %}", {'test': list(range(5)), 'aye': 'a', 'bee': 'b'}, 'a0,b1,a2,b3,a4,'),
 
             ### EXCEPTIONS ############################################################
 
@@ -735,10 +735,10 @@ class Templates(unittest.TestCase):
             'i18n02': ('{% load i18n %}{% trans "xxxyyyxxx" %}', {}, "xxxyyyxxx"),
 
             # simple translation of a variable
-            'i18n03': ('{% load i18n %}{% blocktrans %}{{ anton }}{% endblocktrans %}', {'anton': '\xc3\x85'}, u"Å"),
+            'i18n03': ('{% load i18n %}{% blocktrans %}{{ anton }}{% endblocktrans %}', {'anton': '\xc3\x85'}, "Å"),
 
             # simple translation of a variable and filter
-            'i18n04': ('{% load i18n %}{% blocktrans with anton|lower as berta %}{{ berta }}{% endblocktrans %}', {'anton': '\xc3\x85'}, u'å'),
+            'i18n04': ('{% load i18n %}{% blocktrans with anton|lower as berta %}{{ berta }}{% endblocktrans %}', {'anton': '\xc3\x85'}, 'å'),
 
             # simple translation of a string with interpolation
             'i18n05': ('{% load i18n %}{% blocktrans %}xxx{{ anton }}xxx{% endblocktrans %}', {'anton': 'yyy'}, "xxxyyyxxx"),
@@ -772,8 +772,8 @@ class Templates(unittest.TestCase):
 
             # Escaping inside blocktrans works as if it was directly in the
             # template.
-            'i18n17': ('{% load i18n %}{% blocktrans with anton|escape as berta %}{{ berta }}{% endblocktrans %}', {'anton': 'α & β'}, u'α &amp; β'),
-            'i18n18': ('{% load i18n %}{% blocktrans with anton|force_escape as berta %}{{ berta }}{% endblocktrans %}', {'anton': 'α & β'}, u'α &amp; β'),
+            'i18n17': ('{% load i18n %}{% blocktrans with anton|escape as berta %}{{ berta }}{% endblocktrans %}', {'anton': 'α & β'}, 'α &amp; β'),
+            'i18n18': ('{% load i18n %}{% blocktrans with anton|force_escape as berta %}{{ berta }}{% endblocktrans %}', {'anton': 'α & β'}, 'α &amp; β'),
 
             ### HANDLING OF TEMPLATE_STRING_IF_INVALID ###################################
 
@@ -884,7 +884,7 @@ class Templates(unittest.TestCase):
             'url02': ('{% url regressiontests.templates.views.client_action client.id, action="update" %}', {'client': {'id': 1}}, '/url_tag/client/1/update/'),
             'url03': ('{% url regressiontests.templates.views.index %}', {}, '/url_tag/'),
             'url04': ('{% url named.client client.id %}', {'client': {'id': 1}}, '/url_tag/named-client/1/'),
-            'url05': (u'{% url метка_оператора v %}', {'v': u'Ω'}, '/url_tag/%D0%AE%D0%BD%D0%B8%D0%BA%D0%BE%D0%B4/%CE%A9/'),
+            'url05': ('{% url метка_оператора v %}', {'v': 'Ω'}, '/url_tag/%D0%AE%D0%BD%D0%B8%D0%BA%D0%BE%D0%B4/%CE%A9/'),
 
             # Failures
             'url-fail01': ('{% url %}', {}, template.TemplateSyntaxError),
@@ -925,7 +925,7 @@ class Templates(unittest.TestCase):
             # Strings (ASCII or unicode) already marked as "safe" are not
             # auto-escaped
             'autoescape-tag06': ("{{ first }}", {"first": mark_safe("<b>first</b>")}, "<b>first</b>"),
-            'autoescape-tag07': ("{% autoescape on %}{{ first }}{% endautoescape %}", {"first": mark_safe(u"<b>Apple</b>")}, u"<b>Apple</b>"),
+            'autoescape-tag07': ("{% autoescape on %}{{ first }}{% endautoescape %}", {"first": mark_safe("<b>Apple</b>")}, "<b>Apple</b>"),
 
             # Literal string arguments to filters, if used in the result, are
             # safe.

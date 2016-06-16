@@ -7,7 +7,7 @@ Requires MySQLdb: http://sourceforge.net/projects/mysql-python
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseOperations, util
 try:
     import MySQLdb as Database
-except ImportError, e:
+except ImportError as e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading MySQLdb module: %s" % e)
 
@@ -91,7 +91,7 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def no_limit_value(self):
         # 2**64 - 1, as recommended by the MySQL documentation
-        return 18446744073709551615L
+        return 18446744073709551615
 
     def quote_name(self, name):
         if name.startswith("`") and name.endswith("`"):

@@ -1,4 +1,5 @@
 import sys
+import collections
 
 try:
     import reportlab
@@ -14,7 +15,7 @@ else:
     from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT # Check this also
     from reportlab.lib.colors import black
 
-from exceptions import AttributeNotFound
+from .exceptions import AttributeNotFound
 
 try:
     from functools import wraps
@@ -100,7 +101,7 @@ def get_attr_value(obj, attr_path):
     if len(parts) > 1:
         val = get_attr_value(val, '.'.join(parts[1:]))
 
-    if callable(val):
+    if isinstance(val, collections.Callable):
         val = val()
         
     return val
@@ -109,7 +110,7 @@ def get_attr_value(obj, attr_path):
 def calculate_size(size):
     """Calculates the informed size. If this is a string or unicode, it is
     converted to float using evaluation function"""
-    if isinstance(size, basestring):
+    if isinstance(size, str):
         return eval(size) # If you are thinking this is a semanthic bug, you must
                           # be aware this 'eval' is necessary to calculate sizes
                           # like '10*cm' or '15.8*rows'

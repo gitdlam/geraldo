@@ -16,10 +16,10 @@ from utils.decorators import page, admin_required
 from utils.shortcuts import get_object_or_404
 from utils.serialization import serialize
 
-from models import Entry
-from forms import FormEntry, FormImport
+from .models import Entry
+from .forms import FormEntry, FormImport
 
-import app_settings
+from . import app_settings
 
 @page('gae_blog/index.html')
 def entry_index(request):
@@ -103,9 +103,9 @@ def feeds_tag(request, tag):
     lang = "pt-br"
 
     feed = feedgenerator.Rss201rev2Feed(
-            title = u'Django Utilidades :: Marinho Brandao',
+            title = 'Django Utilidades :: Marinho Brandao',
             link = settings.PROJECT_ROOT_URL,
-            description = u'',
+            description = '',
             language = lang,
             )
 

@@ -31,17 +31,17 @@ class DatastoreTest(unittest.TestCase):
 
   def testDjangoDBConnection(self):
     """Tests that the Django DB connection is using our replacement."""
-    self.assert_(isinstance(connection, DatabaseWrapper))
+    self.assertTrue(isinstance(connection, DatabaseWrapper))
 
   def testDjangoDBConnectionStubs(self):
     """Tests that members required by Django are stubbed."""
-    self.assert_(hasattr(connection, "features"))
-    self.assert_(hasattr(connection, "ops"))
+    self.assertTrue(hasattr(connection, "features"))
+    self.assertTrue(hasattr(connection, "ops"))
 
   def testDjangoDBErrorClasses(self):
     """Tests that the error classes required by Django are stubbed."""
-    self.assert_(hasattr(base, "DatabaseError"))
-    self.assert_(hasattr(base, "IntegrityError"))
+    self.assertTrue(hasattr(base, "DatabaseError"))
+    self.assertTrue(hasattr(base, "IntegrityError"))
 
   def testDatastorePath(self):
     """Tests that the datastore path contains the app name."""
@@ -52,8 +52,8 @@ class DatastoreTest(unittest.TestCase):
   def testTestInMemoryDatastorePath(self):
     """Tests that the test datastore is using the in-memory datastore."""
     td_path, th_path = base.get_test_datastore_paths()
-    self.assert_(td_path is None)
-    self.assert_(th_path is None)
+    self.assertTrue(td_path is None)
+    self.assertTrue(th_path is None)
 
   def testTestFilesystemDatastorePath(self):
     """Tests that the test datastore is on the filesystem when requested."""

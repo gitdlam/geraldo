@@ -23,13 +23,13 @@ def update_contenttypes(app, created_models, verbosity=2, **kwargs):
                 app_label=opts.app_label, model=opts.object_name.lower())
             ct.save()
             if verbosity >= 2:
-                print "Adding content type '%s | %s'" % (ct.app_label, ct.model)
+                print("Adding content type '%s | %s'" % (ct.app_label, ct.model))
     # The presence of any remaining content types means the supplied app has an
     # undefined model and can safely be removed, which cascades to also remove
     # related permissions.
     for ct in content_types:
         if verbosity >= 2:
-            print "Deleting stale content type '%s | %s'" % (ct.app_label, ct.model)
+            print("Deleting stale content type '%s | %s'" % (ct.app_label, ct.model))
         ct.delete()
 
 def update_all_contenttypes(verbosity=2):

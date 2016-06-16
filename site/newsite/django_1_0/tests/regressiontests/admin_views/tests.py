@@ -8,7 +8,7 @@ from django.contrib.admin.util import quote
 from django.utils.html import escape
 
 # local test models
-from models import Article, CustomArticle, Section, ModelWithStringPrimaryKey
+from .models import Article, CustomArticle, Section, ModelWithStringPrimaryKey
 
 def get_perm(Model, perm):
     """Return the permission object, for the Model"""
@@ -99,15 +99,15 @@ class AdminViewPermissionsTest(TestCase):
         """
         # Super User
         request = self.client.get('/test_admin/admin/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         login = self.client.post('/test_admin/admin/', self.super_login)
         self.assertRedirects(login, '/test_admin/admin/')
-        self.failIf(login.context)
+        self.assertFalse(login.context)
         self.client.get('/test_admin/admin/logout/')
         
         # Test if user enters e-mail address
         request = self.client.get('/test_admin/admin/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         login = self.client.post('/test_admin/admin/', self.super_email_login)
         self.assertContains(login, "Your e-mail address is not your username")
         # only correct passwords get a username hint
@@ -121,35 +121,35 @@ class AdminViewPermissionsTest(TestCase):
         
         # Add User
         request = self.client.get('/test_admin/admin/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         login = self.client.post('/test_admin/admin/', self.adduser_login)
         self.assertRedirects(login, '/test_admin/admin/')
-        self.failIf(login.context)
+        self.assertFalse(login.context)
         self.client.get('/test_admin/admin/logout/')
         
         # Change User
         request = self.client.get('/test_admin/admin/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         login = self.client.post('/test_admin/admin/', self.changeuser_login)
         self.assertRedirects(login, '/test_admin/admin/')
-        self.failIf(login.context)
+        self.assertFalse(login.context)
         self.client.get('/test_admin/admin/logout/')
         
         # Delete User
         request = self.client.get('/test_admin/admin/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         login = self.client.post('/test_admin/admin/', self.deleteuser_login)
         self.assertRedirects(login, '/test_admin/admin/')
-        self.failIf(login.context)
+        self.assertFalse(login.context)
         self.client.get('/test_admin/admin/logout/')
         
         # Regular User should not be able to login.
         request = self.client.get('/test_admin/admin/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         login = self.client.post('/test_admin/admin/', self.joepublic_login)
-        self.failUnlessEqual(login.status_code, 200)
+        self.assertEqual(login.status_code, 200)
         # Login.context is a list of context dicts we just need to check the first one.
-        self.assert_(login.context[0].get('error_message'))
+        self.assertTrue(login.context[0].get('error_message'))
 
     def testAddView(self):
         """Test add view restricts access and actually adds items."""
@@ -162,11 +162,11 @@ class AdminViewPermissionsTest(TestCase):
         self.client.get('/test_admin/admin/')
         self.client.post('/test_admin/admin/', self.changeuser_login)
         request = self.client.get('/test_admin/admin/admin_views/article/add/')
-        self.failUnlessEqual(request.status_code, 403)
+        self.assertEqual(request.status_code, 403)
         # Try POST just to make sure
         post = self.client.post('/test_admin/admin/admin_views/article/add/', add_dict)
-        self.failUnlessEqual(post.status_code, 403)
-        self.failUnlessEqual(Article.objects.all().count(), 1)
+        self.assertEqual(post.status_code, 403)
+        self.assertEqual(Article.objects.all().count(), 1)
         self.client.get('/test_admin/admin/logout/')
         
         # Add user may login and POST to add view, then redirect to admin root
@@ -174,7 +174,7 @@ class AdminViewPermissionsTest(TestCase):
         self.client.post('/test_admin/admin/', self.adduser_login)
         post = self.client.post('/test_admin/admin/admin_views/article/add/', add_dict)
         self.assertRedirects(post, '/test_admin/admin/')
-        self.failUnlessEqual(Article.objects.all().count(), 2)
+        self.assertEqual(Article.objects.all().count(), 2)
         self.client.get('/test_admin/admin/logout/')
         
         # Super can add too, but is redirected to the change list view
@@ -182,7 +182,7 @@ class AdminViewPermissionsTest(TestCase):
         self.client.post('/test_admin/admin/', self.super_login)
         post = self.client.post('/test_admin/admin/admin_views/article/add/', add_dict)
         self.assertRedirects(post, '/test_admin/admin/admin_views/article/')
-        self.failUnlessEqual(Article.objects.all().count(), 3)
+        self.assertEqual(Article.objects.all().count(), 3)
         self.client.get('/test_admin/admin/logout/')
         
         # Check and make sure that if user expires, data still persists
@@ -191,7 +191,7 @@ class AdminViewPermissionsTest(TestCase):
         self.super_login['post_data'] = _encode_post_data(add_dict)
         post = self.client.post('/test_admin/admin/admin_views/article/add/', self.super_login)
         self.assertRedirects(post, '/test_admin/admin/admin_views/article/')
-        self.failUnlessEqual(Article.objects.all().count(), 4)
+        self.assertEqual(Article.objects.all().count(), 4)
         self.client.get('/test_admin/admin/logout/')
 
     def testChangeView(self):
@@ -205,23 +205,23 @@ class AdminViewPermissionsTest(TestCase):
         self.client.get('/test_admin/admin/')
         self.client.post('/test_admin/admin/', self.adduser_login)
         request = self.client.get('/test_admin/admin/admin_views/article/')
-        self.failUnlessEqual(request.status_code, 403)
+        self.assertEqual(request.status_code, 403)
         request = self.client.get('/test_admin/admin/admin_views/article/1/')
-        self.failUnlessEqual(request.status_code, 403)
+        self.assertEqual(request.status_code, 403)
         post = self.client.post('/test_admin/admin/admin_views/article/1/', change_dict)
-        self.failUnlessEqual(post.status_code, 403)
+        self.assertEqual(post.status_code, 403)
         self.client.get('/test_admin/admin/logout/')
         
         # change user can view all items and edit them
         self.client.get('/test_admin/admin/')
         self.client.post('/test_admin/admin/', self.changeuser_login)
         request = self.client.get('/test_admin/admin/admin_views/article/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         request = self.client.get('/test_admin/admin/admin_views/article/1/')
-        self.failUnlessEqual(request.status_code, 200)
+        self.assertEqual(request.status_code, 200)
         post = self.client.post('/test_admin/admin/admin_views/article/1/', change_dict)
         self.assertRedirects(post, '/test_admin/admin/admin_views/article/')
-        self.failUnlessEqual(Article.objects.get(pk=1).content, '<p>edited article</p>')
+        self.assertEqual(Article.objects.get(pk=1).content, '<p>edited article</p>')
         self.client.get('/test_admin/admin/logout/')
 
     def testCustomModelAdminTemplates(self):
@@ -230,8 +230,8 @@ class AdminViewPermissionsTest(TestCase):
         
         # Test custom change list template with custom extra context
         request = self.client.get('/test_admin/admin/admin_views/customarticle/')
-        self.failUnlessEqual(request.status_code, 200)
-        self.assert_("var hello = 'Hello!';" in request.content)
+        self.assertEqual(request.status_code, 200)
+        self.assertTrue("var hello = 'Hello!';" in request.content)
         self.assertTemplateUsed(request, 'custom_admin/change_list.html')
         
         # Test custom change form template
@@ -245,7 +245,7 @@ class AdminViewPermissionsTest(TestCase):
             'date_1': '10:54:39'
         })
         self.assertRedirects(post, '/test_admin/admin/admin_views/customarticle/')
-        self.failUnlessEqual(CustomArticle.objects.all().count(), 1)
+        self.assertEqual(CustomArticle.objects.all().count(), 1)
         
         # Test custom delete and object history templates
         request = self.client.get('/test_admin/admin/admin_views/customarticle/1/delete/')
@@ -272,11 +272,11 @@ class AdminViewPermissionsTest(TestCase):
         admin.site.index_template = 'custom_admin/index.html'
         request = self.client.get('/test_admin/admin/')
         self.assertTemplateUsed(request, 'custom_admin/login.html')
-        self.assert_('Hello from a custom login template' in request.content)
+        self.assertTrue('Hello from a custom login template' in request.content)
         self.client.post('/test_admin/admin/', self.changeuser_login)
         request = self.client.get('/test_admin/admin/')
         self.assertTemplateUsed(request, 'custom_admin/index.html')
-        self.assert_('Hello from a custom index template' in request.content)
+        self.assertTrue('Hello from a custom index template' in request.content)
         
         # Finally, using monkey patching check we can inject custom_context arguments in to index
         original_index = admin.site.index
@@ -286,7 +286,7 @@ class AdminViewPermissionsTest(TestCase):
         admin.site.index = index
         request = self.client.get('/test_admin/admin/')
         self.assertTemplateUsed(request, 'custom_admin/index.html')
-        self.assert_('Hello from a custom index template *bar*' in request.content)
+        self.assertTrue('Hello from a custom index template *bar*' in request.content)
         
         self.client.get('/test_admin/admin/logout/')
         del admin.site.index # Resets to using the original
@@ -302,10 +302,10 @@ class AdminViewPermissionsTest(TestCase):
         self.client.get('/test_admin/admin/')
         self.client.post('/test_admin/admin/', self.adduser_login)
         request = self.client.get('/test_admin/admin/admin_views/article/1/delete/')
-        self.failUnlessEqual(request.status_code, 403)
+        self.assertEqual(request.status_code, 403)
         post = self.client.post('/test_admin/admin/admin_views/article/1/delete/', delete_dict)
-        self.failUnlessEqual(post.status_code, 403)
-        self.failUnlessEqual(Article.objects.all().count(), 1)
+        self.assertEqual(post.status_code, 403)
+        self.assertEqual(Article.objects.all().count(), 1)
         self.client.get('/test_admin/admin/logout/')
         
         # Delete user can delete
@@ -316,10 +316,10 @@ class AdminViewPermissionsTest(TestCase):
         self.assertContains(response, "admin_views/article/1/")
         
         response = self.client.get('/test_admin/admin/admin_views/article/1/delete/')
-        self.failUnlessEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         post = self.client.post('/test_admin/admin/admin_views/article/1/delete/', delete_dict)
         self.assertRedirects(post, '/test_admin/admin/')
-        self.failUnlessEqual(Article.objects.all().count(), 0)
+        self.assertEqual(Article.objects.all().count(), 0)
         self.client.get('/test_admin/admin/logout/')
 
 class AdminViewStringPrimaryKeyTest(TestCase):
@@ -341,7 +341,7 @@ class AdminViewStringPrimaryKeyTest(TestCase):
         "Retrieving the object using urlencoded form of primary key should work"
         response = self.client.get('/test_admin/admin/admin_views/modelwithstringprimarykey/%s/' % quote(self.pk))
         self.assertContains(response, escape(self.pk))
-        self.failUnlessEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
     
     def test_changelist_to_changeform_link(self):
         "The link from the changelist referring to the changeform of the object should be quoted"

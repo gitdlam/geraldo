@@ -25,12 +25,13 @@ and Django models can be dumped and loaded to all of the provided formats.
 import os
 import re
 import unittest
-from StringIO import StringIO
+from io import StringIO
 
 from django.core import serializers
 
 from google.appengine.ext import db
 from appengine_django.models import BaseModel
+import collections
 
 
 class ModelA(BaseModel):
@@ -56,7 +57,7 @@ class TestAllFormats(type):
     test_formats = serializers.get_serializer_formats()
     test_formats.remove("python")  # Python serializer is only used indirectly.
 
-    for func_name in attrs.keys():
+    for func_name in list(attrs.keys()):
       m = re.match("^run(.*)Test$", func_name)
       if not m:
         continue
@@ -69,13 +70,12 @@ class TestAllFormats(type):
     return super(TestAllFormats, cls).__new__(cls, name, bases, attrs)
 
 
-class SerializationTest(unittest.TestCase):
+class SerializationTest(unittest.TestCase, metaclass=TestAllFormats):
   """Unit tests for the serialization/deserialization functionality.
 
   Tests that every loaded serialization format can successfully dump and then
   reload objects without the objects changing.
   """
-  __metaclass__ = TestAllFormats
 
   def compareObjects(self, orig, new, format="unknown"):
     """Compares two objects to ensure they are identical.
@@ -98,7 +98,7 @@ class SerializationTest(unittest.TestCase):
                        "keys not equal after %s serialization: %s != %s" %
                        (format, repr(orig.key()), repr(new.key())))
 
-    for key in orig.properties().keys():
+    for key in list(orig.properties().keys()):
       oval = getattr(orig, key)
       nval = getattr(new, key)
       if isinstance(orig.properties()[key], db.Reference):
@@ -132,7 +132,7 @@ class SerializationTest(unittest.TestCase):
     self.compareObjects(obj, result[0].object, format)
     if rel_attr and obj_ref:
       rel = getattr(result[0].object, rel_attr)
-      if callable(rel):
+      if isinstance(rel, collections.Callable):
         rel = rel()
       self.compareObjects(rel, obj_ref, format)
 
@@ -180,7 +180,7 @@ class SerializationTest(unittest.TestCase):
     result = list(serializers.deserialize(format, StringIO(s)))
     self.assertEqual(1, len(result), "expected 1 object from %s" % format)
     result[0].save()
-    self.assert_(isinstance(result[0].object, ModelA))
+    self.assertTrue(isinstance(result[0].object, ModelA))
     self.assertEqual("test", result[0].object.key().name())
 
   # Lookup dicts for the above (doLookupDeserialisationReferenceTest) function.

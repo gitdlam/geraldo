@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin
 
-from models import DynamicTemplate
+from .models import DynamicTemplate
 
 class DynamicTemplateAdmin(ModelAdmin):
     list_display = ('title','slug','group',)

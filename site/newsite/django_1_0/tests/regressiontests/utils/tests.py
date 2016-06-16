@@ -6,10 +6,10 @@ from unittest import TestCase
 
 from django.utils import html, checksums
 
-import timesince
-import datastructures
-import itercompat
-from decorators import DecoratorFromMiddlewareTests
+from . import timesince
+from . import datastructures
+from . import itercompat
+from .decorators import DecoratorFromMiddlewareTests
 
 # We need this because "datastructures" uses sorted() and the tests are run in
 # the scope of this module.

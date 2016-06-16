@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 import datetime
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 UNUSABLE_PASSWORD = '!' # This will never be a valid hash
 
@@ -81,7 +81,7 @@ class Permission(models.Model):
         ordering = ('content_type', 'codename')
 
     def __unicode__(self):
-        return u"%s | %s | %s" % (self.content_type.app_label, self.content_type, self.name)
+        return "%s | %s | %s" % (self.content_type.app_label, self.content_type, self.name)
 
 class Group(models.Model):
     """Groups are a generic way of categorizing users to apply permissions, or some other label, to those users. A user can belong to any number of groups.
@@ -154,7 +154,7 @@ class User(models.Model):
         return self.username
 
     def get_absolute_url(self):
-        return "/users/%s/" % urllib.quote(smart_str(self.username))
+        return "/users/%s/" % urllib.parse.quote(smart_str(self.username))
 
     def is_anonymous(self):
         "Always returns False. This is a way of comparing User objects to anonymous users."
@@ -167,7 +167,7 @@ class User(models.Model):
 
     def get_full_name(self):
         "Returns the first_name plus the last_name, with a space in between."
-        full_name = u'%s %s' % (self.first_name, self.last_name)
+        full_name = '%s %s' % (self.first_name, self.last_name)
         return full_name.strip()
 
     def set_password(self, raw_password):
@@ -324,7 +324,7 @@ class AnonymousUser(object):
         return 'AnonymousUser'
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def __eq__(self, other):
         return isinstance(other, self.__class__)

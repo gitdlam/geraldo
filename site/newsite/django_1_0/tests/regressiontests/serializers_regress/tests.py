@@ -9,7 +9,7 @@ forward, backwards and self references.
 
 
 import unittest, datetime
-from cStringIO import StringIO
+from io import StringIO
 
 from django.utils.functional import curry
 from django.core import serializers
@@ -17,7 +17,7 @@ from django.db import transaction
 from django.core import management
 from django.conf import settings
 
-from models import *
+from .models import *
 try:
     import decimal
 except ImportError:
@@ -75,7 +75,7 @@ def inherited_create(pk, klass, data):
     #     automatically is easier than manually creating both.
     models.Model.save(instance)
     created = [instance]
-    for klass,field in instance._meta.parents.items():
+    for klass,field in list(instance._meta.parents.items()):
         created.append(klass.objects.get(id=pk))
     return created
 
@@ -109,7 +109,7 @@ def pk_compare(testcase, pk, klass, data):
 
 def inherited_compare(testcase, pk, klass, data):
     instance = klass.objects.get(id=pk)
-    for key,value in data.items():
+    for key,value in list(data.items()):
         testcase.assertEqual(value, getattr(instance,key))
 
 # Define some data types. Each data type is
@@ -135,7 +135,7 @@ test_data = [
     (data_obj, 15, CharData, None),
     # (We use something that will fit into a latin1 database encoding here,
     # because that is still the default used on many system setups.)
-    (data_obj, 16, CharData, u'\xa5'),
+    (data_obj, 16, CharData, '\xa5'),
     (data_obj, 20, DateData, datetime.date(2006,6,16)),
     (data_obj, 21, DateData, None),
     (data_obj, 30, DateTimeData, datetime.datetime(2006,6,16,10,42,37)),
@@ -339,8 +339,8 @@ def serializerTest(format, self):
 
     # Assert that the number of objects deserialized is the
     # same as the number that was serialized.
-    for klass, count in instance_count.items():
-        self.assertEquals(count, klass.objects.count())
+    for klass, count in list(instance_count.items()):
+        self.assertEqual(count, klass.objects.count())
 
 def fieldsTest(format, self):
     # Clear the database first
@@ -351,7 +351,7 @@ def fieldsTest(format, self):
 
     # Serialize then deserialize the test database
     serialized_data = serializers.serialize(format, [obj], indent=2, fields=('field1','field3'))
-    result = serializers.deserialize(format, serialized_data).next()
+    result = next(serializers.deserialize(format, serialized_data))
 
     # Check that the deserialized object contains data in only the serialized fields.
     self.assertEqual(result.object.field1, 'first')

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from google.appengine.api import mail, memcache
 
-from django import forms
-from django.http import HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import reverse
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.template.loader import render_to_string
+from .django import forms
+from .django.http import HttpResponseRedirect, HttpResponse
+from .django.core.urlresolvers import reverse
+from .django.conf import settings
+from .django.contrib.auth.decorators import login_required
+from .django.template.loader import render_to_string
 
-from utils.decorators import page, admin_required
-from utils.users import post_message
+from .utils.decorators import page, admin_required
+from .utils.users import post_message
 
 @page('admin_user_required.html')
 def admin_user_required(request):
@@ -48,10 +48,10 @@ def contact(request):
 
         if form.is_valid():
             if form.send():
-                post_message(request, u'Mensagem enviada com sucesso! Obrigado!')
+                post_message(request, 'Mensagem enviada com sucesso! Obrigado!')
                 return HttpResponseRedirect(reverse('wiki_index'))
             
-            post_message(request, u'Ocorreu um erro ao tentar enviar mensagem. Verifique se sua mensagem é muito curta')
+            post_message(request, 'Ocorreu um erro ao tentar enviar mensagem. Verifique se sua mensagem é muito curta')
     else:
         form = FormContact()
 
@@ -61,7 +61,7 @@ def contact(request):
 @admin_required
 def admin_update_cache(request):
     memcache.flush_all()
-    post_message(request, u'All cache items deleted to be updated.')
+    post_message(request, 'All cache items deleted to be updated.')
 
     return HttpResponseRedirect(reverse('views.admin_index'))
 

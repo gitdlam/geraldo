@@ -30,12 +30,12 @@ class ClientTest(TestCase):
         "GET a view"
         # The data is ignored, but let's check it doesn't crash the system
         # anyway.
-        data = {'var': u'\xf2'}
+        data = {'var': '\xf2'}
         response = self.client.get('/test_client/get_view/', data)
 
         # Check some response details
         self.assertContains(response, 'This is a test')
-        self.assertEqual(response.context['var'], u'\xf2')
+        self.assertEqual(response.context['var'], '\xf2')
         self.assertEqual(response.template.name, 'GET Template')
 
     def test_get_post_view(self):
@@ -69,13 +69,13 @@ class ClientTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['data'], '37')
         self.assertEqual(response.template.name, 'POST Template')
-        self.failUnless('Data received' in response.content)
+        self.assertTrue('Data received' in response.content)
     
     def test_response_headers(self):
         "Check the value of HTTP headers returned in a response"
         response = self.client.get("/test_client/header_view/")
         
-        self.assertEquals(response['X-DJANGO-TEST'], 'Slartibartfast')
+        self.assertEqual(response['X-DJANGO-TEST'], 'Slartibartfast')
         
     def test_raw_post(self):
         "POST raw data (with a content type) to a view"
@@ -252,7 +252,7 @@ class ClientTest(TestCase):
 
         # Log in
         login = self.client.login(username='testclient', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
 
         # Request a page that requires a login
         response = self.client.get('/test_client/login_protected_view/')
@@ -268,7 +268,7 @@ class ClientTest(TestCase):
 
         # Log in
         login = self.client.login(username='testclient', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
 
         # Request a page that requires a login
         response = self.client.get('/test_client/login_protected_method_view/')
@@ -284,7 +284,7 @@ class ClientTest(TestCase):
 
         # Log in
         login = self.client.login(username='testclient', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
 
         # Request a page that requires a login
         response = self.client.get('/test_client/login_protected_view_custom_redirect/')
@@ -295,13 +295,13 @@ class ClientTest(TestCase):
         "Request a page that is protected with @login, but use bad credentials"
 
         login = self.client.login(username='otheruser', password='nopassword')
-        self.failIf(login)
+        self.assertFalse(login)
 
     def test_view_with_inactive_login(self):
         "Request a page that is protected with @login, but use an inactive login"
 
         login = self.client.login(username='inactive', password='password')
-        self.failIf(login)
+        self.assertFalse(login)
 
     def test_logout(self):
         "Request a logout after logging in"
@@ -329,7 +329,7 @@ class ClientTest(TestCase):
 
         # Log in
         login = self.client.login(username='testclient', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
 
         # Log in with wrong permissions. Should result in 302.
         response = self.client.get('/test_client/permission_protected_view/')
@@ -346,7 +346,7 @@ class ClientTest(TestCase):
 
         # Log in
         login = self.client.login(username='testclient', password='password')
-        self.failUnless(login, 'Could not log in')
+        self.assertTrue(login, 'Could not log in')
 
         # Log in with wrong permissions. Should result in 302.
         response = self.client.get('/test_client/permission_protected_method_view/')
@@ -367,7 +367,7 @@ class ClientTest(TestCase):
         response = self.client.post('/test_client/session_view/')
 
         # Check that the session was modified
-        self.assertEquals(self.client.session['tobacconist'], 'hovercraft')
+        self.assertEqual(self.client.session['tobacconist'], 'hovercraft')
 
     def test_view_with_exception(self):
         "Request a page that is known to throw an error"

@@ -6,7 +6,7 @@ import sys
 import time
 from datetime import datetime, timedelta
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -41,10 +41,10 @@ class SessionBase(object):
         self.modified = True
 
     def keys(self):
-        return self._session.keys()
+        return list(self._session.keys())
 
     def items(self):
-        return self._session.items()
+        return list(self._session.items())
 
     def get(self, key, default=None):
         return self._session.get(key, default)
@@ -93,19 +93,19 @@ class SessionBase(object):
         self.modified = True
 
     def has_key(self, key):
-        return self._session.has_key(key)
+        return key in self._session
 
     def values(self):
-        return self._session.values()
+        return list(self._session.values())
 
     def iterkeys(self):
-        return self._session.iterkeys()
+        return iter(self._session.keys())
 
     def itervalues(self):
-        return self._session.itervalues()
+        return iter(self._session.values())
 
     def iteritems(self):
-        return self._session.iteritems()
+        return iter(self._session.items())
 
     def _get_new_session_key(self):
         "Returns session key that isn't being used."
@@ -117,7 +117,7 @@ class SessionBase(object):
             # No getpid() in Jython, for example
             pid = 1
         while 1:
-            session_key = md5.new("%s%s%s%s" % (random.randint(0, sys.maxint - 1),
+            session_key = md5.new("%s%s%s%s" % (random.randint(0, sys.maxsize - 1),
                                   pid, time.time(), settings.SECRET_KEY)).hexdigest()
             if not self.exists(session_key):
                 break

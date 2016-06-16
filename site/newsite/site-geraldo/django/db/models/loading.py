@@ -99,7 +99,7 @@ class AppCache(object):
         # Ensure the returned list is always in the same order (with new apps
         # added at the end). This avoids unstable ordering on the admin app
         # list page, for example.
-        apps = [(v, k) for k, v in self.app_store.items()]
+        apps = [(v, k) for k, v in list(self.app_store.items())]
         apps.sort()
         return [elt[1] for elt in apps]
 
@@ -119,7 +119,7 @@ class AppCache(object):
                             return None
                     else:
                         return mod
-            raise ImproperlyConfigured, "App with label %s could not be found" % app_label
+            raise ImproperlyConfigured("App with label %s could not be found" % app_label)
         finally:
             self.write_lock.release()
 
@@ -135,11 +135,11 @@ class AppCache(object):
         """
         self._populate()
         if app_mod:
-            return self.app_models.get(app_mod.__name__.split('.')[-2], SortedDict()).values()
+            return list(self.app_models.get(app_mod.__name__.split('.')[-2], SortedDict()).values())
         else:
             model_list = []
-            for app_entry in self.app_models.itervalues():
-                model_list.extend(app_entry.values())
+            for app_entry in self.app_models.values():
+                model_list.extend(list(app_entry.values()))
             return model_list
 
     def get_model(self, app_label, model_name, seed_cache=True):

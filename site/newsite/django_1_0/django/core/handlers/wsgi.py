@@ -1,9 +1,9 @@
 from threading import Lock
 from pprint import pformat
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 from django import http
 from django.core import signals
@@ -76,13 +76,13 @@ def safe_copyfileobj(fsrc, fdst, length=16*1024, size=0):
 class WSGIRequest(http.HttpRequest):
     def __init__(self, environ):
         script_name = base.get_script_name(environ)
-        path_info = force_unicode(environ.get('PATH_INFO', u'/'))
+        path_info = force_unicode(environ.get('PATH_INFO', '/'))
         if not path_info:
             # Sometimes PATH_INFO exists, but is empty (e.g. accessing
             # the SCRIPT_NAME URL without a trailing slash). We really need to
             # operate as if they'd requested '/'. Not amazingly nice to force
             # the path like this, but should be harmless.
-            path_info = u'/'
+            path_info = '/'
         self.environ = environ
         self.path_info = path_info
         self.path = '%s%s' % (script_name, path_info)
@@ -228,8 +228,8 @@ class WSGIHandler(base.BaseHandler):
         except KeyError:
             status_text = 'UNKNOWN STATUS CODE'
         status = '%s %s' % (response.status_code, status_text)
-        response_headers = [(str(k), str(v)) for k, v in response.items()]
-        for c in response.cookies.values():
+        response_headers = [(str(k), str(v)) for k, v in list(response.items())]
+        for c in list(response.cookies.values()):
             response_headers.append(('Set-Cookie', str(c.output(header=''))))
         start_response(status, response_headers)
         return response

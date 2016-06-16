@@ -35,7 +35,7 @@ class ModPythonRequest(http.HttpRequest):
             # Django prefers empty paths to be '/', rather than '', to give us
             # a common start character for URL patterns. So this is a little
             # naughty, but also pretty harmless.
-            self.path_info = u'/'
+            self.path_info = '/'
 
     def __repr__(self):
         # Since this is called as part of error handling, we need to be very
@@ -56,9 +56,9 @@ class ModPythonRequest(http.HttpRequest):
             meta = pformat(self.META)
         except:
             meta = '<could not parse>'
-        return smart_str(u'<ModPythonRequest\npath:%s,\nGET:%s,\nPOST:%s,\nCOOKIES:%s,\nMETA:%s>' %
-                         (self.path, unicode(get), unicode(post),
-                          unicode(cookies), unicode(meta)))
+        return smart_str('<ModPythonRequest\npath:%s,\nGET:%s,\nPOST:%s,\nCOOKIES:%s,\nMETA:%s>' %
+                         (self.path, str(get), str(post),
+                          str(cookies), str(meta)))
 
     def get_full_path(self):
         return '%s%s' % (self.path, self._req.args and ('?' + self._req.args) or '')
@@ -134,7 +134,7 @@ class ModPythonRequest(http.HttpRequest):
                 'SERVER_PROTOCOL':   self._req.protocol,
                 'SERVER_SOFTWARE':   'mod_python'
             }
-            for key, value in self._req.headers_in.items():
+            for key, value in list(self._req.headers_in.items()):
                 key = 'HTTP_' + key.upper().replace('-', '_')
                 self._meta[key] = value
         return self._meta
@@ -192,10 +192,10 @@ class ModPythonHandler(BaseHandler):
 
         # Convert our custom HttpResponse object back into the mod_python req.
         req.content_type = response['Content-Type']
-        for key, value in response.items():
+        for key, value in list(response.items()):
             if key != 'content-type':
                 req.headers_out[str(key)] = str(value)
-        for c in response.cookies.values():
+        for c in list(response.cookies.values()):
             req.headers_out.add('Set-Cookie', c.output(header=''))
         req.status = response.status_code
         try:

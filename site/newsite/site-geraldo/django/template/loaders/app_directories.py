@@ -23,8 +23,8 @@ for app in settings.INSTALLED_APPS:
             mod = __import__(m, {}, {}, [])
         else:
             mod = getattr(__import__(m, {}, {}, [a]), a)
-    except ImportError, e:
-        raise ImproperlyConfigured, 'ImportError %s: %s' % (app, e.args[0])
+    except ImportError as e:
+        raise ImproperlyConfigured('ImportError %s: %s' % (app, e.args[0]))
     template_dir = os.path.join(os.path.dirname(mod.__file__), 'templates')
     if os.path.isdir(template_dir):
         app_template_dirs.append(template_dir)
@@ -48,5 +48,5 @@ def load_template_source(template_name, template_dirs=None):
             return (open(filepath).read().decode(settings.FILE_CHARSET), filepath)
         except IOError:
             pass
-    raise TemplateDoesNotExist, template_name
+    raise TemplateDoesNotExist(template_name)
 load_template_source.is_usable = True

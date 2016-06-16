@@ -11,7 +11,7 @@ def ensure_default_manager(sender):
         # Create the default manager, if needed.
         try:
             cls._meta.get_field('objects')
-            raise ValueError, "Model %s must specify a custom Manager, because it has a field named 'objects'" % cls.__name__
+            raise ValueError("Model %s must specify a custom Manager, because it has a field named 'objects'" % cls.__name__)
         except FieldDoesNotExist:
             pass
         cls.add_to_class('objects', Manager())
@@ -137,7 +137,7 @@ class ManagerDescriptor(object):
 
     def __get__(self, instance, type=None):
         if instance != None:
-            raise AttributeError, "Manager isn't accessible via %s instances" % type.__name__
+            raise AttributeError("Manager isn't accessible via %s instances" % type.__name__)
         return self.manager
 
 class EmptyManager(Manager):

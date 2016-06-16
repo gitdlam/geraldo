@@ -51,6 +51,6 @@ class DecoratorsTest(TestCase):
         # Only check __name__ on Python 2.4 or later since __name__ can't be
         # assigned to in earlier Python versions.
         if version_info[0] >= 2 and version_info[1] >= 4:
-            self.assertEquals(fully_decorated.__name__, 'fully_decorated')
-        self.assertEquals(fully_decorated.__doc__, 'Expected __doc__')
-        self.assertEquals(fully_decorated.__dict__['anything'], 'Expected __dict__')
+            self.assertEqual(fully_decorated.__name__, 'fully_decorated')
+        self.assertEqual(fully_decorated.__doc__, 'Expected __doc__')
+        self.assertEqual(fully_decorated.__dict__['anything'], 'Expected __dict__')

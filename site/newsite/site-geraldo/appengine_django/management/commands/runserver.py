@@ -42,7 +42,7 @@ def start_dev_appserver():
     except ValueError:
       addr, port = None, addrport
     if not port.isdigit():
-      print "Error: '%s' is not a valid port number." % port
+      print("Error: '%s' is not a valid port number." % port)
       sys.exit(1)
   else:
     addr, port = None, "8000"
@@ -60,7 +60,7 @@ def start_dev_appserver():
   p = get_datastore_paths()
   args.extend(["--datastore_path", p[0], "--history_path", p[1]])
   # Append the current working directory to the arguments.
-  dev_appserver_main.main([progname] + args + [os.getcwdu()])
+  dev_appserver_main.main([progname] + args + [os.getcwd()])
 
 
 class Command(BaseCommand):

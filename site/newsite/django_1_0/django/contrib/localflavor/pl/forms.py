@@ -14,7 +14,7 @@ class PLVoivodeshipSelect(Select):
     as choices.
     """
     def __init__(self, attrs=None):
-        from pl_voivodeships import VOIVODESHIP_CHOICES
+        from .pl_voivodeships import VOIVODESHIP_CHOICES
         super(PLVoivodeshipSelect, self).__init__(attrs, choices=VOIVODESHIP_CHOICES)
 
 class PLAdministrativeUnitSelect(Select):
@@ -22,7 +22,7 @@ class PLAdministrativeUnitSelect(Select):
     A select widget with list of Polish administrative units as choices.
     """
     def __init__(self, attrs=None):
-        from pl_administrativeunits import ADMINISTRATIVE_UNIT_CHOICES
+        from .pl_administrativeunits import ADMINISTRATIVE_UNIT_CHOICES
         super(PLAdministrativeUnitSelect, self).__init__(attrs, choices=ADMINISTRATIVE_UNIT_CHOICES)
 
 class PLNationalIdentificationNumberField(RegexField):
@@ -36,8 +36,8 @@ class PLNationalIdentificationNumberField(RegexField):
     The algorithm is documented at http://en.wikipedia.org/wiki/PESEL.
     """
     default_error_messages = {
-        'invalid': _(u'National Identification Number consists of 11 digits.'),
-        'checksum': _(u'Wrong checksum for the National Identification Number.'),
+        'invalid': _('National Identification Number consists of 11 digits.'),
+        'checksum': _('Wrong checksum for the National Identification Number.'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -48,7 +48,7 @@ class PLNationalIdentificationNumberField(RegexField):
         super(PLNationalIdentificationNumberField, self).clean(value)
         if not self.has_valid_checksum(value):
             raise ValidationError(self.error_messages['checksum'])
-        return u'%s' % value
+        return '%s' % value
 
     def has_valid_checksum(self, number):
         """
@@ -69,8 +69,8 @@ class PLTaxNumberField(RegexField):
     http://wipos.p.lodz.pl/zylla/ut/nip-rego.html
     """
     default_error_messages = {
-        'invalid': _(u'Enter a tax number field (NIP) in the format XXX-XXX-XX-XX or XX-XX-XXX-XXX.'),
-        'checksum': _(u'Wrong checksum for the Tax Number (NIP).'),
+        'invalid': _('Enter a tax number field (NIP) in the format XXX-XXX-XX-XX or XX-XX-XXX-XXX.'),
+        'checksum': _('Wrong checksum for the Tax Number (NIP).'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -82,7 +82,7 @@ class PLTaxNumberField(RegexField):
         value = re.sub("[-]", "", value)
         if not self.has_valid_checksum(value):
             raise ValidationError(self.error_messages['checksum'])
-        return u'%s' % value
+        return '%s' % value
 
     def has_valid_checksum(self, number):
         """
@@ -109,8 +109,8 @@ class PLNationalBusinessRegisterField(RegexField):
     The checksum algorithm is documented at http://wipos.p.lodz.pl/zylla/ut/nip-rego.html
     """
     default_error_messages = {
-        'invalid': _(u'National Business Register Number (REGON) consists of 7 or 9 digits.'),
-        'checksum': _(u'Wrong checksum for the National Business Register Number (REGON).'),
+        'invalid': _('National Business Register Number (REGON) consists of 7 or 9 digits.'),
+        'checksum': _('Wrong checksum for the National Business Register Number (REGON).'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -121,7 +121,7 @@ class PLNationalBusinessRegisterField(RegexField):
         super(PLNationalBusinessRegisterField, self).clean(value)
         if not self.has_valid_checksum(value):
             raise ValidationError(self.error_messages['checksum'])
-        return u'%s' % value
+        return '%s' % value
 
     def has_valid_checksum(self, number):
         """
@@ -153,7 +153,7 @@ class PLPostalCodeField(RegexField):
     Valid code is XX-XXX where X is digit.
     """
     default_error_messages = {
-        'invalid': _(u'Enter a postal code in the format XX-XXX.'),
+        'invalid': _('Enter a postal code in the format XX-XXX.'),
     }
 
     def __init__(self, *args, **kwargs):

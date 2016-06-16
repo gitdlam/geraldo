@@ -23,7 +23,7 @@ def url(regex, view, kwargs=None, name=None, prefix=''):
         # For include(...) processing.
         return RegexURLResolver(regex, view[0], kwargs)
     else:
-        if isinstance(view, basestring):
+        if isinstance(view, str):
             if not view:
                 raise ImproperlyConfigured('Empty URL pattern view name not permitted (for pattern %r)' % regex)
             if prefix:

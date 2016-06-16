@@ -71,7 +71,7 @@ class CollectedObjects(object):
     def __getitem__(self, key):
         return self.data[key]
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.data)
 
     def iteritems(self):
@@ -79,7 +79,7 @@ class CollectedObjects(object):
             yield k, self[k]
 
     def items(self):
-        return list(self.iteritems())
+        return list(self.items())
 
     def keys(self):
         return self.ordered_keys()
@@ -91,7 +91,7 @@ class CollectedObjects(object):
         """
         dealt_with = SortedDict()
         # Start with items that have no children
-        models = self.data.keys()
+        models = list(self.data.keys())
         while len(dealt_with) < len(models):
             found = False
             for model in models:
@@ -105,13 +105,13 @@ class CollectedObjects(object):
                 raise CyclicDependency(
                     "There is a cyclic dependency of items to be processed.")
 
-        return dealt_with.keys()
+        return list(dealt_with.keys())
 
     def unordered_keys(self):
         """
         Fallback for the case where is a cyclic dependency but we don't  care.
         """
-        return self.data.keys()
+        return list(self.data.keys())
 
 
 class QuerySet(object):
@@ -178,11 +178,11 @@ class QuerySet(object):
             if len(self._result_cache) <= pos:
                 self._fill_cache()
 
-    def __nonzero__(self):
+    def __bool__(self):
         if self._result_cache is not None:
             return bool(self._result_cache)
         try:
-            iter(self).next()
+            next(iter(self))
         except StopIteration:
             return False
         return True
@@ -191,7 +191,7 @@ class QuerySet(object):
         """
         Retrieves an item or slice from the set of results.
         """
-        if not isinstance(k, (slice, int, long)):
+        if not isinstance(k, (slice, int)):
             raise TypeError
         assert ((not isinstance(k, slice) and (k >= 0))
                 or (isinstance(k, slice) and (k.start is None or k.start >= 0)
@@ -230,8 +230,8 @@ class QuerySet(object):
             qs = self._clone()
             qs.query.set_limits(k, k + 1)
             return list(qs)[0]
-        except self.model.DoesNotExist, e:
-            raise IndexError, e.args
+        except self.model.DoesNotExist as e:
+            raise IndexError(e.args)
 
     def __and__(self, other):
         self._merge_sanity_check(other)
@@ -264,7 +264,7 @@ class QuerySet(object):
         else:
             requested = None
         max_depth = self.query.max_depth
-        extra_select = self.query.extra_select.keys()
+        extra_select = list(self.query.extra_select.keys())
         index_start = len(extra_select)
         for row in self.query.results_iter():
             if fill_cache:
@@ -326,14 +326,14 @@ class QuerySet(object):
             return self.get(**kwargs), False
         except self.model.DoesNotExist:
             try:
-                params = dict([(k, v) for k, v in kwargs.items() if '__' not in k])
+                params = dict([(k, v) for k, v in list(kwargs.items()) if '__' not in k])
                 params.update(defaults)
                 obj = self.model(**params)
                 sid = transaction.savepoint()
                 obj.save(force_insert=True)
                 transaction.savepoint_commit(sid)
                 return obj, True
-            except IntegrityError, e:
+            except IntegrityError as e:
                 transaction.savepoint_rollback(sid)
                 try:
                     return self.get(**kwargs), False
@@ -440,7 +440,7 @@ class QuerySet(object):
         flat = kwargs.pop('flat', False)
         if kwargs:
             raise TypeError('Unexpected keyword arguments to values_list: %s'
-                    % (kwargs.keys(),))
+                    % (list(kwargs.keys()),))
         if flat and len(fields) > 1:
             raise TypeError("'flat' is not valid when values_list is called with more than one field.")
         return self._clone(klass=ValuesListQuerySet, setup=True, flat=flat,
@@ -528,7 +528,7 @@ class QuerySet(object):
         depth = kwargs.pop('depth', 0)
         if kwargs:
             raise TypeError('Unexpected keyword arguments to select_related: %s'
-                    % (kwargs.keys(),))
+                    % (list(kwargs.keys()),))
         obj = self._clone()
         if fields:
             if depth:
@@ -609,7 +609,7 @@ class QuerySet(object):
         if self._iter:
             try:
                 for i in range(num or ITER_CHUNK_SIZE):
-                    self._result_cache.append(self._iter.next())
+                    self._result_cache.append(next(self._iter))
             except StopIteration:
                 self._iter = None
 
@@ -659,9 +659,9 @@ class ValuesQuerySet(QuerySet):
         if (not self.extra_names and
             len(self.field_names) != len(self.model._meta.fields)):
             self.query.trim_extra_select(self.extra_names)
-        names = self.query.extra_select.keys() + self.field_names
+        names = list(self.query.extra_select.keys()) + self.field_names
         for row in self.query.results_iter():
-            yield dict(zip(names, row))
+            yield dict(list(zip(names, row)))
 
     def _setup_query(self):
         """
@@ -678,7 +678,7 @@ class ValuesQuerySet(QuerySet):
             else:
                 field_names = []
                 for f in self._fields:
-                    if self.query.extra_select.has_key(f):
+                    if f in self.query.extra_select:
                         self.extra_names.append(f)
                     else:
                         field_names.append(f)
@@ -723,9 +723,9 @@ class ValuesListQuerySet(ValuesQuerySet):
             # When extra(select=...) is involved, the extra cols come are
             # always at the start of the row, so we need to reorder the fields
             # to match the order in self._fields.
-            names = self.query.extra_select.keys() + self.field_names
+            names = list(self.query.extra_select.keys()) + self.field_names
             for row in self.query.results_iter():
-                data = dict(zip(names, row))
+                data = dict(list(zip(names, row)))
                 yield tuple([data[f] for f in self._fields])
 
     def _clone(self, *args, **kwargs):
@@ -788,7 +788,7 @@ class EmptyQuerySet(QuerySet):
     def iterator(self):
         # This slightly odd construction is because we need an empty generator
         # (it raises StopIteration immediately).
-        yield iter([]).next()
+        yield next(iter([]))
 
 
 def get_cached_row(klass, row, index_start, max_depth=0, cur_depth=0,
@@ -831,7 +831,7 @@ def delete_objects(seen_objs):
     referred to.
     """
     try:
-        ordered_classes = seen_objs.keys()
+        ordered_classes = list(seen_objs.keys())
     except CyclicDependency:
         # If there is a cyclic dependency, we cannot in general delete the
         # objects.  However, if an appropriate transaction is set up, or if the
@@ -841,7 +841,7 @@ def delete_objects(seen_objs):
 
     obj_pairs = {}
     for cls in ordered_classes:
-        items = seen_objs[cls].items()
+        items = list(seen_objs[cls].items())
         items.sort()
         obj_pairs[cls] = items
 
@@ -856,8 +856,7 @@ def delete_objects(seen_objs):
         update_query = sql.UpdateQuery(cls, connection)
         for field, model in cls._meta.get_fields_with_model():
             if (field.rel and field.null and field.rel.to in seen_objs and
-                    filter(lambda f: f.column == field.column,
-                    field.rel.to._meta.fields)):
+                    [f for f in field.rel.to._meta.fields if f.column == field.column]):
                 if model:
                     sql.UpdateQuery(model, connection).clear_related(field,
                             pk_list)

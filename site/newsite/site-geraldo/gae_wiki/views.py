@@ -13,10 +13,10 @@ from utils.decorators import page, admin_required
 from utils.shortcuts import get_object_or_404
 from utils.serialization import serialize
 
-from models import Wiki
-from forms import FormWiki
+from .models import Wiki
+from .forms import FormWiki
 
-import app_settings
+from . import app_settings
 
 #@cache_page(60)
 def wiki(request, slug):

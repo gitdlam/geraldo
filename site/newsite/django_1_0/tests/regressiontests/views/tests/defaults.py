@@ -23,7 +23,7 @@ class DefaultsTests(TestCase):
         for obj in Article.objects.all():
             short_url = '/views/shortcut/%s/%s/' % (ContentType.objects.get_for_model(Article).id, obj.pk)
             response = self.client.get(short_url)
-            self.assertEquals(response.status_code, 404)
+            self.assertEqual(response.status_code, 404)
 
     def test_page_not_found(self):
         "A 404 status is returned by the page_not_found view"
@@ -31,9 +31,9 @@ class DefaultsTests(TestCase):
                              '/views/other_non_existing_url/'] # this NOT in urls.py
         for url in non_existing_urls:
             response = self.client.get(url)
-            self.assertEquals(response.status_code, 404)
+            self.assertEqual(response.status_code, 404)
 
     def test_server_error(self):
         "The server_error view raises a 500 status"
         response = self.client.get('/views/server_error/')
-        self.assertEquals(response.status_code, 500)
+        self.assertEqual(response.status_code, 500)

@@ -8,7 +8,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         try:
             for line in self.handle_inspection():
-                print line
+                print(line)
         except NotImplementedError:
             raise CommandError("Database inspection isn't supported for the currently selected database backend.")
 
@@ -110,7 +110,7 @@ class Command(NoArgsCommand):
                 if extra_params:
                     if not field_desc.endswith('('):
                         field_desc += ', '
-                    field_desc += ', '.join(['%s=%r' % (k, v) for k, v in extra_params.items()])
+                    field_desc += ', '.join(['%s=%r' % (k, v) for k, v in list(extra_params.items())])
                 field_desc += ')'
                 if comment_notes:
                     field_desc += ' # ' + ' '.join(comment_notes)

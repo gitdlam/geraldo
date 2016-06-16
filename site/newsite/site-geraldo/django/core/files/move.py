@@ -81,7 +81,7 @@ def file_move_safe(old_file_name, new_file_name, chunk_size = 1024*64, allow_ove
 
     try:
         os.remove(old_file_name)
-    except OSError, e:
+    except OSError as e:
         # Certain operating systems (Cygwin and Windows)
         # fail when deleting opened files, ignore it
         if getattr(e, 'winerror', 0) != 32:

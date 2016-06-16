@@ -5,12 +5,13 @@ from django.utils import feedgenerator
 from django.utils.encoding import smart_unicode, iri_to_uri
 from django.conf import settings         
 from django.template import RequestContext
+import collections
 
 def add_domain(domain, url):
     if not (url.startswith('http://') or url.startswith('https://')):
         # 'url' must already be ASCII and URL-quoted, so no need for encoding
         # conversions here.
-        url = iri_to_uri(u'http://%s%s' % (domain, url))
+        url = iri_to_uri('http://%s%s' % (domain, url))
     return url
 
 class FeedDoesNotExist(ObjectDoesNotExist):
@@ -34,22 +35,22 @@ class Feed(object):
         try:
             return item.get_absolute_url()
         except AttributeError:
-            raise ImproperlyConfigured, "Give your %s class a get_absolute_url() method, or define an item_link() method in your Feed class." % item.__class__.__name__
+            raise ImproperlyConfigured("Give your %s class a get_absolute_url() method, or define an item_link() method in your Feed class." % item.__class__.__name__)
 
     def __get_dynamic_attr(self, attname, obj, default=None):
         try:
             attr = getattr(self, attname)
         except AttributeError:
             return default
-        if callable(attr):
+        if isinstance(attr, collections.Callable):
             # Check func_code.co_argcount rather than try/excepting the
             # function and catching the TypeError, because something inside
             # the function may raise the TypeError. This technique is more
             # accurate.
             if hasattr(attr, 'func_code'):
-                argcount = attr.func_code.co_argcount
+                argcount = attr.__code__.co_argcount
             else:
-                argcount = attr.__call__.func_code.co_argcount
+                argcount = attr.__call__.__code__.co_argcount
             if argcount == 2: # one argument is 'self'
                 return attr(obj)
             else:

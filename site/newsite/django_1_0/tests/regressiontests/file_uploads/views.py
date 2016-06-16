@@ -3,7 +3,7 @@ import sha
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpResponse, HttpResponseServerError
 from django.utils import simplejson
-from uploadhandler import QuotaUploadHandler
+from .uploadhandler import QuotaUploadHandler
 
 def file_upload_view(request):
     """
@@ -12,7 +12,7 @@ def file_upload_view(request):
     """
     form_data = request.POST.copy()
     form_data.update(request.FILES)
-    if isinstance(form_data.get('file_field'), UploadedFile) and isinstance(form_data['name'], unicode):
+    if isinstance(form_data.get('file_field'), UploadedFile) and isinstance(form_data['name'], str):
         # If a file is posted, the dummy client should only post the file name,
         # not the full path.
         if os.path.dirname(form_data['file_field'].name) != '':
@@ -29,10 +29,10 @@ def file_upload_view_verify(request):
     form_data.update(request.FILES)
 
     # Check to see if unicode names worked out.
-    if not request.FILES['file_unicode'].name.endswith(u'test_\u4e2d\u6587_Orl\xe9ans.jpg'):
+    if not request.FILES['file_unicode'].name.endswith('test_\u4e2d\u6587_Orl\xe9ans.jpg'):
         return HttpResponseServerError()
 
-    for key, value in form_data.items():
+    for key, value in list(form_data.items()):
         if key.endswith('_hash'):
             continue
         if key + '_hash' not in form_data:
@@ -51,7 +51,7 @@ def file_upload_echo(request):
     """
     Simple view to echo back info about uploaded files for tests.
     """
-    r = dict([(k, f.name) for k, f in request.FILES.items()])
+    r = dict([(k, f.name) for k, f in list(request.FILES.items())])
     return HttpResponse(simplejson.dumps(r))
     
 def file_upload_quota(request):
@@ -75,6 +75,6 @@ def file_upload_getlist_count(request):
     """
     file_counts = {}
 
-    for key in request.FILES.keys():
+    for key in list(request.FILES.keys()):
         file_counts[key] = len(request.FILES.getlist(key))
     return HttpResponse(simplejson.dumps(file_counts))

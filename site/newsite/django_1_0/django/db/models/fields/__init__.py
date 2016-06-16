@@ -2,6 +2,7 @@ import copy
 import datetime
 import os
 import time
+import collections
 try:
     import decimal
 except ImportError:
@@ -44,7 +45,7 @@ def manipulator_validator_unique(f, opts, self, field_data, all_data):
         return
     if getattr(self, 'original_object', None) and self.original_object._get_pk_val() == old_obj._get_pk_val():
         return
-    raise validators.ValidationError, _("%(optname)s with this %(fieldname)s already exists.") % {'optname': capfirst(opts.verbose_name), 'fieldname': f.verbose_name}
+    raise validators.ValidationError(_("%(optname)s with this %(fieldname)s already exists.") % {'optname': capfirst(opts.verbose_name), 'fieldname': f.verbose_name})
 
 # A guide to Field parameters:
 #
@@ -61,13 +62,9 @@ def manipulator_validator_unique(f, opts, self, field_data, all_data):
 #
 #     getattr(obj, opts.pk.attname)
 
-class Field(object):
+class Field(object, metaclass=LegacyMaxlength):
     # Provide backwards compatibility for the maxlength attribute and
     # argument for this class and all subclasses.
-    __metaclass__ = LegacyMaxlength
-
-    # Designates whether empty strings fundamentally are allowed at the
-    # database level.
     empty_strings_allowed = True
 
     # These track each time a Field instance is created. Used to retain order.
@@ -175,7 +172,7 @@ class Field(object):
             return [_('This field is required.')]
         try:
             self.validate(field_data, all_data)
-        except validators.ValidationError, e:
+        except validators.ValidationError as e:
             return e.messages
         return []
 
@@ -268,7 +265,7 @@ class Field(object):
     def get_default(self):
         "Returns the default value for this field."
         if self.default is not NOT_PROVIDED:
-            if callable(self.default):
+            if isinstance(self.default, collections.Callable):
                 return self.default()
             return force_unicode(self.default, strings_only=True)
         if not self.empty_strings_allowed or (self.null and not connection.features.interprets_empty_strings_as_nulls):
@@ -455,7 +452,7 @@ class AutoField(Field):
         try:
             return int(value)
         except (TypeError, ValueError):
-            raise validators.ValidationError, _("This value must be an integer.")
+            raise validators.ValidationError(_("This value must be an integer."))
 
     def get_manipulator_fields(self, opts, manipulator, change, name_prefix='', rel=False, follow=True):
         if not rel:
@@ -496,7 +493,7 @@ class BooleanField(Field):
         if value in (True, False): return value
         if value in ('t', 'True', '1'): return True
         if value in ('f', 'False', '0'): return False
-        raise validators.ValidationError, _("This value must be either True or False.")
+        raise validators.ValidationError(_("This value must be either True or False."))
 
     def get_manipulator_field_objs(self):
         return [oldforms.CheckboxField]
@@ -514,13 +511,13 @@ class CharField(Field):
         return "CharField"
 
     def to_python(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         if value is None:
             if self.null:
                 return value
             else:
-                raise validators.ValidationError, ugettext_lazy("This field cannot be null.")
+                raise validators.ValidationError(ugettext_lazy("This field cannot be null."))
         return smart_unicode(value)
 
     def formfield(self, **kwargs):
@@ -557,7 +554,7 @@ class DateField(Field):
         try:
             return datetime.date(*time.strptime(value, '%Y-%m-%d')[:3])
         except ValueError:
-            raise validators.ValidationError, _('Enter a valid date in YYYY-MM-DD format.')
+            raise validators.ValidationError(_('Enter a valid date in YYYY-MM-DD format.'))
 
     def get_db_prep_lookup(self, lookup_type, value):
         if lookup_type in ('range', 'in'):
@@ -638,7 +635,7 @@ class DateTimeField(DateField):
                 try:
                     return datetime.datetime(*time.strptime(value, '%Y-%m-%d')[:3])
                 except ValueError:
-                    raise validators.ValidationError, _('Enter a valid date/time in YYYY-MM-DD HH:MM format.')
+                    raise validators.ValidationError(_('Enter a valid date/time in YYYY-MM-DD HH:MM format.'))
 
     def get_db_prep_save(self, value):
         # Casts dates into string format for entry into database.
@@ -710,7 +707,7 @@ class DecimalField(Field):
                 _("This value must be a decimal number."))
 
     def _format(self, value):
-        if isinstance(value, basestring) or value is None:
+        if isinstance(value, str) or value is None:
             return value
         else:
             return self.format_number(value)
@@ -728,7 +725,7 @@ class DecimalField(Field):
         if value < 0:
             num_chars += 1
 
-        return u"%.*f" % (self.decimal_places, value)
+        return "%.*f" % (self.decimal_places, value)
 
     def get_db_prep_save(self, value):
         value = self._format(value)
@@ -786,7 +783,7 @@ class FileField(Field):
         elif value is None:
             return None
         else:
-            return unicode(value)
+            return str(value)
 
     def get_manipulator_fields(self, opts, manipulator, change, name_prefix='', rel=False, follow=True):
         field_list = Field.get_manipulator_fields(self, opts, manipulator, change, name_prefix, rel, follow)
@@ -820,7 +817,7 @@ class FileField(Field):
         def isWithinMediaRoot(field_data, all_data):
             f = os.path.abspath(os.path.join(settings.MEDIA_ROOT, field_data))
             if not f.startswith(os.path.abspath(os.path.normpath(settings.MEDIA_ROOT))):
-                raise validators.ValidationError, _("Enter a valid filename.")
+                raise validators.ValidationError(_("Enter a valid filename."))
         field_list[1].validator_list.append(isWithinMediaRoot)
         return field_list
 
@@ -1011,7 +1008,7 @@ class NullBooleanField(Field):
         if value in ('None'): return None
         if value in ('t', 'True', '1'): return True
         if value in ('f', 'False', '0'): return False
-        raise validators.ValidationError, _("This value must be either None, True or False.")
+        raise validators.ValidationError(_("This value must be either None, True or False."))
 
     def get_manipulator_field_objs(self):
         return [oldforms.NullBooleanField]
@@ -1142,7 +1139,7 @@ class TimeField(Field):
                 if isinstance(value, datetime.time):
                     value = datetime.datetime(1900, 1, 1, value.hour, value.minute,
                                               value.second, value.microsecond)
-                elif isinstance(value, basestring):
+                elif isinstance(value, str):
                     value = datetime.datetime(*(time.strptime(value, '%H:%M:%S')[:6]))
             else:
                 value = smart_unicode(value)

@@ -24,13 +24,13 @@ class CacheClass(BaseCache):
         if val is None:
             return default
         else:
-            if isinstance(val, basestring):
+            if isinstance(val, str):
                 return smart_unicode(val)
             else:
                 return val
 
     def set(self, key, value, timeout=0):
-        if isinstance(value, unicode):
+        if isinstance(value, str):
             value = value.encode('utf-8')
         self._cache.set(smart_str(key), value, timeout or self.default_timeout)
 
@@ -38,4 +38,4 @@ class CacheClass(BaseCache):
         self._cache.delete(smart_str(key))
 
     def get_many(self, keys):
-        return self._cache.get_multi(map(smart_str,keys))
+        return self._cache.get_multi(list(map(smart_str,keys)))

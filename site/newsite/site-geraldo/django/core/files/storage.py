@@ -1,6 +1,6 @@
 import os
 import errno
-import urlparse
+import urllib.parse
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
@@ -162,7 +162,7 @@ class FileSystemStorage(Storage):
                     finally:
                         locks.unlock(fd)
                         os.close(fd)
-            except OSError, e:
+            except OSError as e:
                 if e.errno == errno.EEXIST:
                     # Ooops, the file exists. We need a new file name.
                     name = self.get_available_name(name)
@@ -210,7 +210,7 @@ class FileSystemStorage(Storage):
     def url(self, name):
         if self.base_url is None:
             raise ValueError("This file is not accessible via a URL.")
-        return urlparse.urljoin(self.base_url, name).replace('\\', '/')
+        return urllib.parse.urljoin(self.base_url, name).replace('\\', '/')
 
 def get_storage_class(import_path):
     try:
@@ -220,7 +220,7 @@ def get_storage_class(import_path):
     module, classname = import_path[:dot], import_path[dot+1:]
     try:
         mod = __import__(module, {}, {}, [''])
-    except ImportError, e:
+    except ImportError as e:
         raise ImproperlyConfigured('Error importing storage module %s: "%s"' % (module, e))
     try:
         return getattr(mod, classname)

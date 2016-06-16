@@ -208,7 +208,7 @@ def _validate_base(cls, model):
     # radio_fields
     if hasattr(cls, 'radio_fields'):
         _check_isdictw('radio_fields', cls.radio_fields)
-        for field, val in cls.radio_fields.items():
+        for field, val in list(cls.radio_fields.items()):
             f = _check_field_existsw('radio_fields', field)
             if not (isinstance(f, models.ForeignKey) or f.choices):
                 raise ImproperlyConfigured("`%s.radio_fields['%s']` "
@@ -222,7 +222,7 @@ def _validate_base(cls, model):
     # prepopulated_fields
     if hasattr(cls, 'prepopulated_fields'):
         _check_isdictw('prepopulated_fields', cls.prepopulated_fields)
-        for field, val in cls.prepopulated_fields.items():
+        for field, val in list(cls.prepopulated_fields.items()):
             f = _check_field_existsw('prepopulated_fields', field)
             if isinstance(f, (models.DateTimeField, models.ForeignKey,
                 models.ManyToManyField)):

@@ -195,7 +195,7 @@ class MultiPartParser(object):
                                 # We only special-case base64 transfer encoding
                                 try:
                                     chunk = str(chunk).decode('base64')
-                                except Exception, e:
+                                except Exception as e:
                                     # Since this is only a chunk, any error is an unfixable error.
                                     raise MultiPartParserError("Could not decode base64 data: %r" % e)
 
@@ -208,7 +208,7 @@ class MultiPartParser(object):
                                     # If the chunk received by the handler is None, then don't continue.
                                     break
 
-                    except SkipFile, e:
+                    except SkipFile as e:
                         # Just use up the rest of this file...
                         exhaust(field_stream)
                     else:
@@ -217,7 +217,7 @@ class MultiPartParser(object):
                 else:
                     # If this is neither a FIELD or a FILE, just exhaust the stream.
                     exhaust(stream)
-        except StopUpload, e:
+        except StopUpload as e:
             if not e.connection_reset:
                 exhaust(limited_input_data)
         else:
@@ -290,7 +290,7 @@ class LazyStream(object):
             while remaining != 0:
                 assert remaining > 0, 'remaining bytes to read should never go negative'
 
-                chunk = self.next()
+                chunk = next(self)
 
                 emitting = chunk[:remaining]
                 self.unget(chunk[remaining:])
@@ -300,7 +300,7 @@ class LazyStream(object):
         out = ''.join(parts())
         return out
 
-    def next(self):
+    def __next__(self):
         """
         Used when the exact number of bytes to read is unimportant.
 
@@ -312,7 +312,7 @@ class LazyStream(object):
             output = self._leftover
             self._leftover = ''
         else:
-            output = self._producer.next()
+            output = next(self._producer)
             self._unget_history = []
         self.position += len(output)
         return output
@@ -371,7 +371,7 @@ class ChunkIter(object):
         self.flo = flo
         self.chunk_size = chunk_size
 
-    def next(self):
+    def __next__(self):
         try:
             data = self.flo.read(self.chunk_size)
         except InputStreamExhausted:
@@ -416,7 +416,7 @@ class InterBoundaryIter(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         try:
             return LazyStream(BoundaryIter(self._stream, self._boundary))
         except InputStreamExhausted:
@@ -457,7 +457,7 @@ class BoundaryIter(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self._done:
             raise StopIteration()
 

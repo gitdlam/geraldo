@@ -92,4 +92,4 @@ class SampleTestCase(TestCase):
     def testClassFixtures(self):
         "Check that test case has installed 4 fixture objects"
         self.assertEqual(Article.objects.count(), 4)
-        self.assertEquals(str(Article.objects.all()), "[<Article: Django conquers world!>, <Article: Copyright is fine the way it is>, <Article: Poker has no place on ESPN>, <Article: Python program becomes self aware>]")
+        self.assertEqual(str(Article.objects.all()), "[<Article: Django conquers world!>, <Article: Copyright is fine the way it is>, <Article: Poker has no place on ESPN>, <Article: Python program becomes self aware>]")

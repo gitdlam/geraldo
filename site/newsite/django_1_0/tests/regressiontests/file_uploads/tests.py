@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, client
 from django.utils import simplejson
 
-from models import FileModel, UPLOAD_ROOT, UPLOAD_TO
+from .models import FileModel, UPLOAD_ROOT, UPLOAD_TO
 
 class FileUploadTests(TestCase):
     def test_simple_upload(self):
@@ -32,7 +32,7 @@ class FileUploadTests(TestCase):
         file2.seek(0)
 
         # This file contains chinese symbols for a name.
-        file3 = open(os.path.join(tdir, u'test_&#20013;&#25991;_Orl\u00e9ans.jpg'.encode('utf-8')), 'w+b')
+        file3 = open(os.path.join(tdir, 'test_&#20013;&#25991;_Orl\u00e9ans.jpg'.encode('utf-8')), 'w+b')
         file3.write('b' * (2 ** 10))
         file3.seek(0)
 
@@ -43,7 +43,7 @@ class FileUploadTests(TestCase):
             'file_unicode': file3,
             }
 
-        for key in post_data.keys():
+        for key in list(post_data.keys()):
             try:
                 post_data[key + '_hash'] = sha.new(post_data[key].read()).hexdigest()
                 post_data[key].seek(0)
@@ -130,7 +130,7 @@ class FileUploadTests(TestCase):
             'wsgi.input':     client.FakePayload(payload),
         }
         got = simplejson.loads(self.client.request(**r).content)
-        self.assert_(len(got['file']) < 256, "Got a long file name (%s characters)." % len(got['file']))
+        self.assertTrue(len(got['file']) < 256, "Got a long file name (%s characters)." % len(got['file']))
 
     def test_custom_upload_handler(self):
         # A small file (under the 5M quota)
@@ -144,12 +144,12 @@ class FileUploadTests(TestCase):
         # Small file posting should work.
         response = self.client.post('/file_uploads/quota/', {'f': open(smallfile.name)})
         got = simplejson.loads(response.content)
-        self.assert_('f' in got)
+        self.assertTrue('f' in got)
 
         # Large files don't go through.
         response = self.client.post("/file_uploads/quota/", {'f': open(bigfile.name)})
         got = simplejson.loads(response.content)
-        self.assert_('f' not in got)
+        self.assertTrue('f' not in got)
 
     def test_broken_custom_upload_handler(self):
         f = tempfile.NamedTemporaryFile()
@@ -175,11 +175,11 @@ class FileUploadTests(TestCase):
 
         response = self.client.post('/file_uploads/getlist_count/', {
             'file1': open(file1.name),
-            'field1': u'test',
-            'field2': u'test3',
-            'field3': u'test5',
-            'field4': u'test6',
-            'field5': u'test7',
+            'field1': 'test',
+            'field2': 'test3',
+            'field3': 'test5',
+            'field4': 'test6',
+            'field5': 'test7',
             'file2': (open(file2.name), open(file2a.name))
         })
         got = simplejson.loads(response.content)
@@ -198,16 +198,16 @@ class DirectoryCreationTests(unittest.TestCase):
             os.makedirs(UPLOAD_ROOT)
 
     def tearDown(self):
-        os.chmod(UPLOAD_ROOT, 0700)
+        os.chmod(UPLOAD_ROOT, 0o700)
         shutil.rmtree(UPLOAD_ROOT)
 
     def test_readonly_root(self):
         """Permission errors are not swallowed"""
-        os.chmod(UPLOAD_ROOT, 0500)
+        os.chmod(UPLOAD_ROOT, 0o500)
         try:
             self.obj.save_testfile_file('foo.txt', SimpleUploadedFile('foo.txt', 'x'))
-        except OSError, err:
-            self.assertEquals(err.errno, errno.EACCES)
+        except OSError as err:
+            self.assertEqual(err.errno, errno.EACCES)
         except:
             self.fail("OSError [Errno %s] not raised" % errno.EACCES)
 
@@ -218,10 +218,10 @@ class DirectoryCreationTests(unittest.TestCase):
         fd.close()
         try:
             self.obj.save_testfile_file('foo.txt', SimpleUploadedFile('foo.txt', 'x'))
-        except IOError, err:
+        except IOError as err:
             # The test needs to be done on a specific string as IOError
             # is raised even without the patch (just not early enough)
-            self.assertEquals(err.args[0],
+            self.assertEqual(err.args[0],
                               "%s exists and is not a directory" % UPLOAD_TO)
         except:
             self.fail("IOError not raised")

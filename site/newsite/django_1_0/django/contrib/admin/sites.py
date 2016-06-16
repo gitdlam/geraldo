@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy, ugettext as _
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 import base64
-import cPickle as pickle
+import pickle as pickle
 import datetime
 import md5
 import re
@@ -38,7 +38,7 @@ def _decode_post_data(encoded_data):
     pickled, tamper_check = encoded_data[:-32], encoded_data[-32:]
     if md5.new(pickled + settings.SECRET_KEY).hexdigest() != tamper_check:
         from django.core.exceptions import SuspiciousOperation
-        raise SuspiciousOperation, "User may have tampered with session cookie."
+        raise SuspiciousOperation("User may have tampered with session cookie.")
     return pickle.loads(pickled)
 
 class AdminSite(object):
@@ -228,7 +228,7 @@ class AdminSite(object):
         from django.contrib.auth.models import User
 
         # If this isn't already the login page, display it.
-        if not request.POST.has_key(LOGIN_FORM_KEY):
+        if LOGIN_FORM_KEY not in request.POST:
             if request.POST:
                 message = _("Please log in again, because your session has expired. Don't worry: Your submission has been saved.")
             else:
@@ -246,7 +246,7 @@ class AdminSite(object):
         user = authenticate(username=username, password=password)
         if user is None:
             message = ERROR_MESSAGE
-            if u'@' in username:
+            if '@' in username:
                 # Mistakenly entered e-mail address instead of username? Look it up.
                 try:
                     user = User.objects.get(email=username)
@@ -264,9 +264,9 @@ class AdminSite(object):
         else:
             if user.is_active and user.is_staff:
                 login(request, user)
-                if request.POST.has_key('post_data'):
+                if 'post_data' in request.POST:
                     post_data = _decode_post_data(request.POST['post_data'])
-                    if post_data and not post_data.has_key(LOGIN_FORM_KEY):
+                    if post_data and LOGIN_FORM_KEY not in post_data:
                         # overwrite request.POST with the saved post_data, and continue
                         request.POST = post_data
                         request.user = user
@@ -285,7 +285,7 @@ class AdminSite(object):
         """
         app_dict = {}
         user = request.user
-        for model, model_admin in self._registry.items():
+        for model, model_admin in list(self._registry.items()):
             app_label = model._meta.app_label
             has_module_perms = user.has_module_perms(app_label)
 
@@ -298,7 +298,7 @@ class AdminSite(object):
 
                 # Check whether user has any perm for this module.
                 # If so, add the module to the model_list.
-                if True in perms.values():
+                if True in list(perms.values()):
                     model_dict = {
                         'name': capfirst(model._meta.verbose_name_plural),
                         'admin_url': mark_safe('%s/%s/' % (app_label, model.__name__.lower())),
@@ -314,7 +314,7 @@ class AdminSite(object):
                         }
 
         # Sort the apps alphabetically.
-        app_list = app_dict.values()
+        app_list = list(app_dict.values())
         app_list.sort(lambda x, y: cmp(x['name'], y['name']))
 
         # Sort the models alphabetically within each app.
@@ -334,7 +334,7 @@ class AdminSite(object):
 
     def display_login_form(self, request, error_message='', extra_context=None):
         request.session.set_test_cookie()
-        if request.POST and request.POST.has_key('post_data'):
+        if request.POST and 'post_data' in request.POST:
             # User has failed login BUT has previously saved post data.
             post_data = request.POST['post_data']
         elif request.POST:

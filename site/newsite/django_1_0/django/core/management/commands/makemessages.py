@@ -47,7 +47,7 @@ def make_messages(locale=None, domain='django', verbosity='1', all=False):
 
     for locale in languages:
         if verbosity > 0:
-            print "processing language", locale
+            print("processing language", locale)
         basedir = os.path.join(localedir, locale, 'LC_MESSAGES')
         if not os.path.isdir(basedir):
             os.makedirs(basedir)

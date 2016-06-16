@@ -45,11 +45,11 @@ for filename in os.listdir(test_dir):
                            filename[:-3])
   for name in dir(test_module):
     item = getattr(test_module, name)
-    if not (isinstance(item, (type, types.ClassType)) and
+    if not (isinstance(item, type) and
             issubclass(item, unittest.TestCase)):
       continue
     # Found a test, bring into the module namespace.
-    exec "%s = item" % name
+    exec("%s = item" % name)
     test_names.append(name)
 
 # Hide everything other than the test cases from other modules.

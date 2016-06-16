@@ -12,7 +12,7 @@ import time
 os.environ['NLS_LANG'] = '.UTF8'
 try:
     import cx_Oracle as Database
-except ImportError, e:
+except ImportError as e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading cx_Oracle module: %s" % e)
 
@@ -198,7 +198,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def value_to_db_time(self, value):
         if value is None:
             return None
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return datetime.datetime(*(time.strptime(value, '%H:%M:%S')[:6]))
         return datetime.datetime(1900, 1, 1, value.hour, value.minute,
                                  value.second, value.microsecond)
@@ -295,7 +295,7 @@ class OracleParam(object):
         if hasattr(param, 'input_size'):
             # If parameter has `input_size` attribute, use that.
             self.input_size = param.input_size
-        elif isinstance(param, basestring) and len(param) > 4000:
+        elif isinstance(param, str) and len(param) > 4000:
             # Mark any string parameter greater than 4000 characters as an NCLOB.
             self.input_size = Database.NCLOB
         else:
@@ -316,7 +316,7 @@ class FormatStylePlaceholderCursor(Database.Cursor):
     def _format_params(self, params):
         if isinstance(params, dict):
             result = {}
-            for key, value in params.items():
+            for key, value in list(params.items()):
                 result[smart_str(key, self.charset)] = OracleParam(param, self.charset)
             return result
         else:
@@ -325,7 +325,7 @@ class FormatStylePlaceholderCursor(Database.Cursor):
     def _guess_input_sizes(self, params_list):
         if isinstance(params_list[0], dict):
             sizes = {}
-            iterators = [params.iteritems() for params in params_list]
+            iterators = [iter(params.items()) for params in params_list]
         else:
             sizes = [None] * len(params_list[0])
             iterators = [enumerate(params) for params in params_list]
@@ -339,7 +339,7 @@ class FormatStylePlaceholderCursor(Database.Cursor):
 
     def _param_generator(self, params):
         if isinstance(params, dict):
-            return dict([(k, p.smart_str) for k, p in params.iteritems()])
+            return dict([(k, p.smart_str) for k, p in params.items()])
         else:
             return [p.smart_str for p in params]
 
@@ -359,7 +359,7 @@ class FormatStylePlaceholderCursor(Database.Cursor):
         self._guess_input_sizes([params])
         try:
             return Database.Cursor.execute(self, query, self._param_generator(params))
-        except DatabaseError, e:
+        except DatabaseError as e:
             # cx_Oracle <= 4.4.0 wrongly raises a DatabaseError for ORA-01400.
             if e.args[0].code == 1400 and not isinstance(e, IntegrityError):
                 e = IntegrityError(e.args[0])
@@ -382,7 +382,7 @@ class FormatStylePlaceholderCursor(Database.Cursor):
         self._guess_input_sizes(formatted)
         try:
             return Database.Cursor.executemany(self, query, [self._param_generator(p) for p in formatted])
-        except DatabaseError, e:
+        except DatabaseError as e:
             # cx_Oracle <= 4.4.0 wrongly raises a DatabaseError for ORA-01400.
             if e.args[0].code == 1400 and not isinstance(e, IntegrityError):
                 e = IntegrityError(e.args[0])
@@ -407,7 +407,7 @@ def to_unicode(s):
     Convert strings to Unicode objects (and return all other data types
     unchanged).
     """
-    if isinstance(s, basestring):
+    if isinstance(s, str):
         return force_unicode(s)
     return s
 

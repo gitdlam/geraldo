@@ -16,18 +16,17 @@ class Small(object):
         self.first, self.second = first, second
 
     def __unicode__(self):
-        return u'%s%s' % (force_unicode(self.first), force_unicode(self.second))
+        return '%s%s' % (force_unicode(self.first), force_unicode(self.second))
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
-class SmallField(models.Field):
+class SmallField(models.Field, metaclass=models.SubfieldBase):
     """
     Turns the "Small" class into a Django field. Because of the similarities
     with normal character fields and the fact that Small.__unicode__ does
     something sensible, we don't need to implement a lot here.
     """
-    __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = 2
@@ -42,7 +41,7 @@ class SmallField(models.Field):
         return Small(value[0], value[1])
 
     def get_db_prep_save(self, value):
-        return unicode(value)
+        return str(value)
 
     def get_db_prep_lookup(self, lookup_type, value):
         if lookup_type == 'exact':
@@ -63,7 +62,7 @@ class MyModel(models.Model):
     def __unicode__(self):
         return force_unicode(self.name)
 
-__test__ = {'API_TESTS': ur"""
+__test__ = {'API_TESTS': r"""
 # Creating a model with custom fields is done as per normal.
 >>> s = Small(1, 2)
 >>> print s

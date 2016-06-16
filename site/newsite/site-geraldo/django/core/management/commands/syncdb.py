@@ -34,7 +34,7 @@ class Command(NoArgsCommand):
         for app_name in settings.INSTALLED_APPS:
             try:
                 __import__(app_name + '.management', {}, {}, [''])
-            except ImportError, exc:
+            except ImportError as exc:
                 # This is slightly hackish. We want to ignore ImportErrors
                 # if the "management" module itself is missing -- but we don't
                 # want to ignore the exception if the management module exists
@@ -63,19 +63,19 @@ class Command(NoArgsCommand):
             for model in model_list:
                 # Create the model's database table, if it doesn't already exist.
                 if verbosity >= 2:
-                    print "Processing %s.%s model" % (app_name, model._meta.object_name)
+                    print("Processing %s.%s model" % (app_name, model._meta.object_name))
                 if connection.introspection.table_name_converter(model._meta.db_table) in tables:
                     continue
                 sql, references = connection.creation.sql_create_model(model, self.style, seen_models)
                 seen_models.add(model)
                 created_models.add(model)
-                for refto, refs in references.items():
+                for refto, refs in list(references.items()):
                     pending_references.setdefault(refto, []).extend(refs)
                     if refto in seen_models:
                         sql.extend(connection.creation.sql_for_pending_references(refto, self.style, pending_references))
                 sql.extend(connection.creation.sql_for_pending_references(model, self.style, pending_references))
                 if verbosity >= 1:
-                    print "Creating table %s" % model._meta.db_table
+                    print("Creating table %s" % model._meta.db_table)
                 for statement in sql:
                     cursor.execute(statement)
                 tables.append(connection.introspection.table_name_converter(model._meta.db_table))
@@ -90,7 +90,7 @@ class Command(NoArgsCommand):
                     sql = connection.creation.sql_for_many_to_many(model, self.style)
                     if sql:
                         if verbosity >= 2:
-                            print "Creating many-to-many tables for %s.%s model" % (app_name, model._meta.object_name)
+                            print("Creating many-to-many tables for %s.%s model" % (app_name, model._meta.object_name))
                         for statement in sql:
                             cursor.execute(statement)
 
@@ -112,11 +112,11 @@ class Command(NoArgsCommand):
                     custom_sql = custom_sql_for_model(model, self.style)
                     if custom_sql:
                         if verbosity >= 1:
-                            print "Installing custom SQL for %s.%s model" % (app_name, model._meta.object_name)
+                            print("Installing custom SQL for %s.%s model" % (app_name, model._meta.object_name))
                         try:
                             for sql in custom_sql:
                                 cursor.execute(sql)
-                        except Exception, e:
+                        except Exception as e:
                             sys.stderr.write("Failed to install custom SQL for %s.%s model: %s\n" % \
                                                 (app_name, model._meta.object_name, e))
                             if show_traceback:
@@ -127,7 +127,7 @@ class Command(NoArgsCommand):
                             transaction.commit_unless_managed()
                     else:
                         if verbosity >= 2:
-                            print "No custom SQL for %s.%s model" % (app_name, model._meta.object_name)
+                            print("No custom SQL for %s.%s model" % (app_name, model._meta.object_name))
         # Install SQL indicies for all newly created models
         for app in models.get_apps():
             app_name = app.__name__.split('.')[-2]
@@ -136,11 +136,11 @@ class Command(NoArgsCommand):
                     index_sql = connection.creation.sql_indexes_for_model(model, self.style)
                     if index_sql:
                         if verbosity >= 1:
-                            print "Installing index for %s.%s model" % (app_name, model._meta.object_name)
+                            print("Installing index for %s.%s model" % (app_name, model._meta.object_name))
                         try:
                             for sql in index_sql:
                                 cursor.execute(sql)
-                        except Exception, e:
+                        except Exception as e:
                             sys.stderr.write("Failed to install index for %s.%s model: %s\n" % \
                                                 (app_name, model._meta.object_name, e))
                             transaction.rollback_unless_managed()

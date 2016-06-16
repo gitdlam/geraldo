@@ -153,7 +153,7 @@ def connect(receiver, signal=Any, sender=Any, weak=True):
     receiverID = id(receiver)
     # get current set, remove any current references to
     # this receiver in the set, including back-references
-    if signals.has_key(signal):
+    if signal in signals:
         receivers = signals[signal]
         _removeOldBackRefs(senderkey, signal, receiver, receivers)
     else:
@@ -392,8 +392,8 @@ def _removeReceiver(receiver):
     backKey = id(receiver)
     for senderkey in sendersBack.get(backKey,()):
         try:
-            signals = connections[senderkey].keys()
-        except KeyError,err:
+            signals = list(connections[senderkey].keys())
+        except KeyError as err:
             pass
         else:
             for signal in signals:
@@ -404,7 +404,7 @@ def _removeReceiver(receiver):
                 else:
                     try:
                         receivers.remove(receiver)
-                    except Exception, err:
+                    except Exception as err:
                         pass
                 _cleanupConnections(senderkey, signal)
     try:
@@ -441,7 +441,7 @@ def _removeSender(senderkey):
 
 def _removeBackrefs(senderkey):
     """Remove all back-references to this senderkey"""
-    for receiver_list in connections.pop(senderkey, {}).values():
+    for receiver_list in list(connections.pop(senderkey, {}).values()):
         for receiver in receiver_list:
             _killBackref(receiver, senderkey)
 
@@ -466,7 +466,7 @@ def _removeOldBackRefs(senderkey, signal, receiver, receivers):
         found = 0
         signals = connections.get(signal)
         if signals is not None:
-            for sig,recs in connections.get(signal,{}).iteritems():
+            for sig,recs in connections.get(signal,{}).items():
                 if sig != signal:
                     for rec in recs:
                         if rec is oldReceiver:

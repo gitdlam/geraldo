@@ -1,7 +1,7 @@
 # coding: utf-8
-import misc
+from . import misc
 
-regressions = ur"""
+regressions = r"""
 Format string interpolation should work with *_lazy objects.
 
 >>> from django.utils.translation import ugettext, ugettext_lazy, activate, deactivate, gettext_lazy

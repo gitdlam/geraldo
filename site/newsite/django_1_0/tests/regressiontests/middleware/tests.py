@@ -21,7 +21,7 @@ class CommonMiddlewareTest(TestCase):
         """
         settings.APPEND_SLASH = True
         request = self._get_request('slash/')
-        self.assertEquals(CommonMiddleware().process_request(request), None)
+        self.assertEqual(CommonMiddleware().process_request(request), None)
 
     def test_append_slash_slashless_resource(self):
         """
@@ -29,7 +29,7 @@ class CommonMiddlewareTest(TestCase):
         """
         settings.APPEND_SLASH = True
         request = self._get_request('noslash')
-        self.assertEquals(CommonMiddleware().process_request(request), None)
+        self.assertEqual(CommonMiddleware().process_request(request), None)
 
     def test_append_slash_slashless_unknown(self):
         """
@@ -37,7 +37,7 @@ class CommonMiddlewareTest(TestCase):
         """
         settings.APPEND_SLASH = True
         request = self._get_request('unknown')
-        self.assertEquals(CommonMiddleware().process_request(request), None)
+        self.assertEqual(CommonMiddleware().process_request(request), None)
 
     def test_append_slash_redirect(self):
         """
@@ -46,8 +46,8 @@ class CommonMiddlewareTest(TestCase):
         settings.APPEND_SLASH = True
         request = self._get_request('slash')
         r = CommonMiddleware().process_request(request)
-        self.assertEquals(r.status_code, 301)
-        self.assertEquals(r['Location'], 'http://testserver/middleware/slash/')
+        self.assertEqual(r.status_code, 301)
+        self.assertEqual(r['Location'], 'http://testserver/middleware/slash/')
 
     def test_append_slash_no_redirect_on_POST_in_DEBUG(self):
         """
@@ -65,8 +65,8 @@ class CommonMiddlewareTest(TestCase):
             request)
         try:
             CommonMiddleware().process_request(request)
-        except RuntimeError, e:
-            self.failUnless('end in a slash' in str(e))
+        except RuntimeError as e:
+            self.assertTrue('end in a slash' in str(e))
         settings.DEBUG = False
 
     def test_append_slash_disabled(self):
@@ -75,7 +75,7 @@ class CommonMiddlewareTest(TestCase):
         """
         settings.APPEND_SLASH = False
         request = self._get_request('slash')
-        self.assertEquals(CommonMiddleware().process_request(request), None)
+        self.assertEqual(CommonMiddleware().process_request(request), None)
 
     def test_append_slash_quoted(self):
         """
@@ -85,7 +85,7 @@ class CommonMiddlewareTest(TestCase):
         settings.APPEND_SLASH = True
         request = self._get_request('needsquoting#')
         r = CommonMiddleware().process_request(request)
-        self.assertEquals(r.status_code, 301)
-        self.assertEquals(
+        self.assertEqual(r.status_code, 301)
+        self.assertEqual(
             r['Location'],
             'http://testserver/middleware/needsquoting%23/')

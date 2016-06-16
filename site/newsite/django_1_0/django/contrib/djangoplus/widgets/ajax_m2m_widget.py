@@ -131,19 +131,19 @@ class AjaxMultiSelect(widgets.Widget):
             for id in value:
                 try:
                     items.append(self.model.objects.get(id=id))
-                except self.model.DoesNotExist, e:
+                except self.model.DoesNotExist as e:
                     pass
         else:
             items = []
         
-        li_items = '\n'.join([TPL_LI %{'name': name, 'id': item.id, 'repr': unicode(item)} for item in items])
+        li_items = '\n'.join([TPL_LI %{'name': name, 'id': item.id, 'repr': str(item)} for item in items])
         li_add = TPL_LI_ADD %{'name': name, 'url': self.auto_url}
 
         output = []
         output.append(TPL_UL %{'name': name , 'items': '\n'.join((li_items, li_add)), 'attrs': flatatt(final_attrs)})
         output.append(TPL_SCRIPT %{'name': name, 'url': self.auto_url})
 
-        return mark_safe(u'\n'.join(output))
+        return mark_safe('\n'.join(output))
 
     def value_from_datadict(self, data, files, name):
         if isinstance(data, MultiValueDict):
@@ -156,7 +156,7 @@ def auto_complete_view(request, query_func, desc_field, id_field, limit=15, show
         if results:
             for r in results:
                 #yield '%s|%s\n' % (desc_field and getattr(r, desc_field) or unicode(r), getattr(r, id_field))
-                yield unicode('%s|%s\n' % (desc_field and getattr(r, desc_field) or unicode(r), getattr(r, id_field)))
+                yield str('%s|%s\n' % (desc_field and getattr(r, desc_field) or str(r), getattr(r, id_field)))
     
     if not show_empty and not request.GET.get('q'):
         return HttpResponse(mimetype='text/plain')
@@ -164,7 +164,7 @@ def auto_complete_view(request, query_func, desc_field, id_field, limit=15, show
     q = request.GET.get('q', '')
 
     if extra_args:
-        args = dict(request.GET.items())
+        args = dict(list(request.GET.items()))
         items = query_func(q, args)[:limit]
     else:
         items = query_func(q)[:limit]

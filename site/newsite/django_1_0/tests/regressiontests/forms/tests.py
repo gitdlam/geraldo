@@ -1,35 +1,35 @@
 # -*- coding: utf-8 -*-
-from extra import tests as extra_tests
-from fields import tests as fields_tests
-from forms import tests as form_tests
-from error_messages import tests as custom_error_message_tests
-from localflavor.ar import tests as localflavor_ar_tests
-from localflavor.at import tests as localflavor_at_tests
-from localflavor.au import tests as localflavor_au_tests
-from localflavor.br import tests as localflavor_br_tests
-from localflavor.ca import tests as localflavor_ca_tests
-from localflavor.ch import tests as localflavor_ch_tests
-from localflavor.cl import tests as localflavor_cl_tests
-from localflavor.de import tests as localflavor_de_tests
-from localflavor.es import tests as localflavor_es_tests
-from localflavor.fi import tests as localflavor_fi_tests
-from localflavor.fr import tests as localflavor_fr_tests
-from localflavor.generic import tests as localflavor_generic_tests
-from localflavor.is_ import tests as localflavor_is_tests
-from localflavor.it import tests as localflavor_it_tests
-from localflavor.jp import tests as localflavor_jp_tests
-from localflavor.nl import tests as localflavor_nl_tests
-from localflavor.pl import tests as localflavor_pl_tests
-from localflavor.ro import tests as localflavor_ro_tests
-from localflavor.sk import tests as localflavor_sk_tests
-from localflavor.uk import tests as localflavor_uk_tests
-from localflavor.us import tests as localflavor_us_tests
-from localflavor.za import tests as localflavor_za_tests
-from regressions import tests as regression_tests
-from util import tests as util_tests
-from widgets import tests as widgets_tests
-from formsets import tests as formset_tests
-from media import media_tests
+from .extra import tests as extra_tests
+from .fields import tests as fields_tests
+from .forms import tests as form_tests
+from .error_messages import tests as custom_error_message_tests
+from .localflavor.ar import tests as localflavor_ar_tests
+from .localflavor.at import tests as localflavor_at_tests
+from .localflavor.au import tests as localflavor_au_tests
+from .localflavor.br import tests as localflavor_br_tests
+from .localflavor.ca import tests as localflavor_ca_tests
+from .localflavor.ch import tests as localflavor_ch_tests
+from .localflavor.cl import tests as localflavor_cl_tests
+from .localflavor.de import tests as localflavor_de_tests
+from .localflavor.es import tests as localflavor_es_tests
+from .localflavor.fi import tests as localflavor_fi_tests
+from .localflavor.fr import tests as localflavor_fr_tests
+from .localflavor.generic import tests as localflavor_generic_tests
+from .localflavor.is_ import tests as localflavor_is_tests
+from .localflavor.it import tests as localflavor_it_tests
+from .localflavor.jp import tests as localflavor_jp_tests
+from .localflavor.nl import tests as localflavor_nl_tests
+from .localflavor.pl import tests as localflavor_pl_tests
+from .localflavor.ro import tests as localflavor_ro_tests
+from .localflavor.sk import tests as localflavor_sk_tests
+from .localflavor.uk import tests as localflavor_uk_tests
+from .localflavor.us import tests as localflavor_us_tests
+from .localflavor.za import tests as localflavor_za_tests
+from .regressions import tests as regression_tests
+from .util import tests as util_tests
+from .widgets import tests as widgets_tests
+from .formsets import tests as formset_tests
+from .media import media_tests
 
 __test__ = {
     'extra_tests': extra_tests,

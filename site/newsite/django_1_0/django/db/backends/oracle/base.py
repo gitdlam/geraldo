@@ -14,7 +14,7 @@ from django.utils.encoding import smart_str, force_unicode
 os.environ['NLS_LANG'] = '.UTF8'
 try:
     import cx_Oracle as Database
-except ImportError, e:
+except ImportError as e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading cx_Oracle module: %s" % e)
 
@@ -257,7 +257,7 @@ class FormatStylePlaceholderCursor(Database.Cursor):
         if isinstance(params, dict):
             result = {}
             charset = self.charset
-            for key, value in params.items():
+            for key, value in list(params.items()):
                 result[smart_str(key, charset)] = smart_str(value, charset)
             return result
         else:
@@ -267,13 +267,13 @@ class FormatStylePlaceholderCursor(Database.Cursor):
         # Mark any string parameter greater than 4000 characters as an NCLOB.
         if isinstance(params_list[0], dict):
             sizes = {}
-            iterators = [params.iteritems() for params in params_list]
+            iterators = [iter(params.items()) for params in params_list]
         else:
             sizes = [None] * len(params_list[0])
             iterators = [enumerate(params) for params in params_list]
         for iterator in iterators:
             for key, value in iterator:
-                if isinstance(value, basestring) and len(value) > 4000:
+                if isinstance(value, str) and len(value) > 4000:
                     sizes[key] = Database.NCLOB
         if isinstance(sizes, dict):
             self.setinputsizes(**sizes)
@@ -332,7 +332,7 @@ def to_unicode(s):
     Convert strings to Unicode objects (and return all other data types
     unchanged).
     """
-    if isinstance(s, basestring):
+    if isinstance(s, str):
         return force_unicode(s)
     return s
 

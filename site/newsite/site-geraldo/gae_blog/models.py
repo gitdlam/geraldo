@@ -8,7 +8,7 @@ from django.contrib.markup.templatetags.markup import markdown
 
 from utils.custom_models import CustomModel
 
-import app_settings
+from . import app_settings
 
 class Entry(CustomModel):
     title = db.StringProperty()
@@ -35,7 +35,7 @@ class Entry(CustomModel):
 
     def put(self):
         if not self.slug:
-            self.slug = unicode(slugify(self.title))
+            self.slug = str(slugify(self.title))
 
         # Delete from cache
         cache.delete(Entry.get_cache_key(self.slug))

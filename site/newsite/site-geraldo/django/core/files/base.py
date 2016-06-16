@@ -3,9 +3,9 @@ import os
 from django.utils.encoding import smart_str, smart_unicode
 
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 class File(object):
     DEFAULT_CHUNK_SIZE = 64 * 2**10
@@ -20,12 +20,12 @@ class File(object):
         return smart_str(self.name or '')
 
     def __unicode__(self):
-        return smart_unicode(self.name or u'')
+        return smart_unicode(self.name or '')
 
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self or "None")
 
-    def __nonzero__(self):
+    def __bool__(self):
         return not not self.name
 
     def __len__(self):
@@ -91,7 +91,7 @@ class File(object):
         return iter(self)
 
     def readlines(self):
-        return list(self.xreadlines())
+        return list(self)
 
     def __iter__(self):
         # Iterate over this file-like object by newlines
@@ -160,7 +160,7 @@ class ContentFile(File):
     def __str__(self):
         return 'Raw content'
 
-    def __nonzero__(self):
+    def __bool__(self):
         return True
 
     def open(self, mode=None):

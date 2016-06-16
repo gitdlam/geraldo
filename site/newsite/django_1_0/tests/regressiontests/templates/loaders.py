@@ -13,7 +13,7 @@ import unittest
 import sys
 import pkg_resources
 import imp
-import StringIO
+import io
 
 from django.template import TemplateDoesNotExist
 from django.template.loaders.eggs import load_template_source as lts_egg
@@ -57,8 +57,8 @@ class EggLoader(unittest.TestCase):
 
         self.empty_egg = create_egg("egg_empty", {})
         self.egg_1 = create_egg("egg_1", {
-            'templates/y.html' : StringIO.StringIO("y"),
-            'templates/x.txt' : StringIO.StringIO("x"),
+            'templates/y.html' : io.StringIO("y"),
+            'templates/x.txt' : io.StringIO("x"),
         })
         self._old_installed_apps = settings.INSTALLED_APPS
         settings.INSTALLED_APPS = []

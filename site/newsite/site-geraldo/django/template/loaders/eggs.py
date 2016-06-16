@@ -21,5 +21,5 @@ def load_template_source(template_name, template_dirs=None):
                 return (resource_string(app, pkg_name).decode(settings.FILE_CHARSET), 'egg:%s:%s' % (app, pkg_name))
             except:
                 pass
-    raise TemplateDoesNotExist, template_name
+    raise TemplateDoesNotExist(template_name)
 load_template_source.is_usable = resource_string is not None

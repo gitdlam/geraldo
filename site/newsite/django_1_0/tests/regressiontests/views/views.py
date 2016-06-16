@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django import forms
 from django.views.generic.create_update import create_object
 
-from models import Article
+from .models import Article
 
 
 def index_page(request):

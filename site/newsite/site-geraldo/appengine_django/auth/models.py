@@ -20,7 +20,7 @@ from django.core import mail
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.encoding import smart_str
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from django.db.models.manager import EmptyManager
 
@@ -56,7 +56,7 @@ class User(BaseModel):
     return self.username
 
   def __str__(self):
-    return unicode(self).encode('utf-8')
+    return str(self).encode('utf-8')
 
   @classmethod
   def get_djangouser_for_user(cls, user):
@@ -112,10 +112,10 @@ class User(BaseModel):
     return True
 
   def get_absolute_url(self):
-    return "/users/%s/" % urllib.quote(smart_str(self.username))
+    return "/users/%s/" % urllib.parse.quote(smart_str(self.username))
 
   def get_full_name(self):
-    full_name = u'%s %s' % (self.first_name, self.last_name)
+    full_name = '%s %s' % (self.first_name, self.last_name)
     return full_name.strip()
 
   def email_user(self, subject, message, from_email):

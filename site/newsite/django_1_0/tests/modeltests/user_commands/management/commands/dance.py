@@ -6,4 +6,4 @@ class Command(BaseCommand):
     requires_model_validation = True
 
     def handle(self, *args, **options):
-        print "I don't feel like dancing."
+        print("I don't feel like dancing.")

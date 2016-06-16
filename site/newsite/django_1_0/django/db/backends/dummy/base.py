@@ -11,7 +11,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.backends import BaseDatabaseFeatures, BaseDatabaseOperations
 
 def complain(*args, **kwargs):
-    raise ImproperlyConfigured, "You haven't set the DATABASE_ENGINE setting yet."
+    raise ImproperlyConfigured("You haven't set the DATABASE_ENGINE setting yet.")
 
 def ignore(*args, **kwargs):
     pass

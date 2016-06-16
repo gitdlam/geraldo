@@ -3,7 +3,7 @@
 import os
 import time
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -31,7 +31,7 @@ class CacheClass(BaseCache):
             self._createdir()
 
     def add(self, key, value, timeout=None):
-        if self.has_key(key):
+        if key in self:
             return False
 
         self.set(key, value, timeout)
@@ -129,7 +129,7 @@ class CacheClass(BaseCache):
         try:
             os.makedirs(self._dir)
         except OSError:
-            raise EnvironmentError, "Cache directory '%s' does not exist and could not be created'" % self._dir
+            raise EnvironmentError("Cache directory '%s' does not exist and could not be created'" % self._dir)
 
     def _key_to_file(self, key):
         """

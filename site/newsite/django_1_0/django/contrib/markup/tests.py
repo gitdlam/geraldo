@@ -42,7 +42,7 @@ Paragraph 2 with "quotes" and @code@"""
         rendered = t.render(Context(locals())).strip()
         if markdown:
             pattern = re.compile("""<p>Paragraph 1\s*</p>\s*<h2>\s*An h2</h2>""")
-            self.assert_(pattern.match(rendered))
+            self.assertTrue(pattern.match(rendered))
         else:
             self.assertEqual(rendered, markdown_content)
 
@@ -66,7 +66,7 @@ Paragraph 2 with a link_
                 # Docutils v0.4 and earlier
                 self.assertEqual(rendered, """<p>Paragraph 1</p>
 <p>Paragraph 2 with a <a class="reference" href="http://www.example.com/">link</a></p>""")
-            except AssertionError, e:
+            except AssertionError as e:
                 # Docutils from SVN (which will become 0.5)
                 self.assertEqual(rendered, """<p>Paragraph 1</p>
 <p>Paragraph 2 with a <a class="reference external" href="http://www.example.com/">link</a></p>""")
